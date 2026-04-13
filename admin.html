@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>保联 InsuLink — B端管理系统</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #0F766E;
+  --primary-light: #CCFBF1;
+  --primary-dark: #064E3B;
+  --primary-50: #F0FDFA;
+  --accent: #F59E0B;
+  --bg: #F8FAFC;
+  --white: #FFFFFF;
+  --text: #0F172A;
+  --text-secondary: #64748B;
+  --text-muted: #94A3B8;
+  --border: #E2E8F0;
+  --border-light: #F1F5F9;
+  --success: #059669;
+  --success-light: #D1FAE5;
+  --warning: #D97706;
+  --warning-light: #FEF3C7;
+  --danger: #DC2626;
+  --danger-light: #FEE2E2;
+  --info: #2563EB;
+  --info-light: #DBEAFE;
+  --sidebar-bg: #0F172A;
+  --sidebar-hover: #1E293B;
+  --sidebar-active: #0F766E;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.06), 0 2px 4px -2px rgba(0,0,0,0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.06), 0 4px 6px -4px rgba(0,0,0,0.06);
+  --radius: 10px;
+  --radius-lg: 14px;
+}
+body { font-family: 'Inter', -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif; background: var(--bg); color: var(--text); display: flex; height: 100vh; overflow: hidden; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 260px; background: var(--sidebar-bg); color: #CBD5E1;
+  display: flex; flex-direction: column; flex-shrink: 0;
+}
+.sidebar-logo {
+  padding: 24px 24px 20px; display: flex; align-items: center; gap: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.logo-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: linear-gradient(135deg, #14B8A6, #0F766E);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: white; font-weight: 800;
+}
+.logo-text { font-size: 18px; font-weight: 700; color: white; letter-spacing: -0.3px; }
+.logo-sub { font-size: 10px; color: #475569; margin-top: 2px; font-weight: 500; letter-spacing: 0.5px; }
+
+/* Role Switcher */
+.role-switcher {
+  margin: 16px 16px 8px; display: flex; background: #1E293B;
+  border-radius: 8px; padding: 3px; gap: 2px;
+}
+.role-btn {
+  flex: 1; padding: 8px 0; text-align: center; font-size: 12px;
+  font-weight: 600; border-radius: 6px; cursor: pointer;
+  transition: all 0.2s; color: #94A3B8; border: none;
+  background: transparent; font-family: inherit;
+}
+.role-btn.active { background: var(--primary); color: white; }
+.role-btn:hover:not(.active) { color: white; }
+
+/* Nav */
+.sidebar-nav { flex: 1; padding: 8px 0; overflow-y: auto; }
+.sidebar-nav::-webkit-scrollbar { width: 4px; }
+.sidebar-nav::-webkit-scrollbar-thumb { background: #334155; border-radius: 2px; }
+.nav-group-label {
+  padding: 20px 24px 8px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px; color: #475569;
+}
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 24px; cursor: pointer;
+  transition: all 0.15s; font-size: 13px; font-weight: 500;
+  border-left: 3px solid transparent; color: #94A3B8;
+}
+.nav-item:hover { background: var(--sidebar-hover); color: #E2E8F0; }
+.nav-item.active { background: rgba(15,118,110,0.15); color: #5EEAD4; border-left-color: #14B8A6; font-weight: 600; }
+.nav-icon { width: 20px; text-align: center; font-size: 15px; }
+.nav-badge {
+  margin-left: auto; background: var(--danger); color: white;
+  font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 700;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+  padding: 16px 20px; border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; gap: 12px;
+}
+.sf-avatar {
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, #14B8A6, #0F766E);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 14px; font-weight: 700;
+}
+.sf-info { flex: 1; }
+.sf-name { font-size: 13px; color: white; font-weight: 600; }
+.sf-role { font-size: 11px; color: #64748B; margin-top: 1px; }
+
+/* ===== MAIN CONTENT ===== */
+.main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+/* Top Bar */
+.top-bar {
+  height: 64px; background: var(--white); padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.top-bar-left { display: flex; align-items: center; gap: 16px; }
+.top-bar-title { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+.top-bar-breadcrumb { font-size: 12px; color: var(--text-muted); }
+.top-bar-actions { display: flex; align-items: center; gap: 12px; }
+.btn {
+  padding: 8px 18px; border-radius: 8px; font-size: 13px;
+  font-weight: 600; cursor: pointer; border: none; font-family: inherit;
+  transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-outline { background: var(--white); color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.top-search {
+  padding: 8px 14px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 13px; width: 260px; outline: none; font-family: inherit;
+  background: var(--bg);
+}
+.top-search:focus { border-color: var(--primary); background: var(--white); }
+
+/* Content */
+.content { flex: 1; overflow-y: auto; padding: 28px 32px; }
+.content::-webkit-scrollbar { width: 6px; }
+.content::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 3px; }
+
+/* Panels */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* ===== STAT CARDS ===== */
+.stats-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card {
+  background: var(--white); border-radius: var(--radius-lg); padding: 22px;
+  box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);
+  transition: all 0.2s; position: relative; overflow: hidden;
+}
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.stat-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.stat-card.teal::before { background: linear-gradient(90deg, #14B8A6, #0F766E); }
+.stat-card.blue::before { background: linear-gradient(90deg, #3B82F6, #2563EB); }
+.stat-card.amber::before { background: linear-gradient(90deg, #F59E0B, #D97706); }
+.stat-card.rose::before { background: linear-gradient(90deg, #F43F5E, #E11D48); }
+.stat-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 14px;
+}
+.stat-icon.teal { background: var(--primary-light); }
+.stat-icon.blue { background: var(--info-light); }
+.stat-icon.amber { background: var(--warning-light); }
+.stat-icon.rose { background: var(--danger-light); }
+.stat-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+.stat-value { font-size: 30px; font-weight: 800; margin-top: 4px; letter-spacing: -1px; }
+.stat-change { font-size: 12px; margin-top: 6px; font-weight: 600; display: inline-flex; align-items: center; gap: 2px; padding: 2px 8px; border-radius: 6px; }
+.stat-change.up { color: var(--success); background: var(--success-light); }
+.stat-change.down { color: var(--danger); background: var(--danger-light); }
+
+/* ===== TABLE ===== */
+.card {
+  background: var(--white); border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);
+  overflow: hidden;
+}
+.card-header {
+  padding: 20px 24px; display: flex; justify-content: space-between;
+  align-items: center; border-bottom: 1px solid var(--border-light);
+}
+.card-title { font-size: 16px; font-weight: 700; }
+.card-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+table { width: 100%; border-collapse: collapse; }
+th {
+  text-align: left; padding: 12px 20px;
+  font-size: 11px; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  background: var(--bg); border-bottom: 1px solid var(--border);
+}
+td {
+  padding: 14px 20px; font-size: 13px;
+  border-bottom: 1px solid var(--border-light);
+}
+tr:hover td { background: var(--primary-50); }
+.td-name { font-weight: 600; color: var(--text); }
+.td-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.badge {
+  display: inline-flex; padding: 3px 10px; border-radius: 6px;
+  font-size: 11px; font-weight: 600;
+}
+.badge-success { background: var(--success-light); color: var(--success); }
+.badge-warning { background: var(--warning-light); color: var(--warning); }
+.badge-danger { background: var(--danger-light); color: var(--danger); }
+.badge-info { background: var(--info-light); color: var(--info); }
+.badge-muted { background: var(--border-light); color: var(--text-secondary); }
+
+/* ===== CHARTS PLACEHOLDER ===== */
+.chart-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.chart-card {
+  background: var(--white); border-radius: var(--radius-lg); padding: 24px;
+  box-shadow: var(--shadow-sm); border: 1px solid var(--border-light);
+}
+.chart-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+.chart-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+.mini-bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding-top: 8px; }
+.mini-bar {
+  flex: 1; border-radius: 4px 4px 0 0; transition: all 0.3s;
+  position: relative;
+}
+.mini-bar:hover { opacity: 0.8; }
+.mini-bar-label {
+  position: absolute; bottom: -18px; left: 50%; transform: translateX(-50%);
+  font-size: 9px; color: var(--text-muted); white-space: nowrap;
+}
+.donut-placeholder {
+  width: 140px; height: 140px; border-radius: 50%;
+  border: 20px solid var(--border-light); position: relative;
+  margin: 0 auto;
+  background: conic-gradient(
+    var(--primary) 0% 35%,
+    #3B82F6 35% 55%,
+    var(--accent) 55% 75%,
+    #E2E8F0 75% 100%
+  );
+}
+.donut-placeholder::after {
+  content: ''; position: absolute; top: 50%; left: 50%;
+  transform: translate(-50%,-50%);
+  width: 80px; height: 80px; border-radius: 50%;
+  background: var(--white);
+}
+.legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; justify-content: center; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.legend-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+/* ===== FORM ===== */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px; }
+.form-grid.three { grid-template-columns: 1fr 1fr 1fr; }
+.form-group { margin-bottom: 0; }
+.form-group.full { grid-column: 1 / -1; }
+.form-label { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+.form-label .required { color: var(--danger); }
+.form-input, .form-select {
+  width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+  border-radius: 8px; font-size: 13px; outline: none; font-family: inherit;
+  background: var(--white); color: var(--text); transition: border-color 0.15s;
+}
+.form-input:focus, .form-select:focus { border-color: var(--primary); }
+.form-input::placeholder { color: var(--text-muted); }
+.form-section-title {
+  grid-column: 1 / -1; font-size: 14px; font-weight: 700;
+  padding: 12px 0 4px; border-bottom: 2px solid var(--primary-light);
+  margin-bottom: 4px; display: flex; align-items: center; gap: 8px;
+}
+
+/* ===== WORKBENCH ===== */
+.wb-greeting {
+  padding: 28px 32px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius: var(--radius-lg); color: white; margin-bottom: 24px; position: relative; overflow: hidden;
+}
+.wb-greeting::after {
+  content: ''; position: absolute; right: -40px; top: -40px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+}
+.wb-greeting h2 { font-size: 22px; font-weight: 700; }
+.wb-greeting p { font-size: 14px; opacity: 0.85; margin-top: 6px; }
+.wb-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-top: 20px; }
+.wb-stat {
+  background: rgba(255,255,255,0.12); border-radius: 10px; padding: 14px;
+  text-align: center; backdrop-filter: blur(10px);
+}
+.wb-stat-value { font-size: 24px; font-weight: 800; }
+.wb-stat-label { font-size: 11px; opacity: 0.7; margin-top: 2px; }
+
+.wb-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+.wb-todo-list { }
+.wb-todo-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 18px; background: var(--white); border-radius: 10px;
+  margin-bottom: 8px; border: 1px solid var(--border-light);
+  cursor: pointer; transition: all 0.15s;
+}
+.wb-todo-item:hover { border-color: var(--primary); box-shadow: var(--shadow-sm); }
+.wb-todo-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.wb-todo-content { flex: 1; }
+.wb-todo-title { font-size: 13px; font-weight: 600; }
+.wb-todo-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.wb-todo-time { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+
+/* ===== RANKING ===== */
+.rank-item {
+  display: flex; align-items: center; gap: 16px;
+  padding: 14px 20px; border-bottom: 1px solid var(--border-light);
+}
+.rank-num {
+  width: 28px; height: 28px; border-radius: 8px; display: flex;
+  align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 800; flex-shrink: 0;
+}
+.rank-num.gold { background: #FEF3C7; color: #92400E; }
+.rank-num.silver { background: #F1F5F9; color: #475569; }
+.rank-num.bronze { background: #FED7AA; color: #9A3412; }
+.rank-num.normal { background: var(--bg); color: var(--text-muted); }
+.rank-name { font-size: 13px; font-weight: 600; flex: 1; }
+.rank-value { font-size: 14px; font-weight: 700; color: var(--primary); }
+.rank-bar-wrap { width: 120px; height: 6px; background: var(--border-light); border-radius: 3px; overflow: hidden; }
+.rank-bar-fill { height: 100%; border-radius: 3px; background: linear-gradient(90deg, #14B8A6, #0F766E); }
+
+/* Responsive spacing */
+.mb-24 { margin-bottom: 24px; }
+.mb-16 { margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">保</div>
+    <div>
+      <div class="logo-text">保联 InsuLink</div>
+      <div class="logo-sub">管理系统 v1.0</div>
+    </div>
+  </div>
+
+  <div class="role-switcher">
+    <button class="role-btn active" onclick="switchRole('agent')">👨‍💼 经纪人</button>
+    <button class="role-btn" onclick="switchRole('company')">🏢 公司管理</button>
+  </div>
+
+  <!-- Agent Nav -->
+  <div class="sidebar-nav" id="nav-agent">
+    <div class="nav-group-label">工作台</div>
+    <div class="nav-item active" onclick="showPanel('workbench')"><span class="nav-icon">🎯</span> 我的工作台</div>
+
+    <div class="nav-group-label">业务管理</div>
+    <div class="nav-item" onclick="showPanel('my-clients')"><span class="nav-icon">👥</span> 我的客户</div>
+    <div class="nav-item" onclick="showPanel('my-policies')"><span class="nav-icon">📋</span> 客户保单 <span class="nav-badge">3</span></div>
+    <div class="nav-item" onclick="showPanel('my-leads')"><span class="nav-icon">🎯</span> 咨询线索 <span class="nav-badge">5</span></div>
+    <div class="nav-item" onclick="showPanel('add-policy')"><span class="nav-icon">➕</span> 录入保单</div>
+
+    <div class="nav-group-label">收入</div>
+    <div class="nav-item" onclick="showPanel('my-commission')"><span class="nav-icon">💰</span> 我的佣金</div>
+
+    <div class="nav-group-label">工具</div>
+    <div class="nav-item" onclick="showPanel('tools')"><span class="nav-icon">📐</span> 计划书 / 报价</div>
+  </div>
+
+  <!-- Company Nav -->
+  <div class="sidebar-nav" id="nav-company" style="display:none">
+    <div class="nav-group-label">总览</div>
+    <div class="nav-item active" onclick="showPanel('dashboard')"><span class="nav-icon">📊</span> 数据看板</div>
+
+    <div class="nav-group-label">业务数据</div>
+    <div class="nav-item" onclick="showPanel('all-clients')"><span class="nav-icon">👥</span> 全部客户</div>
+    <div class="nav-item" onclick="showPanel('all-policies')"><span class="nav-icon">📋</span> 全部保单</div>
+    <div class="nav-item" onclick="showPanel('all-leads')"><span class="nav-icon">🎯</span> 全部线索 <span class="nav-badge">12</span></div>
+
+    <div class="nav-group-label">团队管理</div>
+    <div class="nav-item" onclick="showPanel('team')"><span class="nav-icon">👨‍💼</span> 经纪人管理</div>
+    <div class="nav-item" onclick="showPanel('ranking')"><span class="nav-icon">🏆</span> 业绩排名</div>
+    <div class="nav-item" onclick="showPanel('commission-mgmt')"><span class="nav-icon">💰</span> 佣金管理</div>
+
+    <div class="nav-group-label">运营</div>
+    <div class="nav-item" onclick="showPanel('content')"><span class="nav-icon">📝</span> 内容管理</div>
+    <div class="nav-item" onclick="showPanel('products')"><span class="nav-icon">🛒</span> 产品管理</div>
+
+    <div class="nav-group-label">系统</div>
+    <div class="nav-item" onclick="showPanel('settings')"><span class="nav-icon">⚙️</span> 系统设置</div>
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="sf-avatar">张</div>
+    <div class="sf-info">
+      <div class="sf-name">张经理</div>
+      <div class="sf-role">B12345 · 持牌经纪人</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN ===== -->
+<div class="main">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="top-bar-title" id="panel-title">我的工作台</div>
+    </div>
+    <div class="top-bar-actions">
+      <input class="top-search" placeholder="搜索客户、保单、线索...">
+      <button class="btn btn-outline">🔔 通知</button>
+      <button class="btn btn-primary" onclick="showPanel('add-policy')">+ 录入保单</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ========== 经纪人：工作台 ========== -->
+    <div class="panel active" id="panel-workbench">
+      <div class="wb-greeting">
+        <h2>👋 早上好，张经理</h2>
+        <p>今天有 3 件待办事项需要处理</p>
+        <div class="wb-stats">
+          <div class="wb-stat"><div class="wb-stat-value">48</div><div class="wb-stat-label">我的客户</div></div>
+          <div class="wb-stat"><div class="wb-stat-value">126</div><div class="wb-stat-label">管理保单</div></div>
+          <div class="wb-stat"><div class="wb-stat-value">5</div><div class="wb-stat-label">待跟进线索</div></div>
+          <div class="wb-stat"><div class="wb-stat-value">¥18.6万</div><div class="wb-stat-label">本月佣金</div></div>
+        </div>
+      </div>
+
+      <div class="wb-grid">
+        <div>
+          <div class="card mb-24">
+            <div class="card-header">
+              <div><div class="card-title">📋 今日待办</div><div class="card-subtitle">3 项待处理</div></div>
+              <button class="btn btn-outline" style="font-size:12px">查看全部</button>
+            </div>
+            <div style="padding:12px 16px">
+              <div class="wb-todo-item">
+                <div class="wb-todo-dot" style="background:var(--danger)"></div>
+                <div class="wb-todo-content">
+                  <div class="wb-todo-title">跟进新线索：王女士咨询重疾险</div>
+                  <div class="wb-todo-sub">来源：产品页「危疾加护保III」· 昨日 15:30 提交</div>
+                </div>
+                <div class="wb-todo-time">紧急</div>
+              </div>
+              <div class="wb-todo-item">
+                <div class="wb-todo-dot" style="background:var(--warning)"></div>
+                <div class="wb-todo-content">
+                  <div class="wb-todo-title">提醒陈先生：保诚保费 5月15日到期</div>
+                  <div class="wb-todo-sub">危疾加护保 III · HK$12,600 · 还有 32 天</div>
+                </div>
+                <div class="wb-todo-time">32天后</div>
+              </div>
+              <div class="wb-todo-item">
+                <div class="wb-todo-dot" style="background:var(--info)"></div>
+                <div class="wb-todo-content">
+                  <div class="wb-todo-title">录入保单：刘先生 AIA 新签储蓄险</div>
+                  <div class="wb-todo-sub">签单日 4月10日 · 待录入系统</div>
+                </div>
+                <div class="wb-todo-time">今天</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div><div class="card-title">📈 本月业绩</div><div class="card-subtitle">2026年4月</div></div>
+            </div>
+            <div style="padding:20px 24px">
+              <div style="display:flex;gap:24px;margin-bottom:20px">
+                <div style="flex:1;text-align:center;padding:16px;background:var(--primary-50);border-radius:10px">
+                  <div style="font-size:28px;font-weight:800;color:var(--primary)">¥18.6万</div>
+                  <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">本月佣金</div>
+                  <div style="font-size:11px;color:var(--success);margin-top:4px;font-weight:600">↑ 23% vs上月</div>
+                </div>
+                <div style="flex:1;text-align:center;padding:16px;background:var(--bg);border-radius:10px">
+                  <div style="font-size:28px;font-weight:800">5</div>
+                  <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">新签保单</div>
+                  <div style="font-size:11px;color:var(--success);margin-top:4px;font-weight:600">目标 8 单</div>
+                </div>
+                <div style="flex:1;text-align:center;padding:16px;background:var(--bg);border-radius:10px">
+                  <div style="font-size:28px;font-weight:800">3</div>
+                  <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">新增客户</div>
+                  <div style="font-size:11px;color:var(--success);margin-top:4px;font-weight:600">↑ 50% vs上月</div>
+                </div>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">月度目标进度</div>
+              <div style="height:12px;background:var(--border-light);border-radius:6px;overflow:hidden">
+                <div style="height:100%;width:62%;background:linear-gradient(90deg,#14B8A6,#0F766E);border-radius:6px"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:4px">
+                <span>已完成 62%</span><span>目标：¥30万</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card mb-24">
+            <div class="card-header"><div class="card-title">🔔 最新动态</div></div>
+            <div style="padding:12px 16px">
+              <div style="padding:10px 0;border-bottom:1px solid var(--border-light);font-size:12px">
+                <div style="color:var(--text);font-weight:500">陈先生查看了保单详情</div>
+                <div style="color:var(--text-muted);margin-top:2px">AIA 充裕未来 · 10分钟前</div>
+              </div>
+              <div style="padding:10px 0;border-bottom:1px solid var(--border-light);font-size:12px">
+                <div style="color:var(--text);font-weight:500">新线索：李小姐咨询医疗险</div>
+                <div style="color:var(--text-muted);margin-top:2px">来自文章「港险理赔攻略」· 1小时前</div>
+              </div>
+              <div style="padding:10px 0;border-bottom:1px solid var(--border-light);font-size:12px">
+                <div style="color:var(--text);font-weight:500">王先生完成了实名认证</div>
+                <div style="color:var(--text-muted);margin-top:2px">已自动关联 2 张保单 · 3小时前</div>
+              </div>
+              <div style="padding:10px 0;font-size:12px">
+                <div style="color:var(--text);font-weight:500">赵女士收藏了「缴费渠道对比」</div>
+                <div style="color:var(--text-muted);margin-top:2px">5小时前</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header"><div class="card-title">⚡ 快捷操作</div></div>
+            <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <button class="btn btn-primary" style="justify-content:center" onclick="showPanel('add-policy')">+ 录入保单</button>
+              <button class="btn btn-outline" style="justify-content:center">📐 制作计划书</button>
+              <button class="btn btn-outline" style="justify-content:center">👥 添加客户</button>
+              <button class="btn btn-outline" style="justify-content:center">💱 汇率查询</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 经纪人：我的客户 ========== -->
+    <div class="panel" id="panel-my-clients">
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card teal"><div class="stat-icon teal">👥</div><div class="stat-label">总客户数</div><div class="stat-value">48</div><div class="stat-change up">↑ 3 本月新增</div></div>
+        <div class="stat-card blue"><div class="stat-icon blue">✅</div><div class="stat-label">活跃客户</div><div class="stat-value">32</div><div class="stat-change up">近30天有互动</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">⏰</div><div class="stat-label">待跟进</div><div class="stat-value">8</div><div class="stat-change down">超30天未联系</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">客户列表</div>
+          <div style="display:flex;gap:8px"><button class="btn btn-outline" style="font-size:12px">筛选</button><button class="btn btn-primary" style="font-size:12px">+ 添加客户</button></div>
+        </div>
+        <table>
+          <thead><tr><th>客户</th><th>手机号</th><th>保单数</th><th>总保费/年</th><th>状态</th><th>最近互动</th></tr></thead>
+          <tbody>
+            <tr><td><div class="td-name">陈先生</div><div class="td-sub">身份证 310***1234</div></td><td>+86 138****1234</td><td><strong>3</strong></td><td>HK$ 26,200<div class="td-sub">≈ ¥23,842</div></td><td><span class="badge badge-success">活跃</span></td><td>今天 14:30</td></tr>
+            <tr><td><div class="td-name">王女士</div><div class="td-sub">通行证 C***789</div></td><td>+86 139****5678</td><td><strong>2</strong></td><td>HK$ 18,400<div class="td-sub">≈ ¥16,744</div></td><td><span class="badge badge-success">活跃</span></td><td>昨天</td></tr>
+            <tr><td><div class="td-name">刘先生</div><div class="td-sub">身份证 440***5678</div></td><td>+86 135****9012</td><td><strong>1</strong></td><td>US$ 5,000<div class="td-sub">≈ ¥36,400</div></td><td><span class="badge badge-warning">待录入</span></td><td>4月10日</td></tr>
+            <tr><td><div class="td-name">赵女士</div><div class="td-sub">护照 E***456</div></td><td>+852 9***4567</td><td><strong>2</strong></td><td>HK$ 32,000<div class="td-sub">≈ ¥29,120</div></td><td><span class="badge badge-muted">沉默</span></td><td>3月2日</td></tr>
+            <tr><td><div class="td-name">林先生</div><div class="td-sub">身份证 350***7890</div></td><td>+86 136****3456</td><td><strong>4</strong></td><td>HK$ 45,600<div class="td-sub">≈ ¥41,496</div></td><td><span class="badge badge-success">活跃</span></td><td>4月12日</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== 经纪人：客户保单 ========== -->
+    <div class="panel" id="panel-my-policies">
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card teal"><div class="stat-icon teal">📋</div><div class="stat-label">管理保单</div><div class="stat-value">126</div></div>
+        <div class="stat-card blue"><div class="stat-icon blue">💰</div><div class="stat-label">总年缴保费</div><div class="stat-value">HK$2.1M</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">⏰</div><div class="stat-label">30天内到期</div><div class="stat-value">8</div></div>
+        <div class="stat-card rose"><div class="stat-icon rose">🔴</div><div class="stat-label">逾期未缴</div><div class="stat-value">1</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">保单列表</div>
+          <div style="display:flex;gap:8px"><button class="btn btn-outline" style="font-size:12px">筛选</button><button class="btn btn-outline" style="font-size:12px">导出</button></div>
+        </div>
+        <table>
+          <thead><tr><th>客户</th><th>保险公司</th><th>产品</th><th>险种</th><th>年缴保费</th><th>状态</th><th>下次缴费</th></tr></thead>
+          <tbody>
+            <tr><td class="td-name">陈先生</td><td>AIA 友邦</td><td class="td-name">充裕未来·传承 III</td><td><span class="badge badge-info">储蓄</span></td><td>US$ 5,200<div class="td-sub">≈ ¥37,856</div></td><td><span class="badge badge-success">正常</span></td><td>2026-06-15</td></tr>
+            <tr><td class="td-name">陈先生</td><td>保诚</td><td class="td-name">危疾加护保 III</td><td><span class="badge badge-danger">重疾</span></td><td>HK$ 12,600<div class="td-sub">≈ ¥11,466</div></td><td><span class="badge badge-warning">即将到期</span></td><td style="color:var(--warning);font-weight:600">2026-05-15</td></tr>
+            <tr><td class="td-name">陈小明</td><td>宏利</td><td class="td-name">活耀人生 危疾保</td><td><span class="badge badge-danger">重疾</span></td><td>HK$ 8,400<div class="td-sub">≈ ¥7,644</div></td><td><span class="badge badge-success">正常</span></td><td>2026-11-01</td></tr>
+            <tr><td class="td-name">王女士</td><td>安盛</td><td class="td-name">真智珍宝</td><td><span class="badge badge-info">储蓄</span></td><td>US$ 3,000<div class="td-sub">≈ ¥21,840</div></td><td><span class="badge badge-success">正常</span></td><td>2026-08-20</td></tr>
+            <tr><td class="td-name">林先生</td><td>富卫</td><td class="td-name">自主保 定期寿险</td><td><span class="badge badge-muted">人寿</span></td><td>HK$ 2,400<div class="td-sub">≈ ¥2,184</div></td><td><span class="badge badge-success">正常</span></td><td>2026-12-01</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== 经纪人：咨询线索 ========== -->
+    <div class="panel" id="panel-my-leads">
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr)">
+        <div class="stat-card teal"><div class="stat-icon teal">🎯</div><div class="stat-label">本月新线索</div><div class="stat-value">12</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">⏰</div><div class="stat-label">待跟进</div><div class="stat-value">5</div></div>
+        <div class="stat-card blue"><div class="stat-icon blue">📞</div><div class="stat-label">已联系</div><div class="stat-value">4</div></div>
+        <div class="stat-card rose"><div class="stat-icon rose">✅</div><div class="stat-label">已转化</div><div class="stat-value">3</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">线索列表</div></div>
+        <table>
+          <thead><tr><th>客户</th><th>咨询内容</th><th>来源</th><th>提交时间</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody>
+            <tr><td><div class="td-name">王女士</div><div class="td-sub">+86 139****5678</div></td><td>咨询重疾险，关注多次赔付</td><td><span class="badge badge-info">产品页</span></td><td>昨天 15:30</td><td><span class="badge badge-danger">待跟进</span></td><td><button class="btn btn-primary" style="font-size:11px;padding:4px 12px">联系</button></td></tr>
+            <tr><td><div class="td-name">李小姐</div><div class="td-sub">+86 137****2345</div></td><td>了解高端医疗险，在大陆是否可用</td><td><span class="badge badge-success">文章页</span></td><td>今天 09:15</td><td><span class="badge badge-danger">待跟进</span></td><td><button class="btn btn-primary" style="font-size:11px;padding:4px 12px">联系</button></td></tr>
+            <tr><td><div class="td-name">张先生</div><div class="td-sub">+86 133****6789</div></td><td>储蓄险对比，充裕未来 vs 隽升</td><td><span class="badge badge-muted">保障分析</span></td><td>4月11日</td><td><span class="badge badge-warning">已联系</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 12px">跟进</button></td></tr>
+            <tr><td><div class="td-name">周女士</div><div class="td-sub">+86 131****4567</div></td><td>给小孩买重疾+储蓄组合</td><td><span class="badge badge-info">产品页</span></td><td>4月9日</td><td><span class="badge badge-success">已签单</span></td><td><button class="btn btn-outline" style="font-size:11px;padding:4px 12px">详情</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== 经纪人：录入保单 ========== -->
+    <div class="panel" id="panel-add-policy">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">录入新保单</div><div class="card-subtitle">录入后将自动关联到客户账户</div></div>
+        </div>
+        <div class="form-grid">
+          <div class="form-section-title">👤 客户信息</div>
+          <div class="form-group"><label class="form-label">客户姓名 <span class="required">*</span></label><input class="form-input" placeholder="请输入与保单一致的姓名"></div>
+          <div class="form-group"><label class="form-label">手机号 <span class="required">*</span></label><input class="form-input" placeholder="+86 / +852"></div>
+          <div class="form-group"><label class="form-label">证件类型 <span class="required">*</span></label><select class="form-select"><option>中国大陆身份证</option><option>港澳通行证</option><option>护照</option><option>HKID</option></select></div>
+          <div class="form-group"><label class="form-label">证件号码 <span class="required">*</span></label><input class="form-input" placeholder="请输入证件号码"></div>
+
+          <div class="form-section-title">📋 保单信息</div>
+          <div class="form-group"><label class="form-label">保单号 <span class="required">*</span></label><input class="form-input" placeholder="保险公司出单号"></div>
+          <div class="form-group"><label class="form-label">保险公司 <span class="required">*</span></label><select class="form-select"><option>AIA 友邦</option><option>保诚 Prudential</option><option>宏利 Manulife</option><option>安盛 AXA</option><option>富卫 FWD</option><option>中国人寿(海外)</option><option>永明 Sun Life</option><option>万通 YF Life</option></select></div>
+          <div class="form-group"><label class="form-label">产品名称 <span class="required">*</span></label><input class="form-input" placeholder="如：充裕未来·传承 III"></div>
+          <div class="form-group"><label class="form-label">险种类型 <span class="required">*</span></label><select class="form-select"><option>储蓄分红</option><option>重疾</option><option>医疗</option><option>人寿</option><option>意外</option></select></div>
+          <div class="form-group"><label class="form-label">保额 <span class="required">*</span></label><input class="form-input" placeholder="如：100,000"></div>
+          <div class="form-group"><label class="form-label">保额币种 <span class="required">*</span></label><select class="form-select"><option>HKD 港币</option><option>USD 美元</option><option>CNY 人民币</option></select></div>
+          <div class="form-group"><label class="form-label">年缴保费 <span class="required">*</span></label><input class="form-input" placeholder="如：5,200"></div>
+          <div class="form-group"><label class="form-label">缴费方式</label><select class="form-select"><option>年缴</option><option>半年缴</option><option>季缴</option><option>月缴</option><option>整付</option></select></div>
+          <div class="form-group"><label class="form-label">缴费期限</label><input class="form-input" placeholder="如：20年"></div>
+          <div class="form-group"><label class="form-label">保单生效日 <span class="required">*</span></label><input class="form-input" type="date"></div>
+
+          <div class="form-section-title">👨‍👩‍👧 人员信息</div>
+          <div class="form-group"><label class="form-label">投保人</label><input class="form-input" placeholder="投保人姓名"></div>
+          <div class="form-group"><label class="form-label">被保人</label><input class="form-input" placeholder="被保人姓名"></div>
+          <div class="form-group full"><label class="form-label">受益人</label><input class="form-input" placeholder="受益人姓名（可多个，逗号分隔）"></div>
+
+          <div class="form-section-title">📎 附加信息</div>
+          <div class="form-group full"><label class="form-label">附加险 (Rider)</label><input class="form-input" placeholder="如：豁免保费、意外身故额外赔偿"></div>
+          <div class="form-group full"><label class="form-label">备注</label><textarea class="form-input" rows="3" placeholder="其他备注信息..."></textarea></div>
+          <div class="form-group full" style="display:flex;gap:12px;justify-content:flex-end;padding-top:12px">
+            <button class="btn btn-outline">取消</button>
+            <button class="btn btn-primary" onclick="alert('保单已保存！系统将在客户下次登录时自动匹配。')">保存保单</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 经纪人：我的佣金 ========== -->
+    <div class="panel" id="panel-my-commission">
+      <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="stat-card teal"><div class="stat-icon teal">💰</div><div class="stat-label">本月佣金</div><div class="stat-value">¥186,400</div><div class="stat-change up">↑ 23%</div></div>
+        <div class="stat-card blue"><div class="stat-icon blue">📊</div><div class="stat-label">累计佣金(本年)</div><div class="stat-value">¥642,800</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">⏳</div><div class="stat-label">待结算</div><div class="stat-value">¥45,200</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">佣金明细</div></div>
+        <table>
+          <thead><tr><th>客户</th><th>保单</th><th>类型</th><th>佣金金额</th><th>状态</th><th>结算日期</th></tr></thead>
+          <tbody>
+            <tr><td class="td-name">刘先生</td><td>AIA 充裕未来 III<div class="td-sub">US$5,000 × 20年</div></td><td><span class="badge badge-info">首年</span></td><td style="font-weight:700;color:var(--primary)">¥52,000</td><td><span class="badge badge-success">已结算</span></td><td>2026-04-10</td></tr>
+            <tr><td class="td-name">周女士</td><td>保诚 危疾加护保 III<div class="td-sub">HK$15,000 × 25年</div></td><td><span class="badge badge-info">首年</span></td><td style="font-weight:700;color:var(--primary)">¥38,400</td><td><span class="badge badge-warning">待结算</span></td><td>预计 4月25日</td></tr>
+            <tr><td class="td-name">陈先生</td><td>AIA 充裕未来 III<div class="td-sub">续年佣金 第3年</div></td><td><span class="badge badge-muted">续年</span></td><td style="font-weight:700">¥6,800</td><td><span class="badge badge-success">已结算</span></td><td>2026-03-15</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== 经纪人：工具 ========== -->
+    <div class="panel" id="panel-tools">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px">
+        <div class="card" style="padding:32px;text-align:center;cursor:pointer">
+          <div style="font-size:40px;margin-bottom:12px">📐</div>
+          <div style="font-size:16px;font-weight:700">制作计划书</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:6px">选择产品，输入客户信息，生成专业计划书</div>
+        </div>
+        <div class="card" style="padding:32px;text-align:center;cursor:pointer">
+          <div style="font-size:40px;margin-bottom:12px">🧮</div>
+          <div style="font-size:16px;font-weight:700">报价计算器</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:6px">快速计算各产品保费，支持多方案对比</div>
+        </div>
+        <div class="card" style="padding:32px;text-align:center;cursor:pointer">
+          <div style="font-size:40px;margin-bottom:12px">💱</div>
+          <div style="font-size:16px;font-weight:700">汇率查询</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:6px">实时 HKD/USD/CNY 汇率，保费换算</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 公司：数据看板 ========== -->
+    <div class="panel" id="panel-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card teal"><div class="stat-icon teal">👥</div><div class="stat-label">总客户数</div><div class="stat-value">1,248</div><div class="stat-change up">↑ 86 本月</div></div>
+        <div class="stat-card blue"><div class="stat-icon blue">📋</div><div class="stat-label">管理保单</div><div class="stat-value">3,456</div><div class="stat-change up">↑ 124 本月</div></div>
+        <div class="stat-card amber"><div class="stat-icon amber">💰</div><div class="stat-label">年保费规模</div><div class="stat-value">HK$48M</div><div class="stat-change up">↑ 18%</div></div>
+        <div class="stat-card rose"><div class="stat-icon rose">🎯</div><div class="stat-label">月新增线索</div><div class="stat-value">156</div><div class="stat-change up">↑ 32%</div></div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-card">
+          <div class="chart-title">月度新增保单趋势</div>
+          <div class="chart-sub">近6个月</div>
+          <div class="mini-bars">
+            <div class="mini-bar" style="height:45%;background:#99F6E4"><div class="mini-bar-label">11月</div></div>
+            <div class="mini-bar" style="height:52%;background:#5EEAD4"><div class="mini-bar-label">12月</div></div>
+            <div class="mini-bar" style="height:48%;background:#2DD4BF"><div class="mini-bar-label">1月</div></div>
+            <div class="mini-bar" style="height:65%;background:#14B8A6"><div class="mini-bar-label">2月</div></div>
+            <div class="mini-bar" style="height:78%;background:#0D9488"><div class="mini-bar-label">3月</div></div>
+            <div class="mini-bar" style="height:92%;background:#0F766E"><div class="mini-bar-label">4月</div></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">保单险种分布</div>
+          <div class="chart-sub">按保单数量</div>
+          <div class="donut-placeholder"></div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--primary)"></div>储蓄 35%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#3B82F6"></div>重疾 20%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>医疗 20%</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#E2E8F0"></div>其他 25%</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-row">
+        <div class="chart-card">
+          <div class="chart-title">线索转化漏斗</div>
+          <div class="chart-sub">本月</div>
+          <div style="padding:8px 0">
+            <div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>新增线索</span><strong>156</strong></div><div style="height:24px;background:var(--primary);border-radius:6px;width:100%"></div></div>
+            <div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>已联系</span><strong>98 (62.8%)</strong></div><div style="height:24px;background:#14B8A6;border-radius:6px;width:63%"></div></div>
+            <div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>有意向</span><strong>42 (26.9%)</strong></div><div style="height:24px;background:#2DD4BF;border-radius:6px;width:27%"></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>已签单</span><strong>18 (11.5%)</strong></div><div style="height:24px;background:#5EEAD4;border-radius:6px;width:12%"></div></div>
+          </div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-title">合作保司保费占比</div>
+          <div class="chart-sub">按年保费金额</div>
+          <div style="padding:8px 0">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="width:60px;font-size:12px;font-weight:600">AIA</span><div style="flex:1;height:20px;background:var(--border-light);border-radius:4px;overflow:hidden"><div style="height:100%;width:35%;background:var(--primary);border-radius:4px"></div></div><span style="font-size:12px;font-weight:600;width:32px">35%</span></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="width:60px;font-size:12px;font-weight:600">保诚</span><div style="flex:1;height:20px;background:var(--border-light);border-radius:4px;overflow:hidden"><div style="height:100%;width:28%;background:#3B82F6;border-radius:4px"></div></div><span style="font-size:12px;font-weight:600;width:32px">28%</span></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="width:60px;font-size:12px;font-weight:600">宏利</span><div style="flex:1;height:20px;background:var(--border-light);border-radius:4px;overflow:hidden"><div style="height:100%;width:18%;background:var(--accent);border-radius:4px"></div></div><span style="font-size:12px;font-weight:600;width:32px">18%</span></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px"><span style="width:60px;font-size:12px;font-weight:600">安盛</span><div style="flex:1;height:20px;background:var(--border-light);border-radius:4px;overflow:hidden"><div style="height:100%;width:12%;background:#E11D48;border-radius:4px"></div></div><span style="font-size:12px;font-weight:600;width:32px">12%</span></div>
+            <div style="display:flex;align-items:center;gap:12px"><span style="width:60px;font-size:12px;font-weight:600">其他</span><div style="flex:1;height:20px;background:var(--border-light);border-radius:4px;overflow:hidden"><div style="height:100%;width:7%;background:#94A3B8;border-radius:4px"></div></div><span style="font-size:12px;font-weight:600;width:32px">7%</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 公司：业绩排名 ========== -->
+    <div class="panel" id="panel-ranking">
+      <div class="chart-row">
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">🏆 本月业绩排名</div><div class="card-subtitle">按新增保费 · 2026年4月</div></div></div>
+          <div class="rank-item"><div class="rank-num gold">1</div><div class="rank-name">张经理</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:100%"></div></div><div class="rank-value">HK$680K</div></div>
+          <div class="rank-item"><div class="rank-num silver">2</div><div class="rank-name">李顾问</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:78%"></div></div><div class="rank-value">HK$530K</div></div>
+          <div class="rank-item"><div class="rank-num bronze">3</div><div class="rank-name">王经理</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:62%"></div></div><div class="rank-value">HK$420K</div></div>
+          <div class="rank-item"><div class="rank-num normal">4</div><div class="rank-name">刘顾问</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:48%"></div></div><div class="rank-value">HK$325K</div></div>
+          <div class="rank-item"><div class="rank-num normal">5</div><div class="rank-name">赵顾问</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:35%"></div></div><div class="rank-value">HK$240K</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div><div class="card-title">🎯 线索转化率排名</div><div class="card-subtitle">线索→签单转化率</div></div></div>
+          <div class="rank-item"><div class="rank-num gold">1</div><div class="rank-name">李顾问</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:100%"></div></div><div class="rank-value">18.5%</div></div>
+          <div class="rank-item"><div class="rank-num silver">2</div><div class="rank-name">张经理</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:82%"></div></div><div class="rank-value">15.2%</div></div>
+          <div class="rank-item"><div class="rank-num bronze">3</div><div class="rank-name">赵顾问</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:70%"></div></div><div class="rank-value">12.8%</div></div>
+          <div class="rank-item"><div class="rank-num normal">4</div><div class="rank-name">王经理</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:55%"></div></div><div class="rank-value">10.1%</div></div>
+          <div class="rank-item"><div class="rank-num normal">5</div><div class="rank-name">刘顾问</div><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:42%"></div></div><div class="rank-value">7.8%</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== 公司：经纪人管理 / 全部客户 / 全部保单 / 全部线索 / 佣金管理 / 内容管理 / 产品管理 / 设置 ========== -->
+    <div class="panel" id="panel-team"><div class="card"><div class="card-header"><div><div class="card-title">经纪人管理</div><div class="card-subtitle">团队花名册</div></div><button class="btn btn-primary" style="font-size:12px">+ 添加经纪人</button></div><table><thead><tr><th>姓名</th><th>工号</th><th>牌照号</th><th>客户数</th><th>保单数</th><th>本月保费</th><th>状态</th></tr></thead><tbody><tr><td class="td-name">张经理</td><td>B12345</td><td>LB-67890</td><td>48</td><td>126</td><td>HK$680K</td><td><span class="badge badge-success">在职</span></td></tr><tr><td class="td-name">李顾问</td><td>B12346</td><td>LB-67891</td><td>35</td><td>98</td><td>HK$530K</td><td><span class="badge badge-success">在职</span></td></tr><tr><td class="td-name">王经理</td><td>B12347</td><td>LB-67892</td><td>42</td><td>110</td><td>HK$420K</td><td><span class="badge badge-success">在职</span></td></tr><tr><td class="td-name">刘顾问</td><td>B12348</td><td>LB-67893</td><td>28</td><td>72</td><td>HK$325K</td><td><span class="badge badge-success">在职</span></td></tr><tr><td class="td-name">赵顾问</td><td>B12349</td><td>LB-67894</td><td>22</td><td>58</td><td>HK$240K</td><td><span class="badge badge-success">在职</span></td></tr></tbody></table></div></div>
+    <div class="panel" id="panel-all-clients"><div class="card"><div class="card-header"><div class="card-title">全部客户（公司级）</div><button class="btn btn-outline" style="font-size:12px">导出</button></div><table><thead><tr><th>客户</th><th>负责经纪</th><th>保单数</th><th>年缴保费</th><th>注册状态</th><th>最近互动</th></tr></thead><tbody><tr><td class="td-name">陈先生</td><td>张经理</td><td>3</td><td>HK$26,200</td><td><span class="badge badge-success">已认证</span></td><td>今天</td></tr><tr><td class="td-name">王女士</td><td>张经理</td><td>2</td><td>HK$18,400</td><td><span class="badge badge-success">已认证</span></td><td>昨天</td></tr><tr><td class="td-name">林先生</td><td>李顾问</td><td>4</td><td>HK$45,600</td><td><span class="badge badge-warning">未注册</span></td><td>—</td></tr><tr><td class="td-name">赵女士</td><td>王经理</td><td>2</td><td>HK$32,000</td><td><span class="badge badge-success">已认证</span></td><td>3月2日</td></tr></tbody></table></div></div>
+    <div class="panel" id="panel-all-policies"><div class="card"><div class="card-header"><div class="card-title">全部保单（公司级）</div><button class="btn btn-outline" style="font-size:12px">导出</button></div><table><thead><tr><th>客户</th><th>经纪人</th><th>保险公司</th><th>产品</th><th>年缴保费</th><th>状态</th></tr></thead><tbody><tr><td class="td-name">陈先生</td><td>张经理</td><td>AIA</td><td>充裕未来 III</td><td>US$5,200</td><td><span class="badge badge-success">正常</span></td></tr><tr><td class="td-name">陈先生</td><td>张经理</td><td>保诚</td><td>危疾加护保 III</td><td>HK$12,600</td><td><span class="badge badge-warning">即将到期</span></td></tr><tr><td class="td-name">林先生</td><td>李顾问</td><td>富卫</td><td>自主保</td><td>HK$2,400</td><td><span class="badge badge-success">正常</span></td></tr></tbody></table></div></div>
+    <div class="panel" id="panel-all-leads"><div class="card"><div class="card-header"><div class="card-title">全部线索（公司级）</div></div><table><thead><tr><th>客户</th><th>分配经纪</th><th>咨询内容</th><th>来源</th><th>状态</th><th>提交时间</th></tr></thead><tbody><tr><td class="td-name">王女士</td><td>张经理</td><td>咨询重疾险</td><td><span class="badge badge-info">产品页</span></td><td><span class="badge badge-danger">待跟进</span></td><td>昨天</td></tr><tr><td class="td-name">李小姐</td><td>张经理</td><td>高端医疗险</td><td><span class="badge badge-success">文章页</span></td><td><span class="badge badge-danger">待跟进</span></td><td>今天</td></tr><tr><td class="td-name">孙先生</td><td>李顾问</td><td>储蓄险</td><td><span class="badge badge-muted">保障分析</span></td><td><span class="badge badge-warning">已联系</span></td><td>4月10日</td></tr></tbody></table></div></div>
+    <div class="panel" id="panel-commission-mgmt"><div class="card"><div class="card-header"><div><div class="card-title">佣金管理（公司级）</div><div class="card-subtitle">各保司佣金合约与经纪人分佣比例</div></div></div><table><thead><tr><th>保险公司</th><th>首年佣金比例</th><th>续年佣金</th><th>经纪人分佣</th><th>合约到期</th></tr></thead><tbody><tr><td class="td-name">AIA 友邦</td><td>50%</td><td>5%-8%</td><td>70%</td><td>2027-12-31</td></tr><tr><td class="td-name">保诚</td><td>55%</td><td>5%-10%</td><td>70%</td><td>2027-06-30</td></tr><tr><td class="td-name">宏利</td><td>48%</td><td>5%-8%</td><td>70%</td><td>2028-03-31</td></tr><tr><td class="td-name">安盛</td><td>45%</td><td>4%-7%</td><td>70%</td><td>2027-09-30</td></tr><tr><td class="td-name">富卫</td><td>50%</td><td>5%-8%</td><td>70%</td><td>2027-12-31</td></tr></tbody></table></div></div>
+    <div class="panel" id="panel-content"><div class="card"><div class="card-header"><div><div class="card-title">内容管理 (CMS)</div><div class="card-subtitle">保险学堂文章管理</div></div><button class="btn btn-primary" style="font-size:12px">+ 新建文章</button></div><table><thead><tr><th>标题</th><th>分类</th><th>阅读量</th><th>线索转化</th><th>状态</th><th>发布时间</th></tr></thead><tbody><tr><td class="td-name">在大陆看病，香港保单能赔吗？</td><td><span class="badge badge-info">理赔指南</span></td><td>2,340</td><td><strong style="color:var(--primary)">12</strong></td><td><span class="badge badge-success">已发布</span></td><td>2026-04-01</td></tr><tr><td class="td-name">港币换汇最佳渠道</td><td><span class="badge badge-success">缴费攻略</span></td><td>1,820</td><td><strong style="color:var(--primary)">8</strong></td><td><span class="badge badge-success">已发布</span></td><td>2026-03-25</td></tr><tr><td class="td-name">储蓄险红利通知书怎么看</td><td><span class="badge badge-muted">险种科普</span></td><td>1,540</td><td><strong style="color:var(--primary)">5</strong></td><td><span class="badge badge-success">已发布</span></td><td>2026-03-18</td></tr><tr><td class="td-name">2026年港险理赔全攻略</td><td><span class="badge badge-info">理赔指南</span></td><td>—</td><td>—</td><td><span class="badge badge-warning">草稿</span></td><td>—</td></tr></tbody></table></div></div>
+    <div class="panel" id="panel-products"><div class="card"><div class="card-header"><div><div class="card-title">产品管理</div><div class="card-subtitle">C端展示的保险产品</div></div><button class="btn btn-primary" style="font-size:12px">+ 添加产品</button></div><table><thead><tr><th>产品名称</th><th>保险公司</th><th>险种</th><th>浏览量</th><th>咨询数</th><th>状态</th></tr></thead><tbody><tr><td class="td-name">充裕未来·传承 III</td><td>AIA</td><td><span class="badge badge-info">储蓄</span></td><td>4,560</td><td>28</td><td><span class="badge badge-success">上架</span></td></tr><tr><td class="td-name">危疾加护保 III</td><td>保诚</td><td><span class="badge badge-danger">重疾</span></td><td>3,210</td><td>22</td><td><span class="badge badge-success">上架</span></td></tr><tr><td class="td-name">守护健康医疗计划</td><td>保诚</td><td><span class="badge badge-warning">医疗</span></td><td>2,180</td><td>15</td><td><span class="badge badge-success">上架</span></td></tr><tr><td class="td-name">活耀人生 危疾保</td><td>宏利</td><td><span class="badge badge-danger">重疾</span></td><td>1,890</td><td>11</td><td><span class="badge badge-success">上架</span></td></tr></tbody></table></div></div>
+    <div class="panel" id="panel-settings"><div class="card" style="padding:40px;text-align:center"><div style="font-size:48px;margin-bottom:16px">⚙️</div><div style="font-size:20px;font-weight:700">系统设置</div><div style="font-size:14px;color:var(--text-secondary);margin-top:8px">权限管理 · 通知配置 · 数据导出 · API设置</div></div></div>
+
+  </div>
+</div>
+
+<script>
+function switchRole(role) {
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+
+  const agentNav = document.getElementById('nav-agent');
+  const companyNav = document.getElementById('nav-company');
+  const footer = document.querySelector('.sidebar-footer');
+
+  if (role === 'agent') {
+    agentNav.style.display = 'block';
+    companyNav.style.display = 'none';
+    footer.querySelector('.sf-name').textContent = '张经理';
+    footer.querySelector('.sf-role').textContent = 'B12345 · 持牌经纪人';
+    showPanel('workbench');
+  } else {
+    agentNav.style.display = 'none';
+    companyNav.style.display = 'block';
+    footer.querySelector('.sf-name').textContent = '管理员';
+    footer.querySelector('.sf-role').textContent = '公司管理端';
+    showPanel('dashboard');
+  }
+}
+
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+
+  const panel = document.getElementById('panel-' + name);
+  if (panel) panel.classList.add('active');
+
+  const titles = {
+    'workbench': '我的工作台', 'my-clients': '我的客户', 'my-policies': '客户保单',
+    'my-leads': '咨询线索', 'add-policy': '录入保单', 'my-commission': '我的佣金',
+    'tools': '工具', 'dashboard': '数据看板', 'all-clients': '全部客户',
+    'all-policies': '全部保单', 'all-leads': '全部线索', 'team': '经纪人管理',
+    'ranking': '业绩排名', 'commission-mgmt': '佣金管理', 'content': '内容管理',
+    'products': '产品管理', 'settings': '系统设置'
+  };
+  document.getElementById('panel-title').textContent = titles[name] || name;
+
+  event && event.target && event.target.closest && event.target.closest('.nav-item') && event.target.closest('.nav-item').classList.add('active');
+}
+</script>
+</body>
+</html>
