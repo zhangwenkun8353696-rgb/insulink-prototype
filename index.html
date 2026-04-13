@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>保联 InsuLink — 原型预览</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  background: linear-gradient(135deg, #0E1B25 0%, #1A3A4A 50%, #0E4A3E 100%);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.container {
+  text-align: center;
+  max-width: 800px;
+  padding: 40px 20px;
+}
+.logo { font-size: 64px; margin-bottom: 16px; }
+h1 { font-size: 42px; font-weight: 800; margin-bottom: 8px; letter-spacing: -1px; }
+.subtitle { font-size: 18px; color: rgba(255,255,255,0.6); margin-bottom: 12px; }
+.slogan { font-size: 15px; color: rgba(255,255,255,0.4); margin-bottom: 48px; }
+.cards { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; }
+.card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 20px;
+  padding: 40px 36px;
+  width: 320px;
+  text-decoration: none;
+  color: white;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+.card:hover {
+  background: rgba(255,255,255,0.14);
+  transform: translateY(-4px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+}
+.card-icon { font-size: 48px; margin-bottom: 16px; }
+.card-title { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.card-desc { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.6; margin-bottom: 20px; }
+.card-btn {
+  display: inline-block;
+  padding: 10px 28px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+.card:nth-child(1) .card-btn { background: #1A6B5C; }
+.card:nth-child(1) .card-btn:hover { background: #22876F; }
+.card:nth-child(2) .card-btn { background: #2563EB; }
+.card:nth-child(2) .card-btn:hover { background: #3B82F6; }
+.footer {
+  margin-top: 48px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.3);
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="logo">🔗</div>
+  <h1>保联 InsuLink</h1>
+  <div class="subtitle">连接你与每一张保单</div>
+  <div class="slogan">香港保险全链路数字化服务平台 · 高保真原型预览</div>
+
+  <div class="cards">
+    <a class="card" href="c-app.html">
+      <div class="card-icon">📱</div>
+      <div class="card-title">C端 · 客户 App</div>
+      <div class="card-desc">面向大陆客户的保单管理、保险教育与产品推荐。4个主Tab + 15+个二级页面完整交互。</div>
+      <div class="card-btn">查看原型 →</div>
+    </a>
+    <a class="card" href="b-admin.html">
+      <div class="card-icon">💻</div>
+      <div class="card-title">B端 · 管理后台</div>
+      <div class="card-desc">经纪人工作台 + 公司管理双视角。客户管理、保单录入、佣金、内容CMS一站式。</div>
+      <div class="card-btn">查看原型 →</div>
+    </a>
+  </div>
+
+  <div class="footer">
+    保联 InsuLink © 2026 · 持牌保险经纪公司出品
+  </div>
+</div>
+</body>
+</html>

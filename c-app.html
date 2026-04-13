@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>保联 InsuLink — C端原型</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #1A6B5C;
+  --primary-light: #E8F5F1;
+  --primary-dark: #0E4A3E;
+  --accent: #F5A623;
+  --bg: #F5F6FA;
+  --white: #FFFFFF;
+  --text: #1A1A2E;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --border: #E5E7EB;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
+}
+body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; }
+
+/* Phone Frame */
+.phone-frame {
+  width: 390px; height: 844px;
+  border: 8px solid #1a1a1a; border-radius: 44px;
+  overflow: hidden; position: relative;
+  margin: 20px auto;
+  background: var(--bg);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 0 0 2px #333;
+}
+.phone-notch {
+  width: 160px; height: 34px;
+  background: #1a1a1a; border-radius: 0 0 20px 20px;
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  z-index: 100;
+}
+.phone-content {
+  width: 100%; height: 100%;
+  overflow: hidden; position: relative;
+}
+
+/* Status Bar */
+.status-bar {
+  height: 54px; padding: 10px 24px 0;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 14px; font-weight: 600;
+  background: var(--white);
+  position: relative; z-index: 50;
+}
+.status-bar .time { margin-left: 4px; }
+.status-bar .icons { display: flex; gap: 6px; font-size: 12px; }
+
+/* Page Container */
+.page { display: none; width: 100%; height: calc(100% - 54px - 60px); overflow-y: auto; position: absolute; top: 54px; left: 0; }
+.page.active { display: block; }
+.page::-webkit-scrollbar { display: none; }
+
+/* Tab Bar */
+.tab-bar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 60px; background: var(--white);
+  display: flex; justify-content: space-around; align-items: center;
+  border-top: 1px solid var(--border);
+  z-index: 90; padding-bottom: 4px;
+}
+.tab-item {
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  font-size: 10px; color: var(--text-muted); cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-item.active { color: var(--primary); }
+.tab-item .tab-icon { font-size: 22px; line-height: 1; }
+.tab-item .tab-label { font-weight: 500; }
+
+/* ========== HOME PAGE ========== */
+.home-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  padding: 16px 20px 20px; color: white;
+}
+.home-greeting { font-size: 18px; font-weight: 600; }
+.home-greeting-sub { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+.home-header .notification-btn {
+  position: absolute; right: 20px; top: 70px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.2); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer;
+}
+.notification-dot {
+  width: 8px; height: 8px; background: var(--danger);
+  border-radius: 50%; position: absolute; top: 6px; right: 6px;
+}
+
+/* Policy Summary Card */
+.policy-summary-card {
+  margin: -12px 16px 12px; padding: 20px;
+  background: var(--white); border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  position: relative; z-index: 10;
+}
+.psc-title { font-size: 13px; color: var(--text-secondary); margin-bottom: 12px; }
+.psc-row { display: flex; justify-content: space-between; align-items: center; }
+.psc-amount { font-size: 28px; font-weight: 700; color: var(--primary-dark); }
+.psc-amount-sub { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.psc-right { text-align: right; }
+.psc-count { font-size: 36px; font-weight: 700; color: var(--primary); }
+.psc-count-label { font-size: 12px; color: var(--text-secondary); }
+.psc-divider { height: 1px; background: var(--border); margin: 14px 0; }
+.psc-footer { display: flex; gap: 20px; }
+.psc-footer-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+.psc-footer-item .dot { width: 8px; height: 8px; border-radius: 50%; }
+.psc-footer-item .dot.green { background: var(--success); }
+.psc-footer-item .dot.yellow { background: var(--warning); }
+
+/* Exchange Rate Bar */
+.exchange-bar {
+  margin: 0 16px 16px; padding: 12px 16px;
+  background: var(--white); border-radius: 12px;
+  display: flex; justify-content: space-between; align-items: center;
+  box-shadow: var(--card-shadow);
+}
+.exchange-bar .label { font-size: 13px; color: var(--text-secondary); }
+.exchange-bar .rate { font-size: 18px; font-weight: 700; color: var(--text); }
+.exchange-bar .change { font-size: 12px; color: var(--success); margin-left: 6px; }
+.exchange-bar .time { font-size: 11px; color: var(--text-muted); }
+
+/* Section Title */
+.section-title {
+  padding: 4px 20px 10px;
+  font-size: 16px; font-weight: 700; color: var(--text);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.section-title .more { font-size: 13px; color: var(--primary); font-weight: 500; cursor: pointer; }
+
+/* Todo Cards */
+.todo-list { padding: 0 16px 12px; }
+.todo-card {
+  padding: 14px 16px; background: var(--white);
+  border-radius: 12px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--card-shadow);
+}
+.todo-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.todo-content { flex: 1; }
+.todo-title { font-size: 14px; font-weight: 500; }
+.todo-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.todo-arrow { color: var(--text-muted); font-size: 16px; }
+
+/* Horizontal Scroll Cards */
+.hscroll { display: flex; gap: 12px; padding: 0 16px 16px; overflow-x: auto; }
+.hscroll::-webkit-scrollbar { display: none; }
+.article-card {
+  min-width: 200px; background: var(--white); border-radius: 14px;
+  overflow: hidden; box-shadow: var(--card-shadow); flex-shrink: 0;
+}
+.article-card .article-img {
+  height: 100px; background: linear-gradient(135deg, #E0F2FE, #BAE6FD);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+}
+.article-card .article-body { padding: 12px; }
+.article-card .article-title { font-size: 13px; font-weight: 600; line-height: 1.4; }
+.article-card .article-meta { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+/* Product Cards */
+.product-card {
+  min-width: 240px; background: var(--white); border-radius: 14px;
+  padding: 16px; box-shadow: var(--card-shadow); flex-shrink: 0;
+}
+.product-card .pc-logo { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 1px; margin-bottom: 6px; }
+.product-card .pc-name { font-size: 15px; font-weight: 700; }
+.product-card .pc-type { font-size: 12px; color: var(--primary); margin-top: 4px; background: var(--primary-light); display: inline-block; padding: 2px 8px; border-radius: 4px; }
+.product-card .pc-highlight { font-size: 12px; color: var(--text-secondary); margin-top: 8px; line-height: 1.5; }
+.product-card .pc-btn {
+  margin-top: 12px; padding: 8px 0; text-align: center;
+  background: var(--primary); color: white; border-radius: 8px;
+  font-size: 13px; font-weight: 600; cursor: pointer;
+}
+
+/* ========== POLICY PAGE ========== */
+.policy-page-header {
+  background: var(--white); padding: 16px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.policy-page-title { font-size: 20px; font-weight: 700; }
+.policy-filter {
+  padding: 4px 12px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 13px; color: var(--text-secondary); cursor: pointer;
+}
+
+/* Coverage Progress */
+.coverage-section { padding: 0 16px 8px; }
+.coverage-card {
+  background: var(--white); border-radius: 14px; padding: 16px;
+  box-shadow: var(--card-shadow);
+}
+.coverage-title { font-size: 14px; font-weight: 600; margin-bottom: 12px; }
+.coverage-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.coverage-label { width: 48px; font-size: 12px; color: var(--text-secondary); }
+.coverage-bar { flex: 1; height: 8px; background: #E5E7EB; border-radius: 4px; overflow: hidden; }
+.coverage-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+.coverage-fill.green { background: var(--success); }
+.coverage-fill.yellow { background: var(--warning); }
+.coverage-fill.red { background: var(--danger); }
+.coverage-fill.gray { background: #D1D5DB; }
+.coverage-value { width: 40px; font-size: 12px; font-weight: 600; text-align: right; }
+
+/* Family Group */
+.family-group { padding: 8px 16px; }
+.family-label {
+  font-size: 14px; font-weight: 600; color: var(--text-secondary);
+  padding: 8px 0 6px; display: flex; align-items: center; gap: 8px;
+}
+.family-label .emoji { font-size: 18px; }
+
+/* Policy Item Card */
+.policy-item {
+  background: var(--white); border-radius: 14px;
+  padding: 16px; margin-bottom: 10px;
+  box-shadow: var(--card-shadow); cursor: pointer;
+  transition: box-shadow 0.2s;
+  position: relative; overflow: hidden;
+}
+.policy-item:active { box-shadow: var(--card-shadow-hover); }
+.policy-item .status-stripe {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+.policy-item .status-stripe.active { background: var(--success); }
+.policy-item .status-stripe.warning { background: var(--warning); }
+.pi-header { display: flex; justify-content: space-between; align-items: flex-start; padding-left: 10px; }
+.pi-company { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
+.pi-status { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+.pi-status.active { background: #D1FAE5; color: #065F46; }
+.pi-status.warning { background: #FEF3C7; color: #92400E; }
+.pi-name { font-size: 16px; font-weight: 700; margin-top: 4px; padding-left: 10px; }
+.pi-type { font-size: 12px; color: var(--primary); margin-top: 2px; padding-left: 10px; }
+.pi-details { display: flex; gap: 16px; margin-top: 12px; padding-left: 10px; }
+.pi-detail-item { }
+.pi-detail-label { font-size: 11px; color: var(--text-muted); }
+.pi-detail-value { font-size: 14px; font-weight: 600; margin-top: 1px; }
+.pi-detail-sub { font-size: 11px; color: var(--text-secondary); }
+.pi-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid var(--border); padding-left: 10px;
+}
+.pi-next-pay { font-size: 12px; color: var(--text-secondary); }
+.pi-next-pay strong { color: var(--text); }
+.pi-arrow { color: var(--text-muted); font-size: 18px; }
+
+/* ========== POLICY DETAIL PAGE ========== */
+.detail-page { display: none; }
+.detail-page.active { display: block; }
+.detail-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  padding: 16px 20px 24px; color: white;
+}
+.detail-back { font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px; opacity: 0.9; }
+.detail-company { font-size: 12px; opacity: 0.8; margin-top: 16px; letter-spacing: 0.5px; }
+.detail-name { font-size: 22px; font-weight: 700; margin-top: 4px; }
+.detail-status-badge {
+  display: inline-block; margin-top: 8px;
+  padding: 4px 12px; border-radius: 20px;
+  background: rgba(255,255,255,0.2); font-size: 12px; font-weight: 600;
+}
+
+.detail-section {
+  margin: 12px 16px; background: var(--white);
+  border-radius: 14px; padding: 16px;
+  box-shadow: var(--card-shadow);
+}
+.detail-section-title {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+.detail-row {
+  display: flex; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid #F3F4F6;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label { font-size: 13px; color: var(--text-secondary); }
+.detail-value { font-size: 13px; font-weight: 600; text-align: right; }
+.detail-value-sub { font-size: 11px; color: var(--text-secondary); font-weight: 400; }
+
+/* Explainer Card */
+.explainer-card {
+  margin: 12px 16px; padding: 16px;
+  background: linear-gradient(135deg, #FFF7ED, #FFFBEB);
+  border-radius: 14px; border-left: 4px solid var(--accent);
+}
+.explainer-title { font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 8px; }
+.explainer-text { font-size: 13px; color: #78350F; line-height: 1.7; }
+
+/* Reminder Button */
+.reminder-btn {
+  margin: 12px 16px; padding: 14px;
+  background: var(--primary); color: white;
+  border-radius: 12px; text-align: center;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.reminder-btn:active { opacity: 0.9; }
+
+/* Related Articles */
+.related-articles { padding: 0 16px 16px; display: flex; gap: 10px; }
+.related-article {
+  flex: 1; background: var(--white); border-radius: 12px;
+  padding: 14px; box-shadow: var(--card-shadow);
+}
+.related-article .ra-title { font-size: 13px; font-weight: 600; line-height: 1.4; }
+.related-article .ra-meta { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+/* Contact Advisor */
+.contact-bar {
+  margin: 8px 16px 16px; display: flex; gap: 10px;
+}
+.contact-btn {
+  flex: 1; padding: 12px; border-radius: 12px;
+  text-align: center; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.contact-btn.primary { background: var(--primary); color: white; }
+.contact-btn.outline { background: var(--white); color: var(--primary); border: 1.5px solid var(--primary); }
+
+/* ========== DISCOVER PAGE ========== */
+.discover-search {
+  margin: 12px 16px; padding: 10px 16px;
+  background: var(--white); border-radius: 10px;
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text-muted); font-size: 14px;
+  box-shadow: var(--card-shadow);
+}
+
+.discover-banner {
+  margin: 8px 16px 16px; height: 120px;
+  background: linear-gradient(135deg, var(--primary), #2D8B78);
+  border-radius: 16px; padding: 20px;
+  color: white; position: relative; overflow: hidden;
+}
+.discover-banner .db-title { font-size: 18px; font-weight: 700; }
+.discover-banner .db-sub { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+.discover-banner .db-badge {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(255,255,255,0.25); padding: 4px 10px;
+  border-radius: 12px; font-size: 11px; font-weight: 600;
+}
+
+/* Category Nav */
+.category-nav {
+  display: flex; gap: 6px; padding: 0 16px 14px;
+  overflow-x: auto; flex-wrap: nowrap;
+}
+.category-nav::-webkit-scrollbar { display: none; }
+.cat-pill {
+  padding: 8px 16px; border-radius: 20px;
+  background: var(--white); font-size: 13px;
+  white-space: nowrap; cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.cat-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* Article List */
+.article-list { padding: 0 16px; }
+.article-list-item {
+  display: flex; gap: 12px; padding: 14px;
+  background: var(--white); border-radius: 14px;
+  margin-bottom: 10px; box-shadow: var(--card-shadow);
+  cursor: pointer;
+}
+.ali-img {
+  width: 88px; height: 88px; border-radius: 10px;
+  flex-shrink: 0; display: flex; align-items: center;
+  justify-content: center; font-size: 32px;
+}
+.ali-content { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.ali-title { font-size: 14px; font-weight: 600; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ali-meta { font-size: 11px; color: var(--text-muted); display: flex; gap: 12px; }
+.ali-tag { font-size: 11px; color: var(--primary); background: var(--primary-light); padding: 2px 8px; border-radius: 4px; }
+
+/* Quick Tools */
+.quick-tools { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding: 0 16px 16px; }
+.quick-tool {
+  background: var(--white); border-radius: 12px; padding: 14px 8px;
+  text-align: center; box-shadow: var(--card-shadow); cursor: pointer;
+}
+.quick-tool .qt-icon { font-size: 24px; margin-bottom: 6px; }
+.quick-tool .qt-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+
+/* ========== PROFILE PAGE ========== */
+.profile-header {
+  background: var(--white); padding: 20px;
+  display: flex; align-items: center; gap: 16px;
+}
+.profile-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 22px; font-weight: 700;
+}
+.profile-name { font-size: 18px; font-weight: 700; }
+.profile-phone { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.profile-verified { font-size: 11px; color: var(--success); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+/* Advisor Card */
+.advisor-card {
+  margin: 12px 16px; padding: 16px;
+  background: var(--white); border-radius: 14px;
+  box-shadow: var(--card-shadow);
+}
+.advisor-card .ac-label { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+.advisor-info { display: flex; align-items: center; gap: 12px; }
+.advisor-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.advisor-name { font-size: 15px; font-weight: 600; }
+.advisor-id { font-size: 12px; color: var(--text-secondary); }
+.advisor-actions { display: flex; gap: 8px; margin-top: 12px; }
+.advisor-btn {
+  flex: 1; padding: 10px; border-radius: 10px;
+  text-align: center; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.advisor-btn.call { background: var(--primary); color: white; }
+.advisor-btn.chat { background: var(--primary-light); color: var(--primary); }
+
+/* Menu List */
+.menu-section { margin: 12px 16px; background: var(--white); border-radius: 14px; box-shadow: var(--card-shadow); overflow: hidden; }
+.menu-item {
+  display: flex; align-items: center; padding: 14px 16px;
+  border-bottom: 1px solid #F3F4F6; cursor: pointer;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-icon { font-size: 18px; width: 32px; text-align: center; }
+.menu-label { flex: 1; font-size: 14px; margin-left: 8px; }
+.menu-arrow { color: var(--text-muted); font-size: 14px; }
+.menu-badge { background: var(--danger); color: white; font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-right: 8px; }
+
+/* ========== LOGIN PAGE ========== */
+.login-page { background: var(--white); }
+.login-top {
+  height: 200px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: white;
+}
+.login-logo { font-size: 48px; margin-bottom: 8px; }
+.login-brand { font-size: 24px; font-weight: 700; }
+.login-slogan { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+.login-form { padding: 30px 24px; }
+.login-form-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
+
+.form-group { margin-bottom: 20px; }
+.form-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+.phone-input {
+  display: flex; border: 1.5px solid var(--border); border-radius: 12px;
+  overflow: hidden; transition: border-color 0.2s;
+}
+.phone-input:focus-within { border-color: var(--primary); }
+.phone-prefix {
+  padding: 14px 12px; background: #F9FAFB;
+  border-right: 1px solid var(--border);
+  font-size: 15px; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; gap: 4px; cursor: pointer;
+  min-width: 80px;
+}
+.phone-prefix .arrow { font-size: 10px; color: var(--text-muted); }
+.phone-input input {
+  flex: 1; padding: 14px; border: none; outline: none;
+  font-size: 16px; font-family: inherit;
+}
+.otp-row { display: flex; gap: 10px; }
+.otp-input {
+  flex: 1; padding: 14px; border: 1.5px solid var(--border);
+  border-radius: 12px; font-size: 16px; outline: none;
+  font-family: inherit; letter-spacing: 4px; text-align: center;
+}
+.otp-input:focus { border-color: var(--primary); }
+.otp-btn {
+  padding: 14px 16px; background: var(--primary-light);
+  color: var(--primary); border: none; border-radius: 12px;
+  font-size: 13px; font-weight: 600; white-space: nowrap;
+  cursor: pointer; font-family: inherit;
+}
+.login-btn {
+  width: 100%; padding: 16px; background: var(--primary);
+  color: white; border: none; border-radius: 12px;
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  font-family: inherit; margin-top: 10px;
+}
+.login-btn:active { opacity: 0.9; }
+.login-terms { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 16px; line-height: 1.6; }
+.login-terms a { color: var(--primary); text-decoration: none; }
+.skip-login { text-align: center; margin-top: 20px; font-size: 14px; color: var(--primary); cursor: pointer; font-weight: 500; }
+
+/* ========== VERIFY PAGE ========== */
+.verify-form { padding: 24px; }
+.verify-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.verify-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; }
+.verify-input {
+  width: 100%; padding: 14px 16px;
+  border: 1.5px solid var(--border); border-radius: 12px;
+  font-size: 15px; outline: none; font-family: inherit;
+  margin-bottom: 14px;
+}
+.verify-input:focus { border-color: var(--primary); }
+.verify-input::placeholder { color: var(--text-muted); }
+.id-type-select {
+  width: 100%; padding: 14px 16px;
+  border: 1.5px solid var(--border); border-radius: 12px;
+  font-size: 15px; font-family: inherit;
+  color: var(--text); background: var(--white);
+  margin-bottom: 14px; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239CA3AF' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+.verify-note {
+  padding: 12px 14px; background: #FFF7ED; border-radius: 10px;
+  font-size: 12px; color: #92400E; line-height: 1.5; margin-bottom: 20px;
+}
+.verify-note .note-icon { margin-right: 4px; }
+
+/* Page Navigation Overlay */
+.page-overlay {
+  display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 200; background: var(--bg);
+  overflow-y: auto;
+}
+.page-overlay.active { display: block; }
+.page-overlay::-webkit-scrollbar { display: none; }
+
+/* Mini nav for overlays */
+.overlay-nav {
+  background: var(--white); padding: 16px 20px;
+  display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 54px; z-index: 10;
+}
+.overlay-back { font-size: 20px; cursor: pointer; color: var(--text); }
+.overlay-title { font-size: 17px; font-weight: 700; }
+
+/* Bottom padding */
+.bottom-spacer { height: 24px; }
+
+/* Page indicator */
+.page-indicator {
+  position: absolute; top: 58px; right: 16px;
+  background: rgba(0,0,0,0.6); color: white;
+  padding: 4px 10px; border-radius: 12px;
+  font-size: 11px; z-index: 200; font-weight: 500;
+}
+
+/* Nav buttons at bottom of phone frame */
+.proto-nav {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 999;
+}
+.proto-btn {
+  padding: 8px 16px; background: #1a1a1a; color: white;
+  border: none; border-radius: 8px; font-size: 12px;
+  cursor: pointer; font-family: inherit; font-weight: 500;
+  transition: all 0.2s;
+}
+.proto-btn:hover { background: #333; }
+.proto-btn.active { background: var(--primary); }
+</style>
+</head>
+<body>
+
+<!-- Navigation Buttons (proto demo switcher) -->
+<div class="proto-nav">
+  <button class="proto-btn active" onclick="showScreen('home')">首页</button>
+  <button class="proto-btn" onclick="showScreen('policy')">保单</button>
+  <button class="proto-btn" onclick="showScreen('discover')">发现</button>
+  <button class="proto-btn" onclick="showScreen('profile')">我的</button>
+</div>
+<div style="position:fixed;bottom:4px;left:50%;transform:translateX(-50%);font-size:9px;color:#999;z-index:999;white-space:nowrap">
+  💡 所有卡片、文章、产品、工具均可点击进入二级页面
+</div>
+
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="phone-content">
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span class="time">23:57</span>
+      <span class="icons">📶 📡 🔋</span>
+    </div>
+
+    <!-- ==================== HOME ==================== -->
+    <div class="page active" id="page-home">
+      <div class="home-header">
+        <div class="home-greeting">早上好，陈先生 👋</div>
+        <div class="home-greeting-sub">您的保单一切正常</div>
+        <div class="notification-btn" onclick="showScreen('notifications')">🔔<div class="notification-dot"></div></div>
+      </div>
+
+      <div class="policy-summary-card" onclick="showScreen('policy')" style="cursor:pointer">
+        <div class="psc-title">我的保障总览</div>
+        <div class="psc-row">
+          <div>
+            <div class="psc-amount">¥3,248,000</div>
+            <div class="psc-amount-sub">≈ HK$ 3,569,000 总保额</div>
+          </div>
+          <div class="psc-right">
+            <div class="psc-count">3</div>
+            <div class="psc-count-label">张保单</div>
+          </div>
+        </div>
+        <div class="psc-divider"></div>
+        <div class="psc-footer">
+          <div class="psc-footer-item"><div class="dot green"></div> 3 张正常</div>
+          <div class="psc-footer-item"><div class="dot yellow"></div> 1 张即将缴费</div>
+        </div>
+      </div>
+
+      <div class="exchange-bar" onclick="showScreen('exchange')" style="cursor:pointer">
+        <div>
+          <div class="label">今日汇率 HKD/CNY</div>
+        </div>
+        <div style="text-align:right">
+          <div><span class="rate">0.9100</span><span class="change">↑ 0.12%</span></div>
+          <div class="time">更新于 14:30</div>
+        </div>
+      </div>
+
+      <div class="section-title">⏰ 待办提醒 <span class="more">查看全部 ›</span></div>
+      <div class="todo-list">
+        <div class="todo-card">
+          <div class="todo-dot" style="background:var(--warning)"></div>
+          <div class="todo-content">
+            <div class="todo-title">重疾险年缴保费即将到期</div>
+            <div class="todo-sub">保诚 危疾加护保 III · 还有 32 天</div>
+          </div>
+          <div class="todo-arrow">›</div>
+        </div>
+        <div class="todo-card">
+          <div class="todo-dot" style="background:var(--primary)"></div>
+          <div class="todo-content">
+            <div class="todo-title">储蓄险新红利通知书已发布</div>
+            <div class="todo-sub">AIA 充裕未来·传承 III · 点击查看</div>
+          </div>
+          <div class="todo-arrow">›</div>
+        </div>
+      </div>
+
+      <div class="section-title">📚 精选文章 <span class="more">更多 ›</span></div>
+      <div class="hscroll">
+        <div class="article-card" onclick="articleFrom='home';showScreen('article-detail')" style="cursor:pointer">
+          <div class="article-img" style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE)">🏥</div>
+          <div class="article-body">
+            <div class="article-title">在大陆看病，香港保单能赔吗？</div>
+            <div class="article-meta">理赔指南 · 2.3k 阅读</div>
+          </div>
+        </div>
+        <div class="article-card" onclick="articleFrom='home';showScreen('article-detail')" style="cursor:pointer">
+          <div class="article-img" style="background:linear-gradient(135deg,#D1FAE5,#A7F3D0)">💰</div>
+          <div class="article-body">
+            <div class="article-title">2026 港币换汇最佳渠道对比</div>
+            <div class="article-meta">缴费攻略 · 1.8k 阅读</div>
+          </div>
+        </div>
+        <div class="article-card" onclick="articleFrom='home';showScreen('article-detail')" style="cursor:pointer">
+          <div class="article-img" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A)">📋</div>
+          <div class="article-body">
+            <div class="article-title">3分钟读懂你的香港保单</div>
+            <div class="article-meta">港险入门 · 3.1k 阅读</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title">🔥 热门产品 <span class="more">更多 ›</span></div>
+      <div class="hscroll">
+        <div class="product-card" onclick="productFrom='home';showScreen('product-detail')" style="cursor:pointer">
+          <div class="pc-logo">AIA 友邦</div>
+          <div class="pc-name">充裕未来·传承 III</div>
+          <div class="pc-type">储蓄分红</div>
+          <div class="pc-highlight">预期 IRR 6.5%+ · 多币种转换 · 无限代传承</div>
+          <div class="pc-btn">了解详情</div>
+        </div>
+        <div class="product-card" onclick="productFrom='home';showScreen('product-detail')" style="cursor:pointer">
+          <div class="pc-logo">PRUDENTIAL 保诚</div>
+          <div class="pc-name">危疾加护保 III</div>
+          <div class="pc-type">重疾保障</div>
+          <div class="pc-highlight">168种疾病保障 · 多次赔付 · 保费豁免</div>
+          <div class="pc-btn">了解详情</div>
+        </div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== POLICY LIST ==================== -->
+    <div class="page" id="page-policy">
+      <div class="policy-page-header">
+        <div class="policy-page-title">我的保单</div>
+        <div class="policy-filter">筛选 ▾</div>
+      </div>
+
+      <div class="coverage-section">
+        <div class="coverage-card">
+          <div class="coverage-title">家庭保障覆盖率</div>
+          <div class="coverage-row">
+            <div class="coverage-label">重疾</div>
+            <div class="coverage-bar"><div class="coverage-fill green" style="width:85%"></div></div>
+            <div class="coverage-value" style="color:var(--success)">85%</div>
+          </div>
+          <div class="coverage-row">
+            <div class="coverage-label">储蓄</div>
+            <div class="coverage-bar"><div class="coverage-fill green" style="width:70%"></div></div>
+            <div class="coverage-value" style="color:var(--success)">70%</div>
+          </div>
+          <div class="coverage-row">
+            <div class="coverage-label">医疗</div>
+            <div class="coverage-bar"><div class="coverage-fill red" style="width:0%"></div></div>
+            <div class="coverage-value" style="color:var(--danger)">未覆盖</div>
+          </div>
+          <div class="coverage-row">
+            <div class="coverage-label">人寿</div>
+            <div class="coverage-bar"><div class="coverage-fill gray" style="width:0%"></div></div>
+            <div class="coverage-value" style="color:var(--text-muted)">未覆盖</div>
+          </div>
+          <div style="text-align:center;margin-top:8px">
+            <span style="font-size:12px;color:var(--primary);cursor:pointer;font-weight:600" onclick="showScreen('gap-analysis')">查看保障缺口分析 →</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="family-group">
+        <div class="family-label"><span class="emoji">👤</span> 陈先生（本人）</div>
+        <div class="policy-item" onclick="showScreen('detail')">
+          <div class="status-stripe active"></div>
+          <div class="pi-header">
+            <div class="pi-company">AIA 友邦</div>
+            <div class="pi-status active">🟢 生效中</div>
+          </div>
+          <div class="pi-name">充裕未来·传承 III</div>
+          <div class="pi-type">储蓄分红险</div>
+          <div class="pi-details">
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">保额</div>
+              <div class="pi-detail-value">US$ 100,000</div>
+              <div class="pi-detail-sub">≈ ¥ 728,000</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">年缴保费</div>
+              <div class="pi-detail-value">US$ 5,200</div>
+              <div class="pi-detail-sub">≈ ¥ 37,856</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">缴费进度</div>
+              <div class="pi-detail-value">3/20年</div>
+            </div>
+          </div>
+          <div class="pi-footer">
+            <div class="pi-next-pay">下次缴费：<strong>2026-06-15</strong>（32天后）</div>
+            <div class="pi-arrow">›</div>
+          </div>
+        </div>
+
+        <div class="policy-item" onclick="showScreen('detail')">
+          <div class="status-stripe warning"></div>
+          <div class="pi-header">
+            <div class="pi-company">PRUDENTIAL 保诚</div>
+            <div class="pi-status warning">🟡 即将缴费</div>
+          </div>
+          <div class="pi-name">危疾加护保 III</div>
+          <div class="pi-type">重疾险</div>
+          <div class="pi-details">
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">保额</div>
+              <div class="pi-detail-value">HK$ 800,000</div>
+              <div class="pi-detail-sub">≈ ¥ 728,000</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">年缴保费</div>
+              <div class="pi-detail-value">HK$ 12,600</div>
+              <div class="pi-detail-sub">≈ ¥ 11,466</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">缴费进度</div>
+              <div class="pi-detail-value">2/25年</div>
+            </div>
+          </div>
+          <div class="pi-footer">
+            <div class="pi-next-pay">下次缴费：<strong>2026-05-15</strong>（<span style="color:var(--warning)">即将到期</span>）</div>
+            <div class="pi-arrow">›</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="family-group">
+        <div class="family-label"><span class="emoji">👶</span> 陈小明（子女）</div>
+        <div class="policy-item" onclick="showScreen('detail')">
+          <div class="status-stripe active"></div>
+          <div class="pi-header">
+            <div class="pi-company">MANULIFE 宏利</div>
+            <div class="pi-status active">🟢 生效中</div>
+          </div>
+          <div class="pi-name">活耀人生 危疾保</div>
+          <div class="pi-type">重疾险</div>
+          <div class="pi-details">
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">保额</div>
+              <div class="pi-detail-value">HK$ 1,000,000</div>
+              <div class="pi-detail-sub">≈ ¥ 910,000</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">年缴保费</div>
+              <div class="pi-detail-value">HK$ 8,400</div>
+              <div class="pi-detail-sub">≈ ¥ 7,644</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">缴费进度</div>
+              <div class="pi-detail-value">1/25年</div>
+            </div>
+          </div>
+          <div class="pi-footer">
+            <div class="pi-next-pay">下次缴费：<strong>2026-11-01</strong>（200天后）</div>
+            <div class="pi-arrow">›</div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== POLICY DETAIL ==================== -->
+    <div class="page-overlay" id="page-detail">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
+        <div class="detail-company">AIA 友邦</div>
+        <div class="detail-name">充裕未来·传承 III</div>
+        <div class="detail-status-badge">🟢 生效中 · 保单号 L123456789</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">📋 保障信息</div>
+        <div class="detail-row"><div class="detail-label">险种类型</div><div class="detail-value">储蓄分红险</div></div>
+        <div class="detail-row"><div class="detail-label">保额</div><div class="detail-value">US$ 100,000<br><span class="detail-value-sub">≈ ¥ 728,000</span></div></div>
+        <div class="detail-row"><div class="detail-label">投保人</div><div class="detail-value">陈XX</div></div>
+        <div class="detail-row"><div class="detail-label">被保人</div><div class="detail-value">陈XX（本人）</div></div>
+        <div class="detail-row"><div class="detail-label">受益人</div><div class="detail-value">李XX（配偶）</div></div>
+        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2023-06-15</div></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">💰 缴费信息</div>
+        <div class="detail-row"><div class="detail-label">缴费方式</div><div class="detail-value">年缴</div></div>
+        <div class="detail-row"><div class="detail-label">年缴保费</div><div class="detail-value">US$ 5,200<br><span class="detail-value-sub">≈ ¥ 37,856</span></div></div>
+        <div class="detail-row"><div class="detail-label">缴费期限</div><div class="detail-value">20年</div></div>
+        <div class="detail-row"><div class="detail-label">已缴年数</div><div class="detail-value">3年（15%）</div></div>
+        <div class="detail-row"><div class="detail-label">下次缴费</div><div class="detail-value" style="color:var(--warning)">2026-06-15<br><span class="detail-value-sub">还有 32 天 · 宽限期至 07-15</span></div></div>
+      </div>
+
+      <div class="reminder-btn">📅 设置缴费提醒</div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">📈 预期利益演示</div>
+        <div class="detail-row"><div class="detail-label">第10年退保价值</div><div class="detail-value">US$ 48,000<br><span class="detail-value-sub">≈ ¥ 349,440</span></div></div>
+        <div class="detail-row"><div class="detail-label">第20年退保价值</div><div class="detail-value">US$ 132,000<br><span class="detail-value-sub">≈ ¥ 961,200</span></div></div>
+        <div class="detail-row"><div class="detail-label">第30年退保价值</div><div class="detail-value">US$ 285,000<br><span class="detail-value-sub">≈ ¥ 2,076,000</span></div></div>
+        <div style="padding:8px 0;font-size:11px;color:var(--text-muted)">* 以上包含非保证部分，仅供参考，实际以保险公司通知为准</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">✅ 附加保障 (Rider)</div>
+        <div class="detail-row"><div class="detail-label">豁免保费附加契约</div><div class="detail-value" style="color:var(--success)">已投保</div></div>
+        <div class="detail-row"><div class="detail-label">意外身故额外赔偿</div><div class="detail-value" style="color:var(--success)">已投保</div></div>
+      </div>
+
+      <div class="explainer-card">
+        <div class="explainer-title">💡 这张保单通俗解读</div>
+        <div class="explainer-text">
+          每年交约 3.8 万人民币，交 20 年。中途可以部分提取当教育金或养老金，也可以放着让钱滚。
+          包含<strong>非保证红利</strong>，长期回报取决于友邦的投资表现。
+          目前已交 3 年，如果现在退保会亏损，建议至少持有到第 10 年以上。
+        </div>
+      </div>
+
+      <div class="section-title">📚 相关知识</div>
+      <div class="related-articles">
+        <div class="related-article">
+          <div class="ra-title">什么是非保证红利？到底靠不靠谱？</div>
+          <div class="ra-meta">险种科普 · 2分钟</div>
+        </div>
+        <div class="related-article">
+          <div class="ra-title">储蓄险最佳退保时机怎么选？</div>
+          <div class="ra-meta">理财技巧 · 3分钟</div>
+        </div>
+      </div>
+
+      <div class="contact-bar">
+        <div class="contact-btn outline">📄 理赔指引</div>
+        <div class="contact-btn primary">👨‍💼 联系我的顾问</div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== DISCOVER ==================== -->
+    <div class="page" id="page-discover">
+      <div class="discover-search">🔍 搜索文章、产品、问题...</div>
+
+      <div class="discover-banner" onclick="articleFrom='discover';showScreen('article-detail')" style="cursor:pointer">
+        <div class="db-badge">📌 置顶</div>
+        <div class="db-title">2026 港险理赔全攻略</div>
+        <div class="db-sub">大陆客户跨境理赔完整指南</div>
+      </div>
+
+      <div class="section-title">🧰 常用工具</div>
+      <div class="quick-tools">
+        <div class="quick-tool" onclick="showScreen('tool-exchange')" style="cursor:pointer"><div class="qt-icon">💱</div><div class="qt-label">汇率查询</div></div>
+        <div class="quick-tool" onclick="alert('保额计算器：输入保额自动换算港币/美元/人民币')" style="cursor:pointer"><div class="qt-icon">🧮</div><div class="qt-label">保额计算</div></div>
+        <div class="quick-tool" onclick="alert('理赔清单生成器：根据险种自动生成所需资料清单')" style="cursor:pointer"><div class="qt-icon">📄</div><div class="qt-label">理赔清单</div></div>
+        <div class="quick-tool" onclick="showScreen('gap-analysis')" style="cursor:pointer"><div class="qt-icon">📊</div><div class="qt-label">保障分析</div></div>
+      </div>
+
+      <div class="section-title">📚 保险学堂</div>
+      <div class="category-nav">
+        <div class="cat-pill active">推荐</div>
+        <div class="cat-pill">港险入门</div>
+        <div class="cat-pill">险种科普</div>
+        <div class="cat-pill">缴费攻略</div>
+        <div class="cat-pill">理赔指南</div>
+        <div class="cat-pill">汇率换汇</div>
+        <div class="cat-pill">热门问答</div>
+      </div>
+
+      <div class="article-list">
+        <div class="article-list-item" onclick="articleFrom='discover';showScreen('article-detail')" style="cursor:pointer">
+          <div class="ali-img" style="background:linear-gradient(135deg,#FEE2E2,#FECACA)">🏥</div>
+          <div class="ali-content">
+            <div>
+              <div class="ali-tag">为你推荐</div>
+              <div class="ali-title" style="margin-top:4px">你的重疾险等待期还有多久？一文看懂等待期规则</div>
+            </div>
+            <div class="ali-meta"><span>险种科普</span><span>2.3k 阅读</span><span>3分钟</span></div>
+          </div>
+        </div>
+
+        <div class="article-list-item" onclick="articleFrom='discover';showScreen('article-detail')" style="cursor:pointer">
+          <div class="ali-img" style="background:linear-gradient(135deg,#D1FAE5,#A7F3D0)">💵</div>
+          <div class="ali-content">
+            <div>
+              <div class="ali-tag">缴费日临近</div>
+              <div class="ali-title" style="margin-top:4px">港币换汇最佳渠道：银行vs汇款公司vs FPS</div>
+            </div>
+            <div class="ali-meta"><span>缴费攻略</span><span>1.8k 阅读</span><span>5分钟</span></div>
+          </div>
+        </div>
+
+        <div class="article-list-item" onclick="articleFrom='discover';showScreen('article-detail')" style="cursor:pointer">
+          <div class="ali-img" style="background:linear-gradient(135deg,#EDE9FE,#DDD6FE)">📊</div>
+          <div class="ali-content">
+            <div>
+              <div class="ali-title">储蓄险红利通知书怎么看？非保证回报到底靠不靠谱</div>
+            </div>
+            <div class="ali-meta"><span>险种科普</span><span>1.5k 阅读</span><span>4分钟</span></div>
+          </div>
+        </div>
+
+        <div class="article-list-item" onclick="articleFrom='discover';showScreen('article-detail')" style="cursor:pointer">
+          <div class="ali-img" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A)">📋</div>
+          <div class="ali-content">
+            <div>
+              <div class="ali-title">3分钟读懂你的香港保单：关键条款中英对照</div>
+            </div>
+            <div class="ali-meta"><span>港险入门</span><span>3.1k 阅读</span><span>3分钟</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">❓ 热门问答</div>
+      <div class="todo-list">
+        <div class="todo-card" onclick="showScreen('faq-detail')" style="cursor:pointer"><div class="todo-dot" style="background:var(--primary)"></div><div class="todo-content"><div class="todo-title">在大陆看病，香港保单能赔吗？</div></div><div class="todo-arrow">›</div></div>
+        <div class="todo-card" onclick="showScreen('faq-detail')" style="cursor:pointer"><div class="todo-dot" style="background:var(--primary)"></div><div class="todo-content"><div class="todo-title">保费可以用微信/支付宝交吗？</div></div><div class="todo-arrow">›</div></div>
+        <div class="todo-card" onclick="showScreen('faq-detail')" style="cursor:pointer"><div class="todo-dot" style="background:var(--primary)"></div><div class="todo-content"><div class="todo-title">保单贷款是什么？划算吗？</div></div><div class="todo-arrow">›</div></div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== PROFILE ==================== -->
+    <div class="page" id="page-profile">
+      <div class="profile-header">
+        <div class="profile-avatar">陈</div>
+        <div>
+          <div class="profile-name">陈先生</div>
+          <div class="profile-phone">+86 138****1234</div>
+          <div class="profile-verified">✅ 已实名认证</div>
+        </div>
+      </div>
+
+      <div class="advisor-card">
+        <div class="ac-label">我的专属顾问</div>
+        <div class="advisor-info">
+          <div class="advisor-avatar">👨‍💼</div>
+          <div>
+            <div class="advisor-name">张经理</div>
+            <div class="advisor-id">工号 B12345 · 持牌编号 LB-67890</div>
+          </div>
+        </div>
+        <div class="advisor-actions">
+          <div class="advisor-btn call">📞 一键拨打</div>
+          <div class="advisor-btn chat">💬 在线沟通</div>
+        </div>
+      </div>
+
+      <div class="section-title">我的服务</div>
+      <div class="menu-section">
+        <div class="menu-item"><div class="menu-icon">📋</div><div class="menu-label">我的收藏</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">📅</div><div class="menu-label">缴费日历</div><div class="menu-badge">1</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">📊</div><div class="menu-label">保障分析报告</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">📝</div><div class="menu-label">理赔记录</div><div class="menu-arrow">›</div></div>
+      </div>
+
+      <div class="section-title">工具箱</div>
+      <div class="menu-section">
+        <div class="menu-item"><div class="menu-icon">💱</div><div class="menu-label">汇率查询 & 趋势</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">🧮</div><div class="menu-label">保额计算器</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">📄</div><div class="menu-label">理赔资料清单</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">💳</div><div class="menu-label">缴费渠道指南</div><div class="menu-arrow">›</div></div>
+      </div>
+
+      <div class="section-title">设置</div>
+      <div class="menu-section">
+        <div class="menu-item"><div class="menu-icon">🔔</div><div class="menu-label">通知设置</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">🌐</div><div class="menu-label">语言切换</div><span style="font-size:12px;color:var(--text-muted);margin-right:8px">简体中文</span><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">🔒</div><div class="menu-label">安全设置</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">📱</div><div class="menu-label">账号管理</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">📜</div><div class="menu-label">隐私政策 & 用户协议</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">❓</div><div class="menu-label">帮助与反馈</div><div class="menu-arrow">›</div></div>
+      </div>
+
+      <div style="text-align:center;padding:20px;color:var(--danger);font-size:14px;cursor:pointer" onclick="showScreen('login')">退出登录</div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== LOGIN ==================== -->
+    <div class="page-overlay login-page" id="page-login">
+      <div class="login-top" style="margin-top:54px">
+        <div class="login-logo">🛡️</div>
+        <div class="login-brand">保联</div>
+        <div class="login-slogan">连接你与每一张保单</div>
+      </div>
+      <div class="login-form">
+        <div class="login-form-title">登录 / 注册</div>
+        <div class="form-group">
+          <div class="form-label">手机号码</div>
+          <div class="phone-input">
+            <div class="phone-prefix">🇨🇳 +86 <span class="arrow">▾</span></div>
+            <input type="tel" placeholder="请输入手机号" value="138****1234">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">验证码</div>
+          <div class="otp-row">
+            <input class="otp-input" type="tel" maxlength="6" placeholder="——">
+            <button class="otp-btn">获取验证码</button>
+          </div>
+        </div>
+        <button class="login-btn" onclick="showScreen('verify')">登录 / 注册</button>
+        <div class="login-terms">
+          登录即表示同意 <a href="#">《用户协议》</a>和<a href="#">《隐私政策》</a>
+        </div>
+        <div class="skip-login" onclick="showScreen('home')">先逛逛，暂不登录 →</div>
+      </div>
+    </div>
+
+    <!-- ==================== VERIFY ==================== -->
+    <div class="page-overlay" id="page-verify">
+      <div class="overlay-nav" style="margin-top:54px">
+        <div class="overlay-back" onclick="showScreen('profile')">‹</div>
+        <div class="overlay-title">实名认证</div>
+      </div>
+      <div class="verify-form">
+        <div class="verify-title">验证您的身份</div>
+        <div class="verify-desc">完成实名认证后，系统将自动匹配您名下的香港保单。您的信息将严格加密保存。</div>
+
+        <div class="form-label">真实姓名</div>
+        <input class="verify-input" type="text" placeholder="请输入与保单一致的中文姓名">
+
+        <div class="form-label">证件类型</div>
+        <select class="id-type-select">
+          <option>中国大陆身份证</option>
+          <option>港澳通行证</option>
+          <option>护照</option>
+          <option>香港身份证 (HKID)</option>
+        </select>
+
+        <div class="form-label">证件号码</div>
+        <input class="verify-input" type="text" placeholder="请输入证件号码">
+
+        <div class="verify-note">
+          <span class="note-icon">🔒</span> 您的身份信息仅用于匹配保单，我们严格遵守香港《私隐条例》及内地《个人信息保护法》，数据加密存储，不会向第三方泄露。
+        </div>
+
+        <button class="login-btn" onclick="showScreen('policy')">提交认证</button>
+      </div>
+    </div>
+
+    <!-- ==================== 二级页面：保障缺口分析 ==================== -->
+    <div class="page-overlay" id="page-gap-analysis">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
+        <div class="detail-company">保障缺口分析</div>
+        <div class="detail-name">陈先生家庭保障全景</div>
+      </div>
+
+      <div class="detail-section" style="background:var(--primary-light);border-radius:12px;margin:0 16px 12px;padding:16px">
+        <div style="font-size:14px;font-weight:600;color:var(--primary-dark);margin-bottom:8px">📊 家庭综合评分</div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:80px;height:80px;border-radius:50%;border:6px solid var(--primary);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--primary)">62<span style="font-size:14px">分</span></div>
+          <div style="flex:1">
+            <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">
+              您的家庭保障覆盖了 <strong>2/4</strong> 个核心险种<br>
+              建议补充 <span style="color:var(--danger);font-weight:600">医疗险</span> 和 <span style="color:var(--danger);font-weight:600">人寿险</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">✅ 已覆盖险种</div>
+        <div style="padding:12px;background:var(--white);border-radius:12px;margin-bottom:8px;border-left:4px solid var(--success)">
+          <div style="font-weight:600;font-size:14px">重疾险 — 覆盖率 85%</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">陈先生 HK$800,000 + 陈小明 HK$1,000,000</div>
+          <div style="font-size:12px;color:var(--success);margin-top:4px">✅ 行业建议：年收入3-5倍。您当前覆盖约4.2倍，达标。</div>
+        </div>
+        <div style="padding:12px;background:var(--white);border-radius:12px;margin-bottom:8px;border-left:4px solid var(--success)">
+          <div style="font-weight:600;font-size:14px">储蓄/教育金 — 覆盖率 70%</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:4px">陈先生 AIA 充裕未来 US$100,000</div>
+          <div style="font-size:12px;color:var(--success);margin-top:4px">✅ 可作为子女教育金和退休金储备。建议持有至少10年。</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">⚠️ 保障缺口</div>
+        <div style="padding:12px;background:#FEF2F2;border-radius:12px;margin-bottom:8px;border-left:4px solid var(--danger)">
+          <div style="font-weight:600;font-size:14px;color:var(--danger)">🔴 医疗险 — 未覆盖</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;line-height:1.6">
+            <strong>为什么需要？</strong><br>
+            重疾险赔一笔钱，但不管住院费。高端医疗险可以报销私立医院/跨境就医费用（住院、手术、药品），与重疾险互补。<br><br>
+            <strong>建议方案：</strong><br>
+            • 保诚「守护健康」自愿医保 — 年保费约 HK$4,800 起<br>
+            • AIA「至尊医疗」计划 — 年保费约 HK$6,200 起<br>
+            • 宏利「活耀人生」医疗 — 年保费约 HK$5,500 起
+          </div>
+          <div style="margin-top:10px;padding:10px;background:var(--white);border-radius:8px;text-align:center;color:var(--primary);font-weight:600;font-size:13px;cursor:pointer" onclick="showScreen('product-detail')">查看推荐产品 →</div>
+        </div>
+        <div style="padding:12px;background:#FFF7ED;border-radius:12px;margin-bottom:8px;border-left:4px solid var(--warning)">
+          <div style="font-weight:600;font-size:14px;color:var(--warning)">🟡 人寿险 — 未覆盖</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-top:6px;line-height:1.6">
+            <strong>为什么需要？</strong><br>
+            如果您是家庭经济支柱，定期寿险可以确保万一发生意外，家人的房贷、子女教育等大额支出有着落。<br><br>
+            <strong>建议方案：</strong><br>
+            • 保额建议覆盖年收入的5-10倍 + 未还房贷金额<br>
+            • Bowtie 定期寿险 — 月保费约 HK$200 起（高性价比）<br>
+            • FWD 自主保 — 月保费约 HK$180 起
+          </div>
+          <div style="margin-top:10px;padding:10px;background:var(--white);border-radius:8px;text-align:center;color:var(--primary);font-weight:600;font-size:13px;cursor:pointer" onclick="alert('查看推荐产品')">查看推荐产品 →</div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">📋 家庭保障一览</div>
+        <div style="overflow-x:auto;padding-bottom:8px">
+          <table style="width:100%;font-size:12px;border-collapse:collapse;min-width:320px">
+            <thead><tr style="background:var(--primary-light)">
+              <th style="padding:8px;text-align:left;font-weight:600;border-radius:8px 0 0 0">家庭成员</th>
+              <th style="padding:8px;text-align:center;font-weight:600">重疾</th>
+              <th style="padding:8px;text-align:center;font-weight:600">储蓄</th>
+              <th style="padding:8px;text-align:center;font-weight:600">医疗</th>
+              <th style="padding:8px;text-align:center;font-weight:600;border-radius:0 8px 0 0">人寿</th>
+            </tr></thead>
+            <tbody>
+              <tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:8px">陈先生（本人）</td>
+                <td style="padding:8px;text-align:center">✅ 80万</td>
+                <td style="padding:8px;text-align:center">✅ 10万美元</td>
+                <td style="padding:8px;text-align:center;color:var(--danger)">❌</td>
+                <td style="padding:8px;text-align:center;color:var(--danger)">❌</td>
+              </tr>
+              <tr style="border-bottom:1px solid var(--border)">
+                <td style="padding:8px">陈小明（子女）</td>
+                <td style="padding:8px;text-align:center">✅ 100万</td>
+                <td style="padding:8px;text-align:center;color:var(--text-muted)">—</td>
+                <td style="padding:8px;text-align:center;color:var(--danger)">❌</td>
+                <td style="padding:8px;text-align:center;color:var(--text-muted)">—</td>
+              </tr>
+              <tr>
+                <td style="padding:8px">配偶</td>
+                <td style="padding:8px;text-align:center;color:var(--danger)">❌</td>
+                <td style="padding:8px;text-align:center;color:var(--danger)">❌</td>
+                <td style="padding:8px;text-align:center;color:var(--danger)">❌</td>
+                <td style="padding:8px;text-align:center;color:var(--danger)">❌</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="contact-bar">
+        <div class="contact-btn primary" onclick="alert('预约顾问，定制家庭保障方案')">👨‍💼 预约顾问定制方案</div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：消息中心 ==================== -->
+    <div class="page-overlay" id="page-notifications">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="detail-company">消息中心</div>
+      </div>
+      <div style="padding:0 16px">
+        <div class="cat-pill active" style="display:inline-block;margin:0 4px 12px 0">全部</div>
+        <div class="cat-pill" style="display:inline-block;margin:0 4px 12px 0">缴费</div>
+        <div class="cat-pill" style="display:inline-block;margin:0 4px 12px 0">保单</div>
+        <div class="cat-pill" style="display:inline-block;margin:0 4px 12px 0">系统</div>
+      </div>
+      <div class="todo-list">
+        <div class="todo-card"><div class="todo-dot" style="background:var(--warning)"></div><div class="todo-content"><div class="todo-title">缴费提醒：保诚 危疾加护保 III</div><div class="todo-sub">年缴保费 HK$12,600 将于 2026-05-15 到期，还有 32 天。请提前准备港币资金。</div><div class="todo-sub" style="color:var(--text-muted);margin-top:4px">今天 09:00</div></div></div>
+        <div class="todo-card"><div class="todo-dot" style="background:var(--primary)"></div><div class="todo-content"><div class="todo-title">红利通知：AIA 充裕未来·传承 III</div><div class="todo-sub">友邦已发布 2025 年度红利通知书，您的保单非保证红利实现率为 102%。点击查看详情。</div><div class="todo-sub" style="color:var(--text-muted);margin-top:4px">昨天 14:30</div></div></div>
+        <div class="todo-card"><div class="todo-dot" style="background:var(--success)"></div><div class="todo-content"><div class="todo-title">保单生效：宏利 活耀人生 危疾保</div><div class="todo-sub">陈小明的重疾险保单已正式生效，等待期至 2026-05-01。等待期内确诊不赔付，请注意。</div><div class="todo-sub" style="color:var(--text-muted);margin-top:4px">4月10日</div></div></div>
+        <div class="todo-card"><div class="todo-dot" style="background:var(--text-muted)"></div><div class="todo-content"><div class="todo-title">系统通知：实名认证已通过</div><div class="todo-sub">您的身份信息已验证通过，已成功关联 3 张保单。</div><div class="todo-sub" style="color:var(--text-muted);margin-top:4px">4月8日</div></div></div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：汇率详情 ==================== -->
+    <div class="page-overlay" id="page-exchange">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="detail-company">汇率查询</div>
+        <div class="detail-name">港币 / 人民币</div>
+      </div>
+
+      <div style="padding:0 16px">
+        <div style="background:var(--white);border-radius:16px;padding:20px;margin-bottom:12px;text-align:center;box-shadow:var(--card-shadow)">
+          <div style="font-size:40px;font-weight:700;color:var(--primary)">0.9100</div>
+          <div style="font-size:14px;color:var(--success);margin-top:4px">↑ 0.0011 (+0.12%)</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px">更新于 2026-04-14 14:30</div>
+        </div>
+
+        <div style="background:var(--white);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--card-shadow)">
+          <div style="font-size:14px;font-weight:600;margin-bottom:12px">💱 快速换算</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div style="flex:1;padding:10px;background:var(--bg);border-radius:8px;text-align:center">
+              <div style="font-size:11px;color:var(--text-muted)">港币 HKD</div>
+              <div style="font-size:20px;font-weight:600">10,000</div>
+            </div>
+            <div style="font-size:18px">→</div>
+            <div style="flex:1;padding:10px;background:var(--primary-light);border-radius:8px;text-align:center">
+              <div style="font-size:11px;color:var(--primary)">人民币 CNY</div>
+              <div style="font-size:20px;font-weight:600;color:var(--primary)">¥ 9,100</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="background:var(--white);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--card-shadow)">
+          <div style="font-size:14px;font-weight:600;margin-bottom:12px">📈 近30天走势</div>
+          <div style="height:120px;background:linear-gradient(180deg,var(--primary-light) 0%,var(--white) 100%);border-radius:8px;position:relative;display:flex;align-items:flex-end;padding:8px;gap:2px">
+            <div style="flex:1;background:var(--primary);opacity:0.4;border-radius:2px 2px 0 0;height:65%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.4;border-radius:2px 2px 0 0;height:60%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.4;border-radius:2px 2px 0 0;height:55%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.4;border-radius:2px 2px 0 0;height:58%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.4;border-radius:2px 2px 0 0;height:62%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.4;border-radius:2px 2px 0 0;height:68%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.4;border-radius:2px 2px 0 0;height:72%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.5;border-radius:2px 2px 0 0;height:70%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.5;border-radius:2px 2px 0 0;height:68%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.5;border-radius:2px 2px 0 0;height:65%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.6;border-radius:2px 2px 0 0;height:70%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.6;border-radius:2px 2px 0 0;height:75%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.7;border-radius:2px 2px 0 0;height:78%"></div>
+            <div style="flex:1;background:var(--primary);opacity:0.8;border-radius:2px 2px 0 0;height:80%"></div>
+            <div style="flex:1;background:var(--primary);border-radius:2px 2px 0 0;height:82%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text-muted);margin-top:4px">
+            <span>3月15日</span><span>3月25日</span><span>4月5日</span><span>今天</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-top:10px;padding:8px;background:var(--bg);border-radius:8px;font-size:12px">
+            <div>最低 <strong>0.9052</strong></div>
+            <div>平均 <strong>0.9078</strong></div>
+            <div>最高 <strong>0.9105</strong></div>
+          </div>
+        </div>
+
+        <div style="background:var(--white);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--card-shadow)">
+          <div style="font-size:14px;font-weight:600;margin-bottom:10px">🏦 换汇渠道对比</div>
+          <div style="font-size:12px;line-height:2;color:var(--text-secondary)">
+            <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span style="font-weight:600;color:var(--text)">渠道</span><span style="font-weight:600;color:var(--text)">汇率</span><span style="font-weight:600;color:var(--text)">手续费</span></div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>银行柜台</span><span>0.9050</span><span>¥50/笔</span></div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>手机银行</span><span>0.9080</span><span>免手续费</span></div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>汇款公司</span><span>0.9095</span><span>¥30/笔起</span></div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0"><span style="color:var(--primary);font-weight:600">FPS 转数快</span><span style="color:var(--primary);font-weight:600">0.9100</span><span style="color:var(--primary);font-weight:600">免费 ⭐</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：文章详情 ==================== -->
+    <div class="page-overlay" id="page-article-detail">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="goBackFromArticle()">‹ 返回</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">理赔指南 · 2.3k 阅读 · 3分钟</div>
+      </div>
+      <div style="padding:0 20px">
+        <div style="font-size:20px;font-weight:700;line-height:1.4;margin-bottom:16px">在大陆看病，香港保单能赔吗？</div>
+
+        <div style="font-size:14px;line-height:2;color:var(--text-secondary)">
+          <p>很多持有香港保单的大陆客户都有一个疑问：<strong style="color:var(--text)">在内地看病，香港保险到底赔不赔？</strong></p>
+
+          <div style="background:var(--primary-light);border-radius:10px;padding:14px;margin:16px 0">
+            <div style="font-weight:600;color:var(--primary-dark);margin-bottom:6px">💡 核心结论</div>
+            <div style="font-size:13px;color:var(--primary-dark)">大部分情况下<strong>可以赔</strong>，但需要满足特定条件。关键在于：就诊医院是否在保单认可范围内，以及资料是否齐全。</div>
+          </div>
+
+          <p style="font-weight:600;color:var(--text);font-size:15px;margin-top:20px">一、哪些医院可以赔？</p>
+          <p>香港保险公司通常接受内地<strong style="color:var(--text)">三甲医院</strong>（三级甲等公立医院）的就诊记录。部分高端医疗险还接受指定的私立医院。</p>
+          <p>⚠️ 注意：社区医院、乡镇卫生院通常<strong style="color:var(--danger)">不在理赔范围内</strong>。</p>
+
+          <p style="font-weight:600;color:var(--text);font-size:15px;margin-top:20px">二、理赔需要什么资料？</p>
+          <div style="background:var(--bg);border-radius:8px;padding:12px;margin:8px 0">
+            ✅ 医院诊断证明（盖章）<br>
+            ✅ 病理报告 / 检查报告<br>
+            ✅ 住院小结（如有住院）<br>
+            ✅ 医疗费用收据原件<br>
+            ✅ 身份证复印件<br>
+            ✅ 银行账户信息（港币或人民币均可）
+          </div>
+
+          <p style="font-weight:600;color:var(--text);font-size:15px;margin-top:20px">三、理赔流程</p>
+          <div style="background:var(--bg);border-radius:8px;padding:12px;margin:8px 0">
+            <strong>第1步</strong>：在三甲医院就诊，保留所有单据原件<br>
+            <strong>第2步</strong>：联系您的保险顾问或直接通过保司App提交<br>
+            <strong>第3步</strong>：填写理赔申请表 + 上传资料<br>
+            <strong>第4步</strong>：保险公司审核（通常15-30个工作日）<br>
+            <strong>第5步</strong>：赔付到账（港币或人民币）
+          </div>
+
+          <p style="font-weight:600;color:var(--text);font-size:15px;margin-top:20px">四、常见拒赔原因</p>
+          <p>❌ 就诊医院不是三甲<br>
+             ❌ 等待期内发病（重疾险通常90天等待期）<br>
+             ❌ 未如实告知既往病史<br>
+             ❌ 资料不齐全或未翻译公证</p>
+        </div>
+
+        <div style="background:var(--primary-light);border-radius:12px;padding:14px;margin:20px 0">
+          <div style="font-size:13px;font-weight:600;color:var(--primary-dark)">💡 与您的保单相关</div>
+          <div style="font-size:12px;color:var(--primary-dark);margin-top:6px">您的「保诚 危疾加护保 III」等待期将于 <strong>2026-09-01</strong> 届满。在此之前确诊的重疾不在赔付范围内。</div>
+          <div style="margin-top:8px;color:var(--primary);font-size:12px;font-weight:600;cursor:pointer" onclick="showScreen('detail')">查看保单详情 →</div>
+        </div>
+
+        <div class="section-title" style="padding-left:0">📚 推荐阅读</div>
+        <div class="todo-list" style="padding:0 0 12px">
+          <div class="todo-card" onclick="alert('理赔资料清单生成器')"><div class="todo-dot" style="background:var(--primary)"></div><div class="todo-content"><div class="todo-title">一键生成理赔资料清单</div><div class="todo-sub">根据您的险种自动列出所需材料</div></div><div class="todo-arrow">›</div></div>
+          <div class="todo-card"><div class="todo-dot" style="background:var(--accent)"></div><div class="todo-content"><div class="todo-title">港币换汇最佳渠道对比</div><div class="todo-sub">赔付后如何将港币兑换为人民币</div></div><div class="todo-arrow">›</div></div>
+        </div>
+
+        <div class="contact-bar" style="position:relative;padding:0 0 16px">
+          <div class="contact-btn outline" style="flex:1;text-align:center" onclick="alert('已收藏')">☆ 收藏</div>
+          <div class="contact-btn primary" style="flex:2;text-align:center" onclick="alert('分享给微信好友')">分享给朋友</div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：产品详情 ==================== -->
+    <div class="page-overlay" id="page-product-detail">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="goBackFromProduct()">‹ 返回</div>
+        <div class="detail-company">PRUDENTIAL 保诚</div>
+        <div class="detail-name">守护健康医疗计划</div>
+        <div class="detail-status-badge">自愿医保 · 高端医疗</div>
+      </div>
+
+      <div style="padding:0 16px">
+        <div style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center">
+          <div style="font-size:48px">🏥</div>
+          <div style="font-size:18px;font-weight:700;margin-top:8px">每年保费低至 HK$4,800 起</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-top:4px">≈ ¥4,368/年 · 可申请税务扣减</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">📋 产品概览</div>
+          <div class="detail-row"><div class="detail-label">保险公司</div><div class="detail-value">保诚 Prudential</div></div>
+          <div class="detail-row"><div class="detail-label">产品类型</div><div class="detail-value">自愿医保 (VHIS) 灵活计划</div></div>
+          <div class="detail-row"><div class="detail-label">投保年龄</div><div class="detail-value">15日 - 75岁</div></div>
+          <div class="detail-row"><div class="detail-label">续保</div><div class="detail-value">保证续保至 100 岁</div></div>
+          <div class="detail-row"><div class="detail-label">保障地区</div><div class="detail-value">全球（含中国大陆）</div></div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">✅ 产品亮点</div>
+          <div style="font-size:13px;line-height:2;color:var(--text-secondary);padding:0 4px">
+            ✅ 每年保障限额高达 <strong style="color:var(--text)">HK$25,000,000</strong><br>
+            ✅ 全数赔偿住院及手术费用（网络医院免自付额）<br>
+            ✅ 涵盖<strong style="color:var(--text)">癌症治疗、标靶药、免疫治疗</strong><br>
+            ✅ 大陆三甲医院直接理赔<br>
+            ✅ 保费可享<strong style="color:var(--text)">香港薪俸税扣减</strong>（每年上限 HK$8,000）<br>
+            ✅ 无终身保障限额
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">💰 保费参考</div>
+          <div style="font-size:12px;line-height:1.8;color:var(--text-secondary)">
+            <div style="display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px solid var(--border);font-weight:600;color:var(--text)"><span>年龄</span><span>年缴保费(HK$)</span><span>≈人民币</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px solid var(--border)"><span>25岁</span><span>4,800</span><span>¥4,368</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px solid var(--border)"><span>30岁</span><span>5,400</span><span>¥4,914</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px solid var(--border)"><span>35岁</span><span>6,200</span><span>¥5,642</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 4px;border-bottom:1px solid var(--border)"><span>40岁</span><span>7,800</span><span>¥7,098</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 4px"><span>45岁</span><span>9,600</span><span>¥8,736</span></div>
+          </div>
+        </div>
+
+        <div style="background:#FEF3C7;border-radius:10px;padding:12px;margin:0 0 12px;font-size:12px;color:#92400E;line-height:1.6">
+          ⚠️ <strong>风险提示</strong>：以上保费仅供参考，实际保费根据个人健康状况、年龄等因素核定。保险产品受条款及细则约束，详情请参阅产品小册子。
+        </div>
+
+        <div class="section-title" style="padding-left:0">📚 相关文章</div>
+        <div class="todo-list" style="padding:0 0 12px">
+          <div class="todo-card" onclick="showScreen('article-detail')"><div class="todo-dot" style="background:var(--primary)"></div><div class="todo-content"><div class="todo-title">在大陆看病，香港保单能赔吗？</div><div class="todo-sub">理赔指南 · 3分钟</div></div><div class="todo-arrow">›</div></div>
+          <div class="todo-card"><div class="todo-dot" style="background:var(--accent)"></div><div class="todo-content"><div class="todo-title">自愿医保 vs 高端医疗：到底选哪个？</div><div class="todo-sub">险种科普 · 4分钟</div></div><div class="todo-arrow">›</div></div>
+        </div>
+      </div>
+
+      <div class="contact-bar">
+        <div class="contact-btn outline">分享给朋友</div>
+        <div class="contact-btn primary" onclick="alert('已提交预约，顾问将在24小时内联系您')">👨‍💼 预约咨询顾问</div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：FAQ详情 ==================== -->
+    <div class="page-overlay" id="page-faq-detail">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('discover')">‹ 返回</div>
+        <div class="detail-company">热门问答</div>
+      </div>
+      <div style="padding:0 20px">
+        <div style="font-size:18px;font-weight:700;margin-bottom:16px">在大陆看病，香港保单能赔吗？</div>
+        <div style="background:var(--primary-light);border-radius:10px;padding:14px;margin-bottom:16px">
+          <div style="font-size:13px;color:var(--primary-dark);font-weight:600">简短回答</div>
+          <div style="font-size:13px;color:var(--primary-dark);margin-top:4px">大部分情况可以赔。在内地<strong>三甲医院</strong>就诊，准备齐全资料即可申请理赔。重疾险确诊即赔，医疗险凭单据报销。</div>
+        </div>
+        <div style="font-size:14px;line-height:2;color:var(--text-secondary)">
+          <p><strong style="color:var(--text)">详细说明：</strong></p>
+          <p>1. <strong style="color:var(--text)">重疾险</strong>：在任何医院确诊合同约定的重大疾病，只要病理报告由三甲医院出具，即可申请理赔。与就诊地无关。</p>
+          <p>2. <strong style="color:var(--text)">医疗险</strong>：住院费用报销类，需要在保单认可医院（通常是三甲公立医院）就诊。保留所有单据原件。</p>
+          <p>3. <strong style="color:var(--text)">储蓄险</strong>：不涉及理赔。退保/提取直接联系保险公司或顾问操作。</p>
+          <p style="margin-top:12px">💡 <strong style="color:var(--text)">小贴士</strong>：看病前先确认医院是否为三甲，可在<a style="color:var(--primary)">卫健委官网</a>查询。</p>
+        </div>
+        <div style="margin-top:16px;padding:12px;background:var(--bg);border-radius:10px;font-size:13px;color:var(--text-secondary)">
+          <div style="font-weight:600;color:var(--text);margin-bottom:6px">📋 相关问答</div>
+          <div style="padding:6px 0;border-bottom:1px solid var(--border);cursor:pointer">理赔需要翻译公证吗？</div>
+          <div style="padding:6px 0;border-bottom:1px solid var(--border);cursor:pointer">理赔多久能到账？</div>
+          <div style="padding:6px 0;cursor:pointer">赔付的钱是港币还是人民币？</div>
+        </div>
+        <div class="contact-bar" style="position:relative;padding:16px 0">
+          <div class="contact-btn primary" style="flex:1;text-align:center" onclick="alert('已提交预约')">👨‍💼 还有疑问？联系顾问</div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：汇率查询工具（从发现页进入） ==================== -->
+    <div class="page-overlay" id="page-tool-exchange">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('discover')">‹ 返回</div>
+        <div class="detail-company">汇率查询</div>
+      </div>
+      <!-- 复用汇率详情的内容逻辑，但返回按钮回发现页 -->
+      <div style="padding:0 16px">
+        <div style="background:var(--white);border-radius:16px;padding:20px;margin-bottom:12px;text-align:center;box-shadow:var(--card-shadow)">
+          <div style="display:flex;justify-content:center;gap:24px;margin-bottom:12px">
+            <div style="padding:8px 16px;background:var(--primary);color:white;border-radius:20px;font-size:13px;font-weight:600">HKD/CNY</div>
+            <div style="padding:8px 16px;background:var(--bg);color:var(--text-secondary);border-radius:20px;font-size:13px">USD/CNY</div>
+            <div style="padding:8px 16px;background:var(--bg);color:var(--text-secondary);border-radius:20px;font-size:13px">GBP/CNY</div>
+          </div>
+          <div style="font-size:40px;font-weight:700;color:var(--primary)">0.9100</div>
+          <div style="font-size:14px;color:var(--success);margin-top:4px">↑ 0.0011 (+0.12%)</div>
+        </div>
+        <div style="background:var(--white);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--card-shadow)">
+          <div style="font-size:14px;font-weight:600;margin-bottom:10px">💱 保费换算</div>
+          <div style="font-size:12px;color:var(--text-secondary);margin-bottom:8px">输入您的港币保费，查看人民币等值</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div style="flex:1;padding:12px;border:1px solid var(--border);border-radius:8px;font-size:16px;text-align:center;background:var(--bg)">HK$ 12,600</div>
+            <div>→</div>
+            <div style="flex:1;padding:12px;border:1px solid var(--primary);border-radius:8px;font-size:16px;text-align:center;background:var(--primary-light);color:var(--primary);font-weight:600">¥ 11,466</div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:6px;text-align:center">基于实时汇率 0.9100</div>
+        </div>
+        <div style="background:var(--white);border-radius:12px;padding:16px;box-shadow:var(--card-shadow)">
+          <div style="font-size:14px;font-weight:600;margin-bottom:8px">📌 缴费汇率小贴士</div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
+            • 缴费日前1-2周换汇，避免当天汇率波动<br>
+            • FPS转数快免手续费，推荐使用<br>
+            • 每人每年外汇额度等值 $50,000 美元<br>
+            • 可分多次购汇，不必一次买齐
+          </div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="tab-bar" id="main-tab-bar">
+      <div class="tab-item active" onclick="showScreen('home')" data-tab="home">
+        <div class="tab-icon">🏠</div>
+        <div class="tab-label">首页</div>
+      </div>
+      <div class="tab-item" onclick="showScreen('policy')" data-tab="policy">
+        <div class="tab-icon">📋</div>
+        <div class="tab-label">保单</div>
+      </div>
+      <div class="tab-item" onclick="showScreen('discover')" data-tab="discover">
+        <div class="tab-icon">🔍</div>
+        <div class="tab-label">发现</div>
+      </div>
+      <div class="tab-item" onclick="showScreen('profile')" data-tab="profile">
+        <div class="tab-icon">👤</div>
+        <div class="tab-label">我的</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var articleFrom = 'home';
+var productFrom = 'home';
+
+function goBackFromArticle() { showScreen(articleFrom); }
+function goBackFromProduct() { showScreen(productFrom); }
+
+function showScreen(name) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page-overlay').forEach(p => p.classList.remove('active'));
+
+  // Show target
+  const target = document.getElementById('page-' + name);
+  if (target) target.classList.add('active');
+
+  // Overlay pages that hide tab bar
+  const overlayPages = ['login','verify','detail','gap-analysis','notifications','exchange','article-detail','product-detail','faq-detail','tool-exchange'];
+  const tabBar = document.getElementById('main-tab-bar');
+
+  if (overlayPages.includes(name)) {
+    tabBar.style.display = 'none';
+  } else {
+    tabBar.style.display = 'flex';
+  }
+
+  // Update tab bar active state
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  const activeTab = document.querySelector(`.tab-item[data-tab="${name}"]`);
+  if (activeTab) activeTab.classList.add('active');
+
+  // Update proto nav
+  document.querySelectorAll('.proto-btn').forEach(b => b.classList.remove('active'));
+}
+</script>
+
+</body>
+</html>
