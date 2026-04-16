@@ -1,0 +1,2787 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>保联 InsuLink — C端原型 V2</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --primary: #1A6B5C;
+  --primary-light: #E8F5F1;
+  --primary-dark: #0E4A3E;
+  --accent: #F5A623;
+  --bg: #F5F6FA;
+  --white: #FFFFFF;
+  --text: #1A1A2E;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  --border: #E5E7EB;
+  --success: #10B981;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --card-shadow-hover: 0 4px 12px rgba(0,0,0,0.08);
+}
+body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif; background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; }
+
+/* Phone Frame */
+.phone-frame {
+  width: 390px; height: 844px;
+  border: 8px solid #1a1a1a; border-radius: 44px;
+  overflow: hidden; position: relative;
+  margin: 20px auto;
+  background: var(--bg);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3), inset 0 0 0 2px #333;
+}
+.phone-notch {
+  width: 160px; height: 34px;
+  background: #1a1a1a; border-radius: 0 0 20px 20px;
+  position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  z-index: 100;
+}
+.phone-content {
+  width: 100%; height: 100%;
+  overflow: hidden; position: relative;
+}
+
+/* Status Bar */
+.status-bar {
+  height: 54px; padding: 10px 24px 0;
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 14px; font-weight: 600;
+  background: var(--white);
+  position: relative; z-index: 50;
+}
+.status-bar .time { margin-left: 4px; }
+.status-bar .icons { display: flex; gap: 6px; font-size: 12px; }
+
+/* Page Container - 调整高度给底部导航留空间 */
+.page { display: none; width: 100%; height: calc(100% - 54px - 84px); overflow-y: auto; position: absolute; top: 54px; left: 0; }
+.page.active { display: block; }
+.page::-webkit-scrollbar { display: none; }
+
+/* Tab Bar - 真实APP样式 */
+.tab-bar {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 84px; background: rgba(255,255,255,0.98);
+  display: flex; justify-content: space-around; align-items: flex-start;
+  border-top: 0.5px solid rgba(0,0,0,0.1);
+  z-index: 90; padding-top: 6px;
+  /* 真实APP的毛玻璃效果 */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  /* Home Indicator 区域 */
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+.tab-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px;
+  font-size: 10px; color: #9CA3AF; cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-tap-highlight-color: transparent;
+  padding: 6px 0;
+  min-width: 64px;
+  position: relative;
+}
+.tab-item:active {
+  transform: scale(0.95);
+}
+.tab-item.active { color: var(--primary); }
+.tab-item.active .tab-icon-wrapper {
+  background: linear-gradient(135deg, var(--primary-light) 0%, rgba(26, 107, 92, 0.08) 100%);
+}
+.tab-item .tab-icon-wrapper {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.tab-item .tab-icon { font-size: 22px; line-height: 1; }
+.tab-item .tab-label { 
+  font-size: 10px; 
+  font-weight: 500; 
+  letter-spacing: 0.3px;
+}
+
+/* 选中态的动画效果 */
+.tab-item.active::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  width: 4px; height: 4px;
+  background: var(--primary);
+  border-radius: 50%;
+}
+
+/* Home Indicator */
+.home-indicator {
+  position: absolute;
+  bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 134px; height: 5px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 3px;
+  z-index: 100;
+}
+
+/* ========== HOME PAGE V2 ========== */
+.home-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  padding: 16px 20px 20px; color: white;
+}
+.home-greeting { font-size: 18px; font-weight: 600; }
+.home-greeting-sub { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+.home-header .notification-btn {
+  position: absolute; right: 20px; top: 70px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,255,255,0.2); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer;
+}
+.notification-dot {
+  width: 8px; height: 8px; background: var(--danger);
+  border-radius: 50%; position: absolute; top: 6px; right: 6px;
+}
+
+/* 账户模块 - 新版：分储蓄/保障两个模块，优化样式 */
+.account-modules {
+  margin: -12px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.account-modules .module-card {
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: var(--card-shadow);
+  display: flex; align-items: center; gap: 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  position: relative;
+  overflow: hidden;
+}
+.account-modules .module-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 80px; height: 80px;
+  border-radius: 50%;
+  opacity: 0.15;
+  transform: translate(30%, -30%);
+}
+.account-modules .module-card:active { transform: scale(0.98); }
+
+/* 储蓄账户卡片 */
+.account-modules .module-card.saving-card {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+.account-modules .module-card.saving-card::before {
+  background: #F59E0B;
+}
+
+/* 保障账户卡片 */
+.account-modules .module-card.protection-card {
+  background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+  border: 1px solid rgba(96, 165, 250, 0.2);
+}
+.account-modules .module-card.protection-card::before {
+  background: #3B82F6;
+}
+
+.account-modules .module-icon {
+  width: 52px; height: 52px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+.account-modules .module-icon.saving { 
+  background: rgba(245, 158, 11, 0.2); 
+}
+.account-modules .module-icon.protection { 
+  background: rgba(59, 130, 246, 0.2); 
+}
+.account-modules .module-info { flex: 1; }
+.account-modules .module-label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+.account-modules .module-value { font-size: 22px; font-weight: 800; margin-top: 4px; }
+.account-modules .saving-card .module-value { color: #B45309; }
+.account-modules .protection-card .module-value { color: #1D4ED8; }
+.account-modules .module-value span { font-size: 12px; font-weight: 500; margin-left: 6px; opacity: 0.7; }
+.account-modules .module-arrow { 
+  font-size: 20px; 
+  opacity: 0.5;
+  transition: transform 0.2s;
+}
+.account-modules .module-card:hover .module-arrow { 
+  transform: translateX(4px);
+  opacity: 0.8;
+}
+
+/* 登录卡片（未登录状态） */
+.login-card {
+  margin: -12px 16px 12px; padding: 24px 20px;
+  background: var(--white); border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  position: relative; z-index: 10;
+  text-align: center;
+}
+.login-card-icon { font-size: 48px; margin-bottom: 12px; }
+.login-card-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.login-card-sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
+.login-card-btn {
+  margin-top: 16px; padding: 12px;
+  background: var(--primary); color: white;
+  border-radius: 10px; font-size: 14px; font-weight: 600;
+  cursor: pointer;
+}
+
+/* Exchange Rate Bar V2 (一行的滚动) */
+.exchange-container {
+  margin: 0 16px 16px; padding: 10px 16px;
+  background: var(--white); border-radius: 12px;
+  box-shadow: var(--card-shadow);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.exchange-label {
+  font-size: 12px; color: var(--text-muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.exchange-scroll-wrapper {
+  overflow: hidden;
+  flex: 1;
+  height: 28px;
+  position: relative;
+}
+.exchange-scroll {
+  display: flex;
+  flex-direction: column;
+  animation: scrollUp 8s ease-in-out infinite;
+}
+@keyframes scrollUp {
+  0%, 45% { transform: translateY(0); }
+  50%, 95% { transform: translateY(-28px); }
+  100% { transform: translateY(0); }
+}
+.exchange-item { height: 28px; display: flex; justify-content: space-between; align-items: center; }
+.exchange-item .label { font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+.exchange-item .rate { font-size: 15px; font-weight: 700; color: var(--text); }
+.exchange-item .change { font-size: 11px; color: var(--success); margin-left: 6px; }
+.exchange-item .time { font-size: 10px; color: var(--text-muted); }
+
+/* Section Title */
+.section-title {
+  padding: 4px 20px 10px;
+  font-size: 16px; font-weight: 700; color: var(--text);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.section-title .more { font-size: 13px; color: var(--primary); font-weight: 500; cursor: pointer; }
+
+/* Todo Cards V2 */
+.todo-list { padding: 0 16px 12px; }
+.todo-card {
+  padding: 14px 16px; background: var(--white);
+  border-radius: 12px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--card-shadow); cursor: pointer;
+  transition: all 0.2s;
+}
+.todo-card:active { transform: scale(0.98); }
+.todo-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.todo-content { flex: 1; }
+.todo-title { font-size: 14px; font-weight: 500; }
+.todo-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.todo-tag {
+  font-size: 10px; padding: 2px 8px; border-radius: 10px;
+  font-weight: 500; flex-shrink: 0;
+}
+.todo-tag.warning { background: #FEF3C7; color: #92400E; }
+.todo-tag.primary { background: var(--primary-light); color: var(--primary); }
+.todo-tag.success { background: #D1FAE5; color: #065F46; }
+.todo-tag.info { background: #DBEAFE; color: #1E40AF; }
+.todo-arrow { color: var(--text-muted); font-size: 16px; }
+
+/* 精选攻略 - 缩小尺寸 */
+.hscroll { display: flex; gap: 10px; padding: 0 16px 16px; overflow-x: auto; }
+.hscroll::-webkit-scrollbar { display: none; }
+.article-card {
+  min-width: 160px; background: var(--white); border-radius: 12px;
+  overflow: hidden; box-shadow: var(--card-shadow); flex-shrink: 0;
+}
+.article-card .article-img {
+  height: 80px; background: linear-gradient(135deg, #E0F2FE, #BAE6FD);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.article-card .article-body { padding: 10px 12px; }
+.article-card .article-title { font-size: 12px; font-weight: 600; line-height: 1.4; }
+.article-card .article-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+/* Service Grid (服务矩阵) */
+.service-grid { padding: 0 16px 16px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.service-item {
+  background: var(--white); border-radius: 12px;
+  padding: 14px 8px; text-align: center;
+  box-shadow: var(--card-shadow); cursor: pointer;
+  transition: all 0.2s;
+}
+.service-item:active { transform: scale(0.96); }
+.service-icon { font-size: 24px; margin-bottom: 6px; }
+.service-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; line-height: 1.3; }
+
+/* ========== POLICY PAGE ========== */
+/* 去掉缺口分析后，直接显示保单列表 */
+.policy-page-header {
+  background: var(--white); padding: 16px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.policy-page-title { font-size: 20px; font-weight: 700; }
+.policy-filter {
+  padding: 4px 12px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 13px; color: var(--text-secondary); cursor: pointer;
+}
+
+/* Family Group */
+.family-group { padding: 8px 16px; }
+.family-label {
+  font-size: 14px; font-weight: 600; color: var(--text-secondary);
+  padding: 8px 0 6px; display: flex; align-items: center; gap: 8px;
+}
+.family-label .emoji { font-size: 18px; }
+
+/* Policy Item Card */
+.policy-item {
+  background: var(--white); border-radius: 14px;
+  padding: 16px; margin-bottom: 10px;
+  box-shadow: var(--card-shadow); cursor: pointer;
+  transition: box-shadow 0.2s;
+  position: relative; overflow: hidden;
+}
+.policy-item:active { box-shadow: var(--card-shadow-hover); }
+.policy-item .status-stripe {
+  position: absolute; left: 0; top: 0; bottom: 0;
+  width: 4px;
+}
+.policy-item .status-stripe.active { background: var(--success); }
+.policy-item .status-stripe.warning { background: var(--warning); }
+.pi-header { display: flex; justify-content: space-between; align-items: flex-start; padding-left: 10px; }
+.pi-company { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
+.pi-status { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+.pi-status.active { background: #D1FAE5; color: #065F46; }
+.pi-status.warning { background: #FEF3C7; color: #92400E; }
+.pi-name { font-size: 16px; font-weight: 700; margin-top: 4px; padding-left: 10px; }
+.pi-type { font-size: 12px; color: var(--primary); margin-top: 2px; padding-left: 10px; }
+.pi-type.protection { color: #2563EB; }
+.pi-details { display: flex; gap: 16px; margin-top: 12px; padding-left: 10px; }
+.pi-detail-item { }
+.pi-detail-label { font-size: 11px; color: var(--text-muted); }
+.pi-detail-value { font-size: 14px; font-weight: 600; margin-top: 1px; }
+.pi-detail-sub { font-size: 11px; color: var(--text-secondary); }
+.pi-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid var(--border); padding-left: 10px;
+}
+.pi-next-pay { font-size: 12px; color: var(--text-secondary); }
+.pi-next-pay strong { color: var(--text); }
+.pi-arrow { color: var(--text-muted); font-size: 18px; }
+
+/* ========== POLICY DETAIL PAGE ========== */
+/* 去掉TAB，直接根据保单类型显示 */
+.detail-page { display: none; }
+.detail-page.active { display: block; }
+.detail-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  padding: 16px 20px 24px; color: white;
+}
+.detail-back { font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px; opacity: 0.9; }
+.detail-company { font-size: 12px; opacity: 0.8; margin-top: 16px; letter-spacing: 0.5px; }
+.detail-name { font-size: 22px; font-weight: 700; margin-top: 4px; }
+.detail-status-badge {
+  display: inline-block; margin-top: 8px;
+  padding: 4px 12px; border-radius: 20px;
+  background: rgba(255,255,255,0.2); font-size: 12px; font-weight: 600;
+}
+.detail-type-tag {
+  display: inline-block; margin-top: 8px; margin-left: 8px;
+  padding: 4px 10px; border-radius: 12px;
+  font-size: 11px; font-weight: 600;
+}
+.detail-type-tag.saving { background: rgba(251,191,36,0.3); color: #FEF3C7; }
+.detail-type-tag.protection { background: rgba(96,165,250,0.3); color: #DBEAFE; }
+
+.detail-section {
+  margin: 12px 16px; background: var(--white);
+  border-radius: 14px; padding: 16px;
+  box-shadow: var(--card-shadow);
+}
+.detail-section-title {
+  font-size: 14px; font-weight: 700; color: var(--text);
+  margin-bottom: 12px; display: flex; align-items: center; gap: 6px;
+}
+.detail-row {
+  display: flex; justify-content: space-between;
+  padding: 8px 0; border-bottom: 1px solid #F3F4F6;
+}
+.detail-row:last-child { border-bottom: none; }
+.detail-label { font-size: 13px; color: var(--text-secondary); }
+.detail-value { font-size: 13px; font-weight: 600; text-align: right; }
+.detail-value-sub { font-size: 11px; color: var(--text-secondary); font-weight: 400; }
+
+/* Explainer Card */
+.explainer-card {
+  margin: 12px 16px; padding: 16px;
+  background: linear-gradient(135deg, #FFF7ED, #FFFBEB);
+  border-radius: 14px; border-left: 4px solid var(--accent);
+}
+.explainer-title { font-size: 13px; font-weight: 700; color: #92400E; margin-bottom: 8px; }
+.explainer-text { font-size: 13px; color: #78350F; line-height: 1.7; }
+
+/* Reminder Button */
+.reminder-btn {
+  margin: 12px 16px; padding: 14px;
+  background: var(--primary); color: white;
+  border-radius: 12px; text-align: center;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.reminder-btn:active { opacity: 0.9; }
+
+/* Related Articles */
+.related-articles { padding: 0 16px 16px; display: flex; gap: 10px; }
+.related-article {
+  flex: 1; background: var(--white); border-radius: 12px;
+  padding: 14px; box-shadow: var(--card-shadow);
+}
+.related-article .ra-title { font-size: 13px; font-weight: 600; line-height: 1.4; }
+.related-article .ra-meta { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+
+/* Contact Advisor */
+.contact-bar {
+  margin: 8px 16px 16px; display: flex; gap: 10px;
+}
+.contact-btn {
+  flex: 1; padding: 12px; border-radius: 12px;
+  text-align: center; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.contact-btn.primary { background: var(--primary); color: white; }
+.contact-btn.outline { background: var(--white); color: var(--primary); border: 1.5px solid var(--primary); }
+
+/* ========== DISCOVER PAGE ========== */
+.discover-search {
+  margin: 12px 16px; padding: 10px 16px;
+  background: var(--white); border-radius: 10px;
+  display: flex; align-items: center; gap: 8px;
+  color: var(--text-muted); font-size: 14px;
+  box-shadow: var(--card-shadow);
+}
+
+.discover-banner {
+  margin: 8px 16px 16px; height: 120px;
+  background: linear-gradient(135deg, var(--primary), #2D8B78);
+  border-radius: 16px; padding: 20px;
+  color: white; position: relative; overflow: hidden;
+}
+.discover-banner .db-title { font-size: 18px; font-weight: 700; }
+.discover-banner .db-sub { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+.discover-banner .db-badge {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(255,255,255,0.25); padding: 4px 10px;
+  border-radius: 12px; font-size: 11px; font-weight: 600;
+}
+
+/* Category Nav */
+.category-nav {
+  display: flex; gap: 6px; padding: 0 16px 14px;
+  overflow-x: auto; flex-wrap: nowrap;
+}
+.category-nav::-webkit-scrollbar { display: none; }
+.cat-pill {
+  padding: 8px 16px; border-radius: 20px;
+  background: var(--white); font-size: 13px;
+  white-space: nowrap; cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all 0.2s;
+}
+.cat-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+/* Article List */
+.article-list { padding: 0 16px; }
+.article-list-item {
+  display: flex; gap: 12px; padding: 14px;
+  background: var(--white); border-radius: 14px;
+  margin-bottom: 10px; box-shadow: var(--card-shadow);
+  cursor: pointer;
+}
+.ali-img {
+  width: 88px; height: 88px; border-radius: 10px;
+  flex-shrink: 0; display: flex; align-items: center;
+  justify-content: center; font-size: 32px;
+}
+.ali-content { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+.ali-title { font-size: 14px; font-weight: 600; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ali-meta { font-size: 11px; color: var(--text-muted); display: flex; gap: 12px; }
+.ali-tag { font-size: 11px; color: var(--primary); background: var(--primary-light); padding: 2px 8px; border-radius: 4px; }
+
+/* Quick Tools */
+.quick-tools { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding: 0 16px 16px; }
+.quick-tool {
+  background: var(--white); border-radius: 12px; padding: 14px 8px;
+  text-align: center; box-shadow: var(--card-shadow); cursor: pointer;
+}
+.quick-tool .qt-icon { font-size: 24px; margin-bottom: 6px; }
+.quick-tool .qt-label { font-size: 11px; color: var(--text-secondary); font-weight: 500; }
+
+/* ========== PROFILE PAGE V2 ========== */
+.profile-header {
+  background: var(--white); padding: 20px;
+  display: flex; align-items: center; gap: 16px;
+}
+.profile-avatar {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 22px; font-weight: 700;
+}
+.profile-name { font-size: 18px; font-weight: 700; }
+.profile-phone { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+.profile-verified { font-size: 11px; color: var(--success); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+.profile-unverified { font-size: 11px; color: var(--warning); margin-top: 4px; display: flex; align-items: center; gap: 4px; }
+
+/* Advisor Card */
+.advisor-card {
+  margin: 12px 16px; padding: 16px;
+  background: var(--white); border-radius: 14px;
+  box-shadow: var(--card-shadow);
+}
+.advisor-card .ac-label { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+.advisor-info { display: flex; align-items: center; gap: 12px; }
+.advisor-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+}
+.advisor-name { font-size: 15px; font-weight: 600; }
+.advisor-id { font-size: 12px; color: var(--text-secondary); }
+.advisor-actions { display: flex; gap: 8px; margin-top: 12px; }
+.advisor-btn {
+  flex: 1; padding: 10px; border-radius: 10px;
+  text-align: center; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.advisor-btn.call { background: var(--primary); color: white; }
+.advisor-btn.chat { background: var(--primary-light); color: var(--primary); }
+
+/* Menu List */
+.menu-section { margin: 12px 16px; background: var(--white); border-radius: 14px; box-shadow: var(--card-shadow); overflow: hidden; }
+.menu-item {
+  display: flex; align-items: center; padding: 14px 16px;
+  border-bottom: 1px solid #F3F4F6; cursor: pointer;
+  transition: background 0.2s;
+}
+.menu-item:active { background: var(--bg); }
+.menu-item:last-child { border-bottom: none; }
+.menu-icon { font-size: 18px; width: 32px; text-align: center; }
+.menu-label { flex: 1; font-size: 14px; margin-left: 8px; }
+.menu-arrow { color: var(--text-muted); font-size: 14px; }
+.menu-badge { background: var(--danger); color: white; font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-right: 8px; }
+
+/* Toggle Switch */
+.toggle-switch {
+  width: 44px; height: 24px; background: #D1D5DB; border-radius: 12px;
+  position: relative; cursor: pointer; transition: background 0.2s;
+}
+.toggle-switch.active { background: var(--primary); }
+.toggle-switch::after {
+  content: ''; width: 20px; height: 20px; background: white;
+  border-radius: 50%; position: absolute; top: 2px; left: 2px;
+  transition: left 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch.active::after { left: 22px; }
+
+/* ========== SERVICE SUB PAGES ========== */
+.service-sub-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  padding: 16px 20px 20px; color: white;
+}
+.service-sub-back { font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px; opacity: 0.9; }
+.service-sub-icon { font-size: 48px; margin-top: 12px; }
+.service-sub-title { font-size: 22px; font-weight: 700; margin-top: 8px; }
+.service-sub-desc { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+
+.service-section { padding: 0 16px 12px; }
+.service-section-title {
+  font-size: 14px; font-weight: 600; color: var(--text);
+  padding: 12px 0 8px; display: flex; align-items: center; gap: 8px;
+}
+.service-card {
+  background: var(--white); border-radius: 12px;
+  padding: 16px; margin-bottom: 10px;
+  box-shadow: var(--card-shadow); cursor: pointer;
+  transition: all 0.2s;
+}
+.service-card:active { transform: scale(0.98); }
+.service-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.service-card-icon { font-size: 24px; }
+.service-card-name { font-size: 15px; font-weight: 600; }
+.service-card-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.5; padding-left: 36px; }
+.service-card-highlight {
+  display: inline-block; background: var(--primary-light); color: var(--primary);
+  font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-top: 8px; margin-left: 36px;
+}
+
+.service-step-card {
+  background: var(--white); border-radius: 12px;
+  padding: 16px; margin-bottom: 10px;
+  box-shadow: var(--card-shadow);
+}
+.service-step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--primary); color: white;
+  font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px;
+}
+.service-step-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+.service-step-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+.service-step-tip {
+  margin-top: 10px; padding: 10px 12px;
+  background: #FEF3C7; border-radius: 8px;
+  font-size: 12px; color: #92400E;
+}
+
+.service-apply-btn {
+  margin: 12px 16px 16px; padding: 14px;
+  background: var(--primary); color: white;
+  border-radius: 12px; text-align: center;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.service-apply-btn:active { opacity: 0.9; }
+
+/* ========== ARTICLE DETAIL PAGE ========== */
+.article-detail-header {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  padding: 16px 20px 24px; color: white;
+}
+.article-detail-back { font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px; opacity: 0.9; }
+.article-detail-meta { font-size: 13px; opacity: 0.8; margin-top: 16px; }
+.article-detail-title { font-size: 20px; font-weight: 700; margin-top: 8px; line-height: 1.4; }
+.article-detail-subtitle { font-size: 14px; opacity: 0.85; margin-top: 6px; }
+
+/* Article Content */
+.article-content { padding: 16px 20px; }
+.article-content h3 {
+  font-size: 15px; font-weight: 600; color: var(--text);
+  margin: 20px 0 10px;
+}
+.article-content p {
+  font-size: 14px; line-height: 1.8; color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.article-content .highlight-box {
+  background: var(--primary-light); border-radius: 10px;
+  padding: 14px; margin: 16px 0;
+}
+.article-content .highlight-box .highlight-title {
+  font-weight: 600; color: var(--primary-dark); margin-bottom: 6px;
+  font-size: 13px;
+}
+.article-content .highlight-box .highlight-text {
+  font-size: 13px; color: var(--primary-dark); line-height: 1.6;
+}
+.article-content .step-list {
+  counter-reset: step;
+  padding-left: 0;
+}
+.article-content .step-item {
+  display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start;
+}
+.article-content .step-num {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--primary); color: white;
+  font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.article-content .step-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; flex: 1; }
+.article-content .tip-box {
+  background: #FEF3C7; border-radius: 10px;
+  padding: 12px 14px; margin: 16px 0;
+  font-size: 13px; color: #92400E; line-height: 1.6;
+}
+.article-content .tip-box::before { content: '💡 '; }
+
+/* ========== LOGIN PAGE ========== */
+.login-page { background: var(--white); }
+.login-top {
+  height: 200px; background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: white;
+}
+.login-logo { font-size: 48px; margin-bottom: 8px; }
+.login-brand { font-size: 24px; font-weight: 700; }
+.login-slogan { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+.login-form { padding: 30px 24px; }
+.login-form-title { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
+
+.form-group { margin-bottom: 20px; }
+.form-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; }
+.phone-input {
+  display: flex; border: 1.5px solid var(--border); border-radius: 12px;
+  overflow: hidden; transition: border-color 0.2s;
+}
+.phone-input:focus-within { border-color: var(--primary); }
+.phone-prefix {
+  padding: 14px 12px; background: #F9FAFB;
+  border-right: 1px solid var(--border);
+  font-size: 15px; font-weight: 600; color: var(--text);
+  display: flex; align-items: center; gap: 4px; cursor: pointer;
+  min-width: 80px;
+}
+.phone-prefix .arrow { font-size: 10px; color: var(--text-muted); }
+.phone-input input {
+  flex: 1; padding: 14px; border: none; outline: none;
+  font-size: 16px; font-family: inherit;
+}
+.otp-row { display: flex; gap: 10px; }
+.otp-input {
+  flex: 1; padding: 14px; border: 1.5px solid var(--border);
+  border-radius: 12px; font-size: 16px; outline: none;
+  font-family: inherit; letter-spacing: 4px; text-align: center;
+}
+.otp-input:focus { border-color: var(--primary); }
+.otp-btn {
+  padding: 14px 16px; background: var(--primary-light);
+  color: var(--primary); border: none; border-radius: 12px;
+  font-size: 13px; font-weight: 600; white-space: nowrap;
+  cursor: pointer; font-family: inherit;
+}
+.login-btn {
+  width: 100%; padding: 16px; background: var(--primary);
+  color: white; border: none; border-radius: 12px;
+  font-size: 16px; font-weight: 700; cursor: pointer;
+  font-family: inherit; margin-top: 10px;
+}
+.login-btn:active { opacity: 0.9; }
+.login-terms { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 16px; line-height: 1.6; }
+.login-terms a { color: var(--primary); text-decoration: none; }
+.skip-login { text-align: center; margin-top: 20px; font-size: 14px; color: var(--primary); cursor: pointer; font-weight: 500; }
+
+/* ========== VERIFY PAGE ========== */
+.verify-form { padding: 24px; }
+.verify-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.verify-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 24px; }
+.verify-input {
+  width: 100%; padding: 14px 16px;
+  border: 1.5px solid var(--border); border-radius: 12px;
+  font-size: 15px; outline: none; font-family: inherit;
+  margin-bottom: 14px;
+}
+.verify-input:focus { border-color: var(--primary); }
+.verify-input::placeholder { color: var(--text-muted); }
+.id-type-select {
+  width: 100%; padding: 14px 16px;
+  border: 1.5px solid var(--border); border-radius: 12px;
+  font-size: 15px; font-family: inherit;
+  color: var(--text); background: var(--white);
+  margin-bottom: 14px; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239CA3AF' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 14px center;
+}
+.verify-note {
+  padding: 12px 14px; background: #FFF7ED; border-radius: 10px;
+  font-size: 12px; color: #92400E; line-height: 1.5; margin-bottom: 20px;
+}
+.verify-note .note-icon { margin-right: 4px; }
+
+/* Page Navigation Overlay */
+.page-overlay {
+  display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 200; background: var(--bg);
+  overflow-y: auto;
+}
+.page-overlay.active { display: block; }
+.page-overlay::-webkit-scrollbar { display: none; }
+
+/* Mini nav for overlays */
+.overlay-nav {
+  background: var(--white); padding: 16px 20px;
+  display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 54px; z-index: 10;
+}
+.overlay-back { font-size: 20px; cursor: pointer; color: var(--text); }
+.overlay-title { font-size: 17px; font-weight: 700; }
+
+/* Bottom padding */
+.bottom-spacer { height: 24px; }
+
+/* Page indicator */
+.page-indicator {
+  position: absolute; top: 58px; right: 16px;
+  background: rgba(0,0,0,0.6); color: white;
+  padding: 4px 10px; border-radius: 12px;
+  font-size: 11px; z-index: 200; font-weight: 500;
+}
+
+/* Nav buttons at bottom of phone frame */
+.proto-nav {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 8px; z-index: 999;
+}
+.proto-btn {
+  padding: 8px 16px; background: #1a1a1a; color: white;
+  border: none; border-radius: 8px; font-size: 12px;
+  cursor: pointer; font-family: inherit; font-weight: 500;
+  transition: all 0.2s;
+}
+.proto-btn:hover { background: #333; }
+.proto-btn.active { background: var(--primary); }
+
+/* Login state toggle */
+.state-toggle {
+  position: absolute; top: 58px; right: 16px;
+  background: rgba(0,0,0,0.6); color: white;
+  padding: 6px 12px; border-radius: 14px;
+  font-size: 11px; z-index: 200; cursor: pointer;
+}
+
+/* ========== MESSAGE CENTER ========== */
+.notif-item {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 14px; background: var(--white);
+  border-radius: 12px; margin-bottom: 8px;
+  box-shadow: var(--card-shadow); cursor: pointer;
+  transition: all 0.2s;
+}
+.notif-item:active { transform: scale(0.98); }
+.notif-item.unread { background: #F0FDF4; }
+.notif-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: transparent; flex-shrink: 0; margin-top: 5px;
+}
+.notif-dot.unread { background: var(--danger); }
+.notif-content { flex: 1; }
+.notif-header { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.notif-type {
+  font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600;
+}
+.notif-type.payment { background: #FEF3C7; color: #92400E; }
+.notif-type.policy { background: var(--primary-light); color: var(--primary); }
+.notif-type.service { background: #DBEAFE; color: #1E40AF; }
+.notif-time { font-size: 11px; color: var(--text-muted); margin-left: auto; }
+.notif-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.notif-desc { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.notif-arrow { color: var(--text-muted); font-size: 18px; margin-top: 2px; }
+.notif-type-tag {
+  font-size: 11px; padding: 3px 10px; border-radius: 6px; font-weight: 600;
+}
+
+/* ========== UNIFIED ACCOUNT CARD ========== */
+.unified-account-card {
+  margin: -12px 16px 12px; padding: 22px 20px;
+  background: linear-gradient(135deg, var(--primary) 0%, #2D8B78 100%);
+  border-radius: 16px; box-shadow: var(--card-shadow-hover);
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: transform 0.25s ease;
+}
+.unified-account-card:active { transform: scale(0.98); }
+.unified-account-card::before {
+  content: ''; position: absolute;
+  top: -20px; right: -20px;
+  width: 100px; height: 100px;
+  background: rgba(255,255,255,0.1); border-radius: 50%;
+}
+.unified-account-card .card-header {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+}
+.unified-account-card .card-icon { font-size: 22px; }
+.unified-account-card .card-title { font-size: 14px; color: rgba(255,255,255,0.9); font-weight: 500; }
+.unified-account-card .card-body {
+  display: flex; gap: 20px;
+}
+.unified-account-card .account-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+.unified-account-card .account-label {
+  font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 6px;
+}
+.unified-account-card .account-value {
+  font-size: 22px; font-weight: 800; color: white; line-height: 1.3; margin-bottom: 4px;
+}
+.unified-account-card .account-unit {
+  font-size: 12px; color: rgba(255,255,255,0.8);
+}
+.unified-account-card .account-divider {
+  width: 1px; background: rgba(255,255,255,0.2);
+}
+.unified-account-card .card-arrow {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  font-size: 20px; color: rgba(255,255,255,0.5);
+}
+
+/* 未实名状态引导 */
+.bind-prompt-card {
+  margin: -12px 16px 12px; padding: 20px;
+  background: var(--white); border-radius: 16px;
+  box-shadow: var(--card-shadow);
+  text-align: center;
+}
+.bind-prompt-icon { font-size: 40px; margin-bottom: 10px; }
+.bind-prompt-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.bind-prompt-desc { font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; line-height: 1.5; }
+.bind-prompt-btn {
+  display: inline-block; padding: 10px 20px;
+  background: var(--primary); color: white;
+  border-radius: 10px; font-size: 13px; font-weight: 600;
+  cursor: pointer;
+}
+
+/* 实名状态切换按钮 */
+.verified-toggle {
+  position: absolute; top: 88px; right: 16px;
+  background: rgba(0,0,0,0.6); color: white;
+  padding: 6px 12px; border-radius: 14px;
+  font-size: 11px; z-index: 200; cursor: pointer;
+}
+</style>
+</head>
+<body>
+
+<!-- Navigation Buttons (proto demo switcher) -->
+<div class="proto-nav">
+  <button class="proto-btn active" onclick="showScreen('home')">首页</button>
+  <button class="proto-btn" onclick="showScreen('policy')">保单</button>
+  <button class="proto-btn" onclick="showScreen('discover')">发现</button>
+  <button class="proto-btn" onclick="showScreen('profile')">我的</button>
+</div>
+<div class="state-toggle" onclick="toggleLoginState()">🔄 切换登录</div>
+<div class="verified-toggle" onclick="toggleVerifiedState()">📋 切换实名</div>
+
+<div class="phone-frame">
+  <div class="phone-notch"></div>
+  <div class="phone-content">
+
+    <!-- Status Bar -->
+    <div class="status-bar">
+      <span class="time">23:57</span>
+      <span class="icons">📶 📡 🔋</span>
+    </div>
+
+    <!-- ==================== HOME V2 ==================== -->
+    <div class="page active" id="page-home">
+      <div class="home-header">
+        <div class="home-greeting" id="home-greeting">早上好，陈先生 👋</div>
+        <div class="home-greeting-sub" id="home-greeting-sub">您的保单一切正常</div>
+        <div class="notification-btn" onclick="showScreen('notifications')">🔔<div class="notification-dot"></div></div>
+      </div>
+
+      <!-- 登录卡片（未登录状态） -->
+      <div class="login-card" id="home-login-card" style="display:none">
+        <div class="login-card-icon">🔐</div>
+        <div class="login-card-title">登录后查看您的保单</div>
+        <div class="login-card-sub">关联保单、缴费提醒、收益简报一手掌握</div>
+        <div class="login-card-btn" onclick="showScreen('login')">立即登录 / 注册</div>
+      </div>
+
+      <!-- 统一账户卡片（已登录+已实名状态） -->
+      <div class="unified-account-card" id="home-unified-account" onclick="showScreen('policy')">
+        <div class="card-body">
+          <div class="account-section">
+            <div class="account-label">💰 账户</div>
+            <div class="account-value">$15,600</div>
+            <div class="account-unit">已缴保费</div>
+          </div>
+          <div class="account-divider"></div>
+          <div class="account-section">
+            <div class="account-label">🛡️ 保障</div>
+            <div class="account-value">2</div>
+            <div class="account-unit">保单</div>
+          </div>
+        </div>
+        <div class="card-arrow">›</div>
+      </div>
+
+      <!-- 未实名引导卡片（已登录+未实名状态） -->
+      <div class="bind-prompt-card" id="home-bind-prompt" style="display:none">
+        <div class="bind-prompt-icon">🔗</div>
+        <div class="bind-prompt-title">关联您的香港保单</div>
+        <div class="bind-prompt-desc">完成实名认证后，我们将自动帮您匹配名下所有香港保单</div>
+        <div class="bind-prompt-btn" onclick="showScreen('verify')">立即关联保单</div>
+      </div>
+
+      <!-- 隐藏旧的账户模块 -->
+      <div class="account-modules" id="home-account-modules" style="display:none">
+        <!-- 储蓄账户 -->
+        <div class="module-card saving-card" onclick="showScreen('policy')">
+          <div class="module-icon saving">💰</div>
+          <div class="module-info">
+            <div class="module-label">储蓄账户</div>
+            <div class="module-value">US$ 15,600<span>已缴纳保费</span></div>
+          </div>
+          <div class="module-arrow">›</div>
+        </div>
+        <!-- 保障账户 -->
+        <div class="module-card protection-card" onclick="showScreen('policy')">
+          <div class="module-icon protection">🛡️</div>
+          <div class="module-info">
+            <div class="module-label">保障账户</div>
+            <div class="module-value">2<span>张保单</span></div>
+          </div>
+          <div class="module-arrow">›</div>
+        </div>
+      </div>
+
+      <!-- 今日汇率（一行滚动） -->
+      <div class="exchange-container" onclick="showScreen('exchange')" style="cursor:pointer">
+        <div class="exchange-label">📊 今日汇率</div>
+        <div class="exchange-scroll-wrapper">
+          <div class="exchange-scroll">
+            <div class="exchange-item">
+              <span class="label">HKD / CNY</span>
+              <span><span class="rate">0.9100</span><span class="change">↑ 0.12%</span></span>
+            </div>
+            <div class="exchange-item">
+              <span class="label">USD / CNY</span>
+              <span><span class="rate">7.2800</span><span class="change">↓ 0.05%</span></span>
+            </div>
+            <div class="exchange-item">
+              <span class="label">HKD / CNY</span>
+              <span><span class="rate">0.9100</span><span class="change">↑ 0.12%</span></span>
+            </div>
+            <div class="exchange-item">
+              <span class="label">USD / CNY</span>
+              <span><span class="rate">7.2800</span><span class="change">↓ 0.05%</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 待办提醒 -->
+      <div id="home-todo-section">
+        <div class="section-title">
+          <span>⏰ 待办提醒</span>
+          <span class="more" onclick="showScreen('notifications')">查看全部 ›</span>
+        </div>
+        <div class="todo-list">
+          <div class="todo-card" onclick="showScreen('detail-protection')">
+            <div class="todo-dot" style="background:var(--warning)"></div>
+            <div class="todo-content">
+              <div class="todo-title">重疾险年缴保费即将到期</div>
+              <div class="todo-sub">保诚 危疾加护保 III · 还有 32 天</div>
+            </div>
+            <span class="todo-tag warning">缴费提醒</span>
+            <div class="todo-arrow">›</div>
+          </div>
+          <div class="todo-card" onclick="showScreen('detail-saving')">
+            <div class="todo-dot" style="background:var(--primary)"></div>
+            <div class="todo-content">
+              <div class="todo-title">储蓄险周年红利简报已发布</div>
+              <div class="todo-sub">AIA 充裕未来·传承 III · 点击查看</div>
+            </div>
+            <span class="todo-tag primary">收益简报</span>
+            <div class="todo-arrow">›</div>
+          </div>
+          <div class="todo-card" onclick="showScreen('service-autopay')">
+            <div class="todo-dot" style="background:var(--success)"></div>
+            <div class="todo-content">
+              <div class="todo-title">自动转账授权申请已受理</div>
+              <div class="todo-sub">预计 3 个工作日完成 · 服务进度更新</div>
+            </div>
+            <span class="todo-tag success">服务进度</span>
+            <div class="todo-arrow">›</div>
+          </div>
+          <div class="todo-card" onclick="showScreen('detail-protection')">
+            <div class="todo-dot" style="background:var(--warning)"></div>
+            <div class="todo-content">
+              <div class="todo-title">宏利保单已过等待期</div>
+              <div class="todo-sub">活耀人生 危疾保 · 等待期已于 2026-05-01 届满</div>
+            </div>
+            <span class="todo-tag info">保单状态</span>
+            <div class="todo-arrow">›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 精选攻略 - 恢复老样式横向滚动 -->
+      <div class="section-title">📚 精选攻略 <span class="more">更多 ›</span></div>
+      <div class="hscroll">
+        <div class="article-card" onclick="showScreen('article-renewal')">
+          <div class="article-img" style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE)">💳</div>
+          <div class="article-body">
+            <div class="article-title">如何进行续期缴费</div>
+            <div class="article-meta">AIA · 保诚 · 宏利</div>
+          </div>
+        </div>
+        <div class="article-card" onclick="showScreen('article-autopay')">
+          <div class="article-img" style="background:linear-gradient(135deg,#D1FAE5,#A7F3D0)">🔄</div>
+          <div class="article-body">
+            <div class="article-title">如何申请自动转账授权</div>
+            <div class="article-meta">按产品或保司分类指引</div>
+          </div>
+        </div>
+        <div class="article-card" onclick="showScreen('article-withdraw')">
+          <div class="article-img" style="background:linear-gradient(135deg,#FEF3C7,#FDE68A)">💰</div>
+          <div class="article-body">
+            <div class="article-title">如何申请提取款项</div>
+            <div class="article-meta">储蓄险部分提取操作指南</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 保单服务入口 - 每个服务直接跳转对应页面 -->
+      <div class="section-title">🔧 保单服务</div>
+      <div class="service-grid">
+        <div class="service-item" onclick="showScreen('service-renewal')">
+          <div class="service-icon">💳</div>
+          <div class="service-label">续期缴费</div>
+        </div>
+        <div class="service-item" onclick="showScreen('service-autopay')">
+          <div class="service-icon">🔄</div>
+          <div class="service-label">自动转账</div>
+        </div>
+        <div class="service-item" onclick="showScreen('service-withdraw')">
+          <div class="service-icon">💰</div>
+          <div class="service-label">提取款项</div>
+        </div>
+        <div class="service-item" onclick="showScreen('service-beneficiary')">
+          <div class="service-icon">👥</div>
+          <div class="service-label">变更受益人</div>
+        </div>
+        <div class="service-item" onclick="showScreen('service-insured')">
+          <div class="service-icon">🛡️</div>
+          <div class="service-label">变更受保人</div>
+        </div>
+        <div class="service-item" onclick="showScreen('service-owner')">
+          <div class="service-icon">📋</div>
+          <div class="service-label">变更持有人</div>
+        </div>
+        <div class="service-item" onclick="showScreen('service-surrender')">
+          <div class="service-icon">❌</div>
+          <div class="service-label">退保</div>
+        </div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== POLICY LIST ==================== -->
+    <div class="page" id="page-policy">
+      <div class="policy-page-header">
+        <div class="policy-page-title">我的保单</div>
+        <!-- 移除筛选组件 -->
+      </div>
+
+      <!-- 去掉缺口分析，直接显示保单 -->
+
+      <div class="family-group">
+        <div class="family-label"><span class="emoji">👤</span> 陈先生（本人）</div>
+        <!-- 储蓄类保单 -->
+        <div class="policy-item" onclick="showScreen('detail-saving')">
+          <div class="status-stripe active"></div>
+          <div class="pi-header">
+            <div class="pi-company">AIA 友邦</div>
+            <div class="pi-status active">🟢 生效中</div>
+          </div>
+          <div class="pi-name">充裕未来·传承 III</div>
+          <div class="pi-type">储蓄分红险</div>
+          <div class="pi-details">
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">已缴保费</div>
+              <div class="pi-detail-value">US$ 15,600</div>
+              <div class="pi-detail-sub">≈ ¥ 113,568</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">年缴保费</div>
+              <div class="pi-detail-value">US$ 5,200</div>
+              <div class="pi-detail-sub">≈ ¥ 37,856</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">缴费进度</div>
+              <div class="pi-detail-value">3/20年</div>
+            </div>
+          </div>
+          <div class="pi-footer">
+            <div class="pi-next-pay">下次缴费：<strong>2026-06-15</strong>（32天后）</div>
+            <div class="pi-arrow">›</div>
+          </div>
+        </div>
+
+        <!-- 保障类保单 -->
+        <div class="policy-item" onclick="showScreen('detail-protection')">
+          <div class="status-stripe warning"></div>
+          <div class="pi-header">
+            <div class="pi-company">PRUDENTIAL 保诚</div>
+            <div class="pi-status warning">🟡 即将缴费</div>
+          </div>
+          <div class="pi-name">危疾加护保 III</div>
+          <div class="pi-type protection">重疾险</div>
+          <div class="pi-details">
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">保额</div>
+              <div class="pi-detail-value">HK$ 800,000</div>
+              <div class="pi-detail-sub">≈ ¥ 728,000</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">年缴保费</div>
+              <div class="pi-detail-value">HK$ 12,600</div>
+              <div class="pi-detail-sub">≈ ¥ 11,466</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">缴费进度</div>
+              <div class="pi-detail-value">2/25年</div>
+            </div>
+          </div>
+          <div class="pi-footer">
+            <div class="pi-next-pay">下次缴费：<strong>2026-05-15</strong>（<span style="color:var(--warning)">即将到期</span>）</div>
+            <div class="pi-arrow">›</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="family-group">
+        <div class="family-label"><span class="emoji">👶</span> 陈小明（子女）</div>
+        <div class="policy-item" onclick="showScreen('detail-protection-child')">
+          <div class="status-stripe active"></div>
+          <div class="pi-header">
+            <div class="pi-company">MANULIFE 宏利</div>
+            <div class="pi-status active">🟢 生效中</div>
+          </div>
+          <div class="pi-name">活耀人生 危疾保</div>
+          <div class="pi-type protection">重疾险</div>
+          <div class="pi-details">
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">保额</div>
+              <div class="pi-detail-value">HK$ 1,000,000</div>
+              <div class="pi-detail-sub">≈ ¥ 910,000</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">年缴保费</div>
+              <div class="pi-detail-value">HK$ 8,400</div>
+              <div class="pi-detail-sub">≈ ¥ 7,644</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">缴费进度</div>
+              <div class="pi-detail-value">1/25年</div>
+            </div>
+          </div>
+          <div class="pi-footer">
+            <div class="pi-next-pay">下次缴费：<strong>2026-11-01</strong>（200天后）</div>
+            <div class="pi-arrow">›</div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== POLICY DETAIL (储蓄类) ==================== -->
+    <div class="page-overlay" id="page-detail-saving">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
+        <div class="detail-company">AIA 友邦</div>
+        <div class="detail-name">充裕未来·传承 III</div>
+        <div class="detail-status-badge">🟢 生效中 · 保单号 L123456789</div>
+        <div class="detail-type-tag saving">💰 储蓄类</div>
+      </div>
+
+      <!-- 储蓄类详情 - 用已缴纳保费代替账户价值 -->
+      <div class="detail-section">
+        <div class="detail-section-title">📋 保单信息</div>
+        <div class="detail-row"><div class="detail-label">产品名称</div><div class="detail-value">充裕未来·传承 III</div></div>
+        <div class="detail-row"><div class="detail-label">保单状态</div><div class="detail-value">生效中</div></div>
+        <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">L123456789</div></div>
+        <div class="detail-row"><div class="detail-label">承保公司</div><div class="detail-value">AIA 友邦</div></div>
+        <div class="detail-row"><div class="detail-label">保单持有人</div><div class="detail-value">陈XX</div></div>
+        <div class="detail-row"><div class="detail-label">受保人</div><div class="detail-value">陈XX（本人）</div></div>
+        <div class="detail-row"><div class="detail-label">受益人</div><div class="detail-value">李XX（配偶）</div></div>
+        <div class="detail-row"><div class="detail-label">生效时间</div><div class="detail-value">2023-06-15</div></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">💰 缴费与领取</div>
+        <div class="detail-row"><div class="detail-label">投入方式</div><div class="detail-value">年缴 · US$ 5,200/年</div></div>
+        <div class="detail-row"><div class="detail-label">缴费期限</div><div class="detail-value">20年</div></div>
+        <div class="detail-row"><div class="detail-label">已缴年数</div><div class="detail-value">3年（15%）</div></div>
+        <div class="detail-row"><div class="detail-label">已缴纳保费</div><div class="detail-value" style="color:var(--primary-dark)">US$ 15,600</div></div>
+        <div class="detail-row"><div class="detail-label">下次缴费</div><div class="detail-value" style="color:var(--warning)">2026-06-15（还有32天）</div></div>
+      </div>
+
+      <div class="reminder-btn">📅 设置缴费提醒</div>
+
+      <!-- 移除通俗解读卡片 -->
+
+      <div class="contact-bar">
+        <div class="contact-btn outline">📄 提取款项</div>
+        <div class="contact-btn primary">👨‍💼 联系顾问</div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== POLICY DETAIL (保障类-本人) ==================== -->
+    <div class="page-overlay" id="page-detail-protection">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
+        <div class="detail-company">PRUDENTIAL 保诚</div>
+        <div class="detail-name">危疾加护保 III</div>
+        <div class="detail-status-badge">🟡 即将缴费 · 保单号 P987654321</div>
+        <div class="detail-type-tag protection">🛡️ 保障类</div>
+      </div>
+
+      <!-- 保障类详情 -->
+      <div class="detail-section">
+        <div class="detail-section-title">📋 保单信息</div>
+        <div class="detail-row"><div class="detail-label">产品名称</div><div class="detail-value">危疾加护保 III</div></div>
+        <div class="detail-row"><div class="detail-label">保单状态</div><div class="detail-value">生效中</div></div>
+        <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">P987654321</div></div>
+        <div class="detail-row"><div class="detail-label">承保公司</div><div class="detail-value">PRUDENTIAL 保诚</div></div>
+        <div class="detail-row"><div class="detail-label">被保人</div><div class="detail-value">陈XX（本人）</div></div>
+        <div class="detail-row"><div class="detail-label">保障期限</div><div class="detail-value">终身（至100岁）</div></div>
+        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2024-06-15</div></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">💰 缴费信息</div>
+        <div class="detail-row"><div class="detail-label">缴费方式</div><div class="detail-value">年缴</div></div>
+        <div class="detail-row"><div class="detail-label">年缴保费</div><div class="detail-value">HK$ 12,600</div></div>
+        <div class="detail-row"><div class="detail-label">缴费期限</div><div class="detail-value">25年</div></div>
+        <div class="detail-row"><div class="detail-label">已缴年数</div><div class="detail-value">2年（8%）</div></div>
+        <div class="detail-row"><div class="detail-label">下次缴费</div><div class="detail-value" style="color:var(--warning)">2026-05-15（即将到期）</div></div>
+      </div>
+
+      <div class="reminder-btn">📅 设置缴费提醒</div>
+
+      <!-- 移除通俗解读卡片 -->
+
+      <div class="contact-bar">
+        <div class="contact-btn outline">📄 理赔指引</div>
+        <div class="contact-btn primary">👨‍💼 联系顾问</div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== POLICY DETAIL (保障类-子女) ==================== -->
+    <div class="page-overlay" id="page-detail-protection-child">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
+        <div class="detail-company">MANULIFE 宏利</div>
+        <div class="detail-name">活耀人生 危疾保</div>
+        <div class="detail-status-badge">🟢 生效中 · 保单号 M567891234</div>
+        <div class="detail-type-tag protection">🛡️ 保障类</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">📋 保单信息</div>
+        <div class="detail-row"><div class="detail-label">产品名称</div><div class="detail-value">活耀人生 危疾保</div></div>
+        <div class="detail-row"><div class="detail-label">保单状态</div><div class="detail-value">生效中</div></div>
+        <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">M567891234</div></div>
+        <div class="detail-row"><div class="detail-label">承保公司</div><div class="detail-value">MANULIFE 宏利</div></div>
+        <div class="detail-row"><div class="detail-label">持有人</div><div class="detail-value">陈XX</div></div>
+        <div class="detail-row"><div class="detail-label">被保人</div><div class="detail-value">陈小明（子女）</div></div>
+        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2026-02-01</div></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">💰 缴费信息</div>
+        <div class="detail-row"><div class="detail-label">年缴保费</div><div class="detail-value">HK$ 8,400</div></div>
+        <div class="detail-row"><div class="detail-label">缴费期限</div><div class="detail-value">25年</div></div>
+        <div class="detail-row"><div class="detail-label">已缴年数</div><div class="detail-value">1年（4%）</div></div>
+        <div class="detail-row"><div class="detail-label">下次缴费</div><div class="detail-value">2026-11-01（200天后）</div></div>
+      </div>
+
+      <div class="explainer-card">
+        <div class="explainer-title">⚠️ 重要提示</div>
+        <div class="explainer-text">
+          保单等候期至 <strong>2026-05-01</strong> 届满。
+          在等候期内确诊重疾不在赔付范围内，建议持续关注。
+        </div>
+      </div>
+
+      <!-- 移除通俗解读卡片 - 保留重要提示 -->
+
+      <div class="contact-bar">
+        <div class="contact-btn outline">📄 理赔指引</div>
+        <div class="contact-btn primary">👨‍💼 联系顾问</div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== DISCOVER ==================== -->
+    <div class="page" id="page-discover">
+      <div class="discover-search">🔍 搜索文章、产品、问题...</div>
+
+      <div class="discover-banner" onclick="articleFrom='discover';showScreen('article-detail')" style="cursor:pointer">
+        <div class="db-badge">📌 置顶</div>
+        <div class="db-title">2026 港险理赔全攻略</div>
+        <div class="db-sub">大陆客户跨境理赔完整指南</div>
+      </div>
+
+      <div class="section-title">🧰 常用工具</div>
+      <div class="quick-tools">
+        <div class="quick-tool" onclick="showScreen('tool-exchange')" style="cursor:pointer"><div class="qt-icon">💱</div><div class="qt-label">汇率查询</div></div>
+        <div class="quick-tool" onclick="alert('保额计算器：输入保额自动换算港币/美元/人民币')" style="cursor:pointer"><div class="qt-icon">🧮</div><div class="qt-label">保额计算</div></div>
+        <div class="quick-tool" onclick="alert('理赔清单生成器：根据险种自动生成所需资料清单')" style="cursor:pointer"><div class="qt-icon">📄</div><div class="qt-label">理赔清单</div></div>
+        <div class="quick-tool" onclick="showScreen('gap-analysis')" style="cursor:pointer"><div class="qt-icon">📊</div><div class="qt-label">保障分析</div></div>
+      </div>
+
+      <div class="section-title">📚 保险学堂</div>
+      <div class="category-nav">
+        <div class="cat-pill active">推荐</div>
+        <div class="cat-pill">港险入门</div>
+        <div class="cat-pill">险种科普</div>
+        <div class="cat-pill">缴费攻略</div>
+        <div class="cat-pill">理赔指南</div>
+        <div class="cat-pill">汇率换汇</div>
+        <div class="cat-pill">热门问答</div>
+      </div>
+
+      <div class="article-list">
+        <div class="article-list-item" onclick="articleFrom='discover';showScreen('article-detail')" style="cursor:pointer">
+          <div class="ali-img" style="background:linear-gradient(135deg,#FEE2E2,#FECACA)">🏥</div>
+          <div class="ali-content">
+            <div>
+              <div class="ali-tag">为你推荐</div>
+              <div class="ali-title" style="margin-top:4px">你的重疾险等待期还有多久？一文看懂等待期规则</div>
+            </div>
+            <div class="ali-meta"><span>险种科普</span><span>2.3k 阅读</span><span>3分钟</span></div>
+          </div>
+        </div>
+
+        <div class="article-list-item" onclick="articleFrom='discover';showScreen('article-detail')" style="cursor:pointer">
+          <div class="ali-img" style="background:linear-gradient(135deg,#D1FAE5,#A7F3D0)">💵</div>
+          <div class="ali-content">
+            <div>
+              <div class="ali-tag">缴费日临近</div>
+              <div class="ali-title" style="margin-top:4px">港币换汇最佳渠道：银行vs汇款公司vs FPS</div>
+            </div>
+            <div class="ali-meta"><span>缴费攻略</span><span>1.8k 阅读</span><span>5分钟</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:8px">❓ 热门问答</div>
+      <div class="todo-list">
+        <div class="todo-card" onclick="showScreen('faq-detail')" style="cursor:pointer"><div class="todo-dot" style="background:var(--primary)"></div><div class="todo-content"><div class="todo-title">在大陆看病，香港保单能赔吗？</div></div><div class="todo-arrow">›</div></div>
+        <div class="todo-card" onclick="showScreen('faq-detail')" style="cursor:pointer"><div class="todo-dot" style="background:var(--primary)"></div><div class="todo-content"><div class="todo-title">保费可以用微信/支付宝交吗？</div></div><div class="todo-arrow">›</div></div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== PROFILE V2 ==================== -->
+    <div class="page" id="page-profile">
+      <!-- 已登录状态头部 -->
+      <div class="profile-header" id="profile-header-loggedin">
+        <div class="profile-avatar">陈</div>
+        <div>
+          <div class="profile-name">陈先生</div>
+          <div class="profile-phone">+86 138****1234</div>
+          <div class="profile-verified" id="profile-verified-loggedin">✅ 已实名认证</div>
+          <div class="profile-unverified" id="profile-unverified-loggedin" style="display:none">⚠️ 未实名认证</div>
+        </div>
+      </div>
+
+      <!-- 未登录状态头部 -->
+      <div class="profile-header" id="profile-header-loggedout" style="display:none">
+        <div class="profile-avatar" style="background:linear-gradient(135deg,#9CA3AF,#6B7280)">👤</div>
+        <div>
+          <div class="profile-name">未登录</div>
+          <div class="profile-phone">登录后查看更多信息</div>
+        </div>
+      </div>
+
+      <!-- 专属顾问（已登录才显示） -->
+      <div class="advisor-card" id="profile-advisor">
+        <div class="ac-label">🏅 我的专属顾问</div>
+        <div class="advisor-info">
+          <div class="advisor-avatar">👨‍💼</div>
+          <div>
+            <div class="advisor-name">张经理</div>
+            <div class="advisor-id">持牌编号 LB-67890</div>
+          </div>
+        </div>
+        <div class="advisor-actions">
+          <div class="advisor-btn call">📞 一键拨打</div>
+          <div class="advisor-btn chat">💬 在线沟通</div>
+        </div>
+      </div>
+
+      <!-- 我的资料 -->
+      <div class="section-title">📝 我的资料</div>
+      <div class="menu-section">
+        <!-- 已实名状态 -->
+        <div class="menu-item" id="profile-verify-item-verified" onclick="showScreen('verify')">
+          <div class="menu-icon">🪪</div>
+          <div class="menu-label">实名认证</div>
+          <span style="font-size:12px;color:var(--success);margin-right:4px">已认证 ✓</span>
+          <div class="menu-arrow">›</div>
+        </div>
+        <!-- 未实名状态 -->
+        <div class="menu-item" id="profile-verify-item-unverified" onclick="showScreen('verify')" style="display:none">
+          <div class="menu-icon">🪪</div>
+          <div class="menu-label">实名认证</div>
+          <span style="font-size:12px;color:var(--warning);margin-right:4px">去认证</span>
+          <div class="menu-arrow">›</div>
+        </div>
+        <!-- 未登录状态（无认证标记） -->
+        <div class="menu-item" id="profile-verify-item-loggedout" onclick="showScreen('login')" style="display:none">
+          <div class="menu-icon">🪪</div>
+          <div class="menu-label">实名认证</div>
+          <div class="menu-arrow">›</div>
+        </div>
+        <div class="menu-item"><div class="menu-icon">📱</div><div class="menu-label">修改账户手机号</div><div class="menu-arrow">›</div></div>
+      </div>
+
+      <!-- 协议 -->
+      <div class="section-title">📄 协议与政策</div>
+      <div class="menu-section">
+        <div class="menu-item"><div class="menu-icon">📜</div><div class="menu-label">服务协议</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">🔒</div><div class="menu-label">隐私协议</div><div class="menu-arrow">›</div></div>
+      </div>
+
+      <!-- 设置 -->
+      <div class="section-title">⚙️ 设置</div>
+      <div class="menu-section">
+        <div class="menu-item" style="cursor:default">
+          <div class="menu-icon">🔔</div><div class="menu-label">通知管理</div>
+          <div class="toggle-switch active" onclick="this.classList.toggle('active')"></div>
+        </div>
+        <div class="menu-item">
+          <div class="menu-icon">ℹ️</div><div class="menu-label">关于</div>
+          <span style="font-size:12px;color:var(--text-muted);margin-right:8px">v2.0.1</span>
+          <div class="menu-arrow">›</div>
+        </div>
+      </div>
+
+      <!-- 账号操作 -->
+      <div class="section-title">🔐 账号</div>
+      <div class="menu-section">
+        <div class="menu-item" id="profile-menu-login-other"><div class="menu-icon">🔄</div><div class="menu-label">登录其他账号</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item" id="profile-menu-logout" onclick="doLogout()"><div class="menu-icon" style="color:var(--danger)">🚪</div><div class="menu-label" style="color:var(--danger)">退出登录</div><div class="menu-arrow">›</div></div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== SERVICE: 续期缴费 ==================== -->
+    <div class="page-overlay" id="page-service-renewal">
+      <div class="service-sub-header" style="margin-top:54px">
+        <div class="service-sub-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="service-sub-icon">💳</div>
+        <div class="service-sub-title">续期缴费</div>
+        <div class="service-sub-desc">保持保单有效的重要步骤</div>
+      </div>
+
+      <!-- 经纪人协助卡片 -->
+      <div class="service-section">
+        <div class="service-card" style="background:linear-gradient(135deg,var(--primary-light),#F0FDF4);border:1px solid rgba(26,107,92,0.15)">
+          <div class="service-card-header">
+            <span class="service-card-icon">👨‍💼</span>
+            <span class="service-card-name" style="color:var(--primary-dark)">水滴经纪人协助办理</span>
+          </div>
+          <div class="service-card-desc" style="padding-left:36px;color:var(--primary-dark)">
+            准备好以下材料，联系您的专属顾问协助您完成缴费：<br><br>
+            📋 <strong>所需材料：</strong><br>
+            • 保单号码（如有）<br>
+            • 缴费金额确认<br>
+            • 香港银行账户信息（如需转账）<br><br>
+            💡 顾问将协助您完成整个缴费流程，确保资金及时到账。
+          </div>
+        </div>
+      </div>
+
+      <!-- APP操作流程 -->
+      <div class="service-section">
+        <div class="service-section-title">📱 APP内自助办理</div>
+        <div class="service-step-card">
+          <div class="service-step-num">1</div>
+          <div class="service-step-title">打开保险公司APP</div>
+          <div class="service-step-desc">登录 AIA Connect / PRU / Pulse 等保险公司官方APP</div>
+        </div>
+        <div class="service-step-card">
+          <div class="service-step-num">2</div>
+          <div class="service-step-title">进入保单服务</div>
+          <div class="service-step-desc">点击「我的保单」→「缴费服务」→「续期缴费」</div>
+        </div>
+        <div class="service-step-card">
+          <div class="service-step-num">3</div>
+          <div class="service-step-title">选择缴费方式</div>
+          <div class="service-step-desc">推荐使用 FPS 转数快，免费实时到账</div>
+        </div>
+        <div class="service-step-card">
+          <div class="service-step-num">4</div>
+          <div class="service-step-title">确认并完成</div>
+          <div class="service-step-desc">核对缴费信息，完成支付后等待到账确认</div>
+        </div>
+      </div>
+
+      <div class="service-section">
+        <div class="service-section-title">🏦 其他缴费方式</div>
+        <div class="service-card">
+          <div class="service-card-header">
+            <span class="service-card-icon">💳</span>
+            <span class="service-card-name">FPS 转数快（推荐）</span>
+          </div>
+          <div class="service-card-desc">免费、实时到账、无额度限制。各大保险公司均支持。</div>
+        </div>
+
+        <div class="service-card">
+          <div class="service-card-header">
+            <span class="service-card-icon">🏦</span>
+            <span class="service-card-name">网上银行转账</span>
+          </div>
+          <div class="service-card-desc">通过香港银行账户转账至保险公司账户，通常隔天到账，免手续费。</div>
+        </div>
+      </div>
+
+      <div class="service-step-tip">
+        💡 建议提前 1-2 周缴费，避免节假日或周末导致延迟到账
+      </div>
+
+      <div class="service-apply-btn">📞 联系顾问协助缴费</div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== SERVICE: 自动转账 ==================== -->
+    <div class="page-overlay" id="page-service-autopay">
+      <div class="service-sub-header" style="margin-top:54px">
+        <div class="service-sub-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="service-sub-icon">🔄</div>
+        <div class="service-sub-title">自动转账授权</div>
+        <div class="service-sub-desc">设置一次，年年自动缴费</div>
+      </div>
+
+      <!-- 经纪人协助卡片 -->
+      <div class="service-section">
+        <div class="service-card" style="background:linear-gradient(135deg,var(--primary-light),#F0FDF4);border:1px solid rgba(26,107,92,0.15)">
+          <div class="service-card-header">
+            <span class="service-card-icon">👨‍💼</span>
+            <span class="service-card-name" style="color:var(--primary-dark)">水滴经纪人协助办理</span>
+          </div>
+          <div class="service-card-desc" style="padding-left:36px;color:var(--primary-dark)">
+            准备好以下材料，联系您的专属顾问协助您完成申请：<br><br>
+            📋 <strong>所需材料：</strong><br>
+            • 香港银行账户信息（银行名称、账户号码）<br>
+            • 持有人身份证件<br>
+            • 保险公司直接付款授权书<br><br>
+            💡 顾问将协助您填写表格并提交给保险公司，审核周期约 2-4 周。
+          </div>
+        </div>
+      </div>
+
+      <!-- APP操作流程 -->
+      <div class="service-section">
+        <div class="service-section-title">📱 APP内自助办理</div>
+        <div class="service-step-card">
+          <div class="service-step-num">1</div>
+          <div class="service-step-title">打开保险公司APP</div>
+          <div class="service-step-desc">登录 AIA Connect / PRU / Pulse 等保险公司官方APP</div>
+        </div>
+        <div class="service-step-card">
+          <div class="service-step-num">2</div>
+          <div class="service-step-title">进入自动转账服务</div>
+          <div class="service-step-desc">点击「保单服务」→「自动转账授权」→「新增授权」</div>
+        </div>
+        <div class="service-step-card">
+          <div class="service-step-num">3</div>
+          <div class="service-step-title">填写银行账户信息</div>
+          <div class="service-step-desc">输入香港银行账户信息，签署电子授权书</div>
+        </div>
+        <div class="service-step-card">
+          <div class="service-step-num">4</div>
+          <div class="service-step-title">提交并等待审核</div>
+          <div class="service-step-desc">审核周期约 2-4 周，完成后每年自动扣款</div>
+        </div>
+      </div>
+
+      <div class="service-section">
+        <div class="service-section-title">✨ 优势</div>
+        <div class="service-card">
+          <div style="display:flex;align-items:center;gap:12px">
+            <div style="font-size:28px">✅</div>
+            <div>
+              <div style="font-size:13px;font-weight:600">省心省力</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">每年自动扣款，无需手动操作</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;margin-top:12px">
+            <div style="font-size:28px">✅</div>
+            <div>
+              <div style="font-size:13px;font-weight:600">避免逾期</div>
+              <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">自动扣款不会忘记，避免保单失效</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="service-step-tip">
+        ⚠️ 建议在保费到期前 1 个月申请，确保有足够时间审核
+      </div>
+
+      <div class="service-apply-btn">📞 联系顾问协助申请</div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== SERVICE: 提取款项 ==================== -->
+    <div class="page-overlay" id="page-service-withdraw">
+      <div class="service-sub-header" style="margin-top:54px">
+        <div class="service-sub-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="service-sub-icon">💰</div>
+        <div class="service-sub-title">提取款项</div>
+        <div class="service-sub-desc">从储蓄险账户中提取现金</div>
+      </div>
+
+      <!-- 经纪人协助卡片 -->
+      <div class="service-section">
+        <div class="service-card" style="background:linear-gradient(135deg,var(--primary-light),#F0FDF4);border:1px solid rgba(26,107,92,0.15)">
+          <div class="service-card-header">
+            <span class="service-card-icon">👨‍💼</span>
+            <span class="service-card-name" style="color:var(--primary-dark)">水滴经纪人协助办理</span>
+          </div>
+          <div class="service-card-desc" style="padding-left:36px;color:var(--primary-dark)">
+            准备好以下材料，联系您的专属顾问协助您完成申请：<br><br>
+            📋 <strong>所需材料：</strong><br>
+            • 保单号码<br>
+            • 提取金额（港币/美元）<br>
+            • 收款银行账户信息<br><br>
+            💡 顾问将协助您计算最优提取方案，确保不影响您的保障权益。
+          </div>
+        </div>
+      </div>
+
+      <div class="service-section">
+        <div class="service-section-title">⚠️ 注意事项</div>
+        <div class="service-card" style="background:#FEF2F2">
+          <div class="service-card-desc" style="padding-left:0;color:#991B1B">
+            提取后会相应减少保单的账户价值和身故赔偿额。请确保提取金额不影响您的保障需求。
+          </div>
+        </div>
+      </div>
+
+      <div class="service-section">
+        <div class="service-section-title">📋 提取条件</div>
+        <div class="service-card">
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
+            ✅ 保单已过冷河期（21天）<br>
+            ✅ 保单已生效至少 2 年<br>
+            ✅ 账户中有足够的现金价值<br>
+            ✅ 提取后保单不会立即失效
+          </div>
+        </div>
+      </div>
+
+      <div class="service-apply-btn">📞 联系顾问协助办理</div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== SERVICE: 变更受益人 ==================== -->
+    <div class="page-overlay" id="page-service-beneficiary">
+      <div class="service-sub-header" style="margin-top:54px">
+        <div class="service-sub-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="service-sub-icon">👥</div>
+        <div class="service-sub-title">变更受益人</div>
+        <div class="service-sub-desc">修改保单的身故赔偿受益人</div>
+      </div>
+
+      <!-- 经纪人协助卡片 -->
+      <div class="service-section">
+        <div class="service-card" style="background:linear-gradient(135deg,var(--primary-light),#F0FDF4);border:1px solid rgba(26,107,92,0.15)">
+          <div class="service-card-header">
+            <span class="service-card-icon">👨‍💼</span>
+            <span class="service-card-name" style="color:var(--primary-dark)">水滴经纪人协助办理</span>
+          </div>
+          <div class="service-card-desc" style="padding-left:36px;color:var(--primary-dark)">
+            准备好以下材料，联系您的专属顾问协助您完成申请：<br><br>
+            📋 <strong>所需材料：</strong><br>
+            • 保单持有人身份证件<br>
+            • 新受益人身份信息（姓名、证件号、与被保人关系）<br>
+            • 受益人分配比例（如有多位）<br><br>
+            💡 顾问将协助您准备申请表并提交给保险公司。
+          </div>
+        </div>
+      </div>
+
+      <div class="service-section">
+        <div class="service-section-title">📋 适用场景</div>
+        <div class="service-card">
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
+            • 婚后添加配偶为受益人<br>
+            • 子女出生后添加子女<br>
+            • 离婚后变更原配偶为其他亲属<br>
+            • 调整多个受益人的分配比例
+          </div>
+        </div>
+      </div>
+
+      <div class="service-step-tip">
+        💡 受益人变更通常无需被保险人同意（除非涉及不可撤销受益人）
+      </div>
+
+      <div class="service-apply-btn">📞 联系顾问协助办理</div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== SERVICE: 变更受保人 ==================== -->
+    <div class="page-overlay" id="page-service-insured">
+      <div class="service-sub-header" style="margin-top:54px">
+        <div class="service-sub-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="service-sub-icon">🛡️</div>
+        <div class="service-sub-title">变更受保人</div>
+        <div class="service-sub-desc">更换保单的被保险人（适用于传承规划）</div>
+      </div>
+
+      <!-- 经纪人协助卡片 -->
+      <div class="service-section">
+        <div class="service-card" style="background:linear-gradient(135deg,var(--primary-light),#F0FDF4);border:1px solid rgba(26,107,92,0.15)">
+          <div class="service-card-header">
+            <span class="service-card-icon">👨‍💼</span>
+            <span class="service-card-name" style="color:var(--primary-dark)">水滴经纪人协助办理</span>
+          </div>
+          <div class="service-card-desc" style="padding-left:36px;color:var(--primary-dark)">
+            准备好以下材料，联系您的专属顾问协助您完成申请：<br><br>
+            📋 <strong>所需材料：</strong><br>
+            • 原受保人及新受保人身份证件<br>
+            • 与新受保人的关系证明<br>
+            • 新受保人健康问卷（如需要）<br><br>
+            ⚠️ 新受保人需要通过核保程序，可能需要体检。
+          </div>
+        </div>
+      </div>
+
+      <div class="service-section">
+        <div class="service-section-title">⚠️ 重要说明</div>
+        <div class="service-card" style="background:#FEF2F2">
+          <div class="service-card-desc" style="padding-left:0;color:#991B1B">
+            变更受保人是重要的传承规划操作，需要原受保人和新受保人双方同意。部分产品可能收取行政费用。
+          </div>
+        </div>
+      </div>
+
+      <div class="service-section">
+        <div class="service-section-title">📋 适用场景</div>
+        <div class="service-card">
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
+            • 将保单传承给子女<br>
+            • 夫妻之间转移保障<br>
+            • 作为礼物赠与他人<br>
+            • 税务规划需要
+          </div>
+        </div>
+      </div>
+
+      <div class="service-apply-btn">📞 联系顾问协助办理</div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== SERVICE: 变更持有人 ==================== -->
+    <div class="page-overlay" id="page-service-owner">
+      <div class="service-sub-header" style="margin-top:54px">
+        <div class="service-sub-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="service-sub-icon">📋</div>
+        <div class="service-sub-title">变更持有人</div>
+        <div class="service-sub-desc">转让保单所有权</div>
+      </div>
+
+      <!-- 经纪人协助卡片 -->
+      <div class="service-section">
+        <div class="service-card" style="background:linear-gradient(135deg,var(--primary-light),#F0FDF4);border:1px solid rgba(26,107,92,0.15)">
+          <div class="service-card-header">
+            <span class="service-card-icon">👨‍💼</span>
+            <span class="service-card-name" style="color:var(--primary-dark)">水滴经纪人协助办理</span>
+          </div>
+          <div class="service-card-desc" style="padding-left:36px;color:var(--primary-dark)">
+            准备好以下材料，联系您的专属顾问协助您完成申请：<br><br>
+            📋 <strong>所需材料：</strong><br>
+            • 原持有人及新持有人身份证件<br>
+            • 新持有人与受保人的关系证明<br>
+            • 双方签署的转让申请表<br>
+            • 新持有人住址证明（如需要）<br><br>
+            💡 新持有人将获得保单的所有权利和义务。
+          </div>
+        </div>
+      </div>
+
+      <div class="service-section">
+        <div class="service-section-title">⚠️ 重要说明</div>
+        <div class="service-card" style="background:#FEF2F2">
+          <div class="service-card-desc" style="padding-left:0;color:#991B1B">
+            变更持有人需要原持有人和新持有人双方签署同意。部分产品可能有税务影响，建议事先咨询专业意见。
+          </div>
+        </div>
+      </div>
+
+      <div class="service-section">
+        <div class="service-section-title">📋 适用场景</div>
+        <div class="service-card">
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
+            • 赠与子女或亲属<br>
+            • 资产传承规划<br>
+            • 离婚或分居后的财产分割<br>
+            • 其他资产安排需要
+          </div>
+        </div>
+      </div>
+
+      <div class="service-apply-btn">📞 联系顾问协助办理</div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== SERVICE: 退保 ==================== -->
+    <div class="page-overlay" id="page-service-surrender">
+      <div class="service-sub-header" style="margin-top:54px;background:linear-gradient(135deg,#DC2626,#991B1B)">
+        <div class="service-sub-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="service-sub-icon">❌</div>
+        <div class="service-sub-title">退保</div>
+        <div class="service-sub-desc">终止保单并取回退保价值</div>
+      </div>
+
+      <!-- 经纪人协助卡片 -->
+      <div class="service-section">
+        <div class="service-card" style="background:linear-gradient(135deg,#FEE2E2,#FEF2F2);border:1px solid rgba(220,38,38,0.15)">
+          <div class="service-card-header">
+            <span class="service-card-icon">👨‍💼</span>
+            <span class="service-card-name" style="color:#991B1B">水滴经纪人协助办理</span>
+          </div>
+          <div class="service-card-desc" style="padding-left:36px;color:#991B1B">
+            退保是重要的决定，建议您先联系专属顾问了解详情：<br><br>
+            📋 <strong>退保前请确认：</strong><br>
+            • 退保后将终止保单保障<br>
+            • 前几年现金价值可能低于已缴保费<br>
+            • 顾问可协助了解替代方案（部分提取、保单贷款等）<br><br>
+            💡 顾问将协助您评估最合适的方案，并指导后续操作。
+          </div>
+        </div>
+      </div>
+
+      <div class="service-section">
+        <div class="service-section-title">⚠️ 重要风险提示</div>
+        <div class="service-card" style="background:#FEF2F2">
+          <div class="service-card-desc" style="padding-left:0;color:#991B1B">
+            <strong>提前退保可能造成重大损失！</strong><br><br>
+            • 储蓄险前几年现金价值通常低于已缴保费<br>
+            • 退保后保障立即终止<br>
+            • 已进入保障的家庭失去重要防护<br><br>
+            建议谨慎考虑，或先咨询顾问了解替代方案
+          </div>
+        </div>
+      </div>
+
+      <div class="service-section">
+        <div class="service-section-title">💰 退保价值估算</div>
+        <div class="service-card">
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+              <span>已缴保费合计</span>
+              <span style="font-weight:600">US$ 15,600</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
+              <span>当前退保价值</span>
+              <span style="font-weight:600;color:var(--warning)">约 US$ 12,000</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;color:var(--danger)">
+              <span>预计损失</span>
+              <span style="font-weight:600">约 US$ 3,600</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="service-step-tip">
+        💡 建议先了解「部分提取」或「保单贷款」是否能满足您的资金需求
+      </div>
+
+      <div class="service-apply-btn">📞 联系顾问确认退保</div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== ARTICLE: 续期缴费 ==================== -->
+    <div class="page-overlay" id="page-article-renewal">
+      <div class="article-detail-header" style="margin-top:54px">
+        <div class="article-detail-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="article-detail-meta">缴费攻略 · 5分钟阅读</div>
+        <div class="article-detail-title">如何进行续期缴费</div>
+        <div class="article-detail-subtitle">按保险公司分类的详细操作指南</div>
+      </div>
+
+      <div class="article-content">
+        <h3>📌 概览</h3>
+        <p>续期缴费是保持保单有效的重要步骤。每年的保费到期日前，您需要确保资金到位。</p>
+
+        <div class="highlight-box">
+          <div class="highlight-title">⏰ 重要提醒</div>
+          <div class="highlight-text">保费到期日后有 30 天宽限期。宽限期内缴费，保单依然有效。超过宽限期未缴，保单将失效。</div>
+        </div>
+
+        <h3>AIA 友邦</h3>
+        <div class="step-list">
+          <div class="step-item"><span class="step-num">1</span><span class="step-text">登录 AIA Connect app 或访问官网</span></div>
+          <div class="step-item"><span class="step-num">2</span><span class="step-text">进入「我的保单」→「缴费」</span></div>
+          <div class="step-item"><span class="step-num">3</span><span class="step-text">选择要缴费的保单</span></div>
+          <div class="step-item"><span class="step-num">4</span><span class="step-text">选择缴费方式（FPS/转账/信用卡）</span></div>
+          <div class="step-item"><span class="step-num">5</span><span class="step-text">确认金额并完成支付</span></div>
+        </div>
+
+        <h3>PRUDENTIAL 保诚</h3>
+        <div class="step-list">
+          <div class="step-item"><span class="step-num">1</span><span class="step-text">登录 Pulse app 或 PRU online</span></div>
+          <div class="step-item"><span class="step-num">2</span><span class="step-text">点击「保单服务」→「缴付保费」</span></div>
+          <div class="step-item"><span class="step-num">3</span><span class="step-text">选择保单号码</span></div>
+          <div class="step-item"><span class="step-num">4</span><span class="step-text">确认缴费金额和方式</span></div>
+        </div>
+
+        <div class="tip-box">
+          建议设置自动转账授权，省去每年手动缴费的麻烦。
+        </div>
+
+        <h3>📱 推荐缴费方式</h3>
+        <p>🥇 <strong>FPS 转数快</strong> — 免费、实时到账、无额度限制</p>
+        <p>🥈 <strong>网上银行转账</strong> — 免手续费，隔天到账</p>
+        <p>🥉 <strong>信用卡支付</strong> — 部分产品支持，但可能收 1.5% 手续费</p>
+      </div>
+
+      <div class="contact-bar" style="padding:0 16px 16px">
+        <div class="contact-btn primary" style="flex:1">💬 还有疑问？联系顾问</div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== ARTICLE: 自动转账 ==================== -->
+    <div class="page-overlay" id="page-article-autopay">
+      <div class="article-detail-header" style="margin-top:54px">
+        <div class="article-detail-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="article-detail-meta">服务指南 · 3分钟阅读</div>
+        <div class="article-detail-title">如何申请自动转账授权</div>
+        <div class="article-detail-subtitle">设置一次，年年自动缴费</div>
+      </div>
+
+      <div class="article-content">
+        <p>自动转账授权可以让您的保费在到期日自动从香港银行账户扣款，无需每年手动操作。</p>
+
+        <div class="highlight-box">
+          <div class="highlight-title">✅ 优点</div>
+          <div class="highlight-text">省心省力 · 避免逾期 · 一次设置永久生效</div>
+        </div>
+
+        <h3>申请流程</h3>
+        <div class="step-list">
+          <div class="step-item"><span class="step-num">1</span><span class="step-text">联系您的保险顾问</span></div>
+          <div class="step-item"><span class="step-num">2</span><span class="step-text">填写「直接付款授权书」</span></div>
+          <div class="step-item"><span class="step-num">3</span><span class="step-text">提供香港银行账户信息</span></div>
+          <div class="step-item"><span class="step-num">4</span><span class="step-text">等待 2-4 周审核完成</span></div>
+        </div>
+
+        <div class="tip-box">
+          建议在保费到期前 1 个月申请。
+        </div>
+      </div>
+
+      <div class="contact-bar" style="padding:0 16px 16px">
+        <div class="contact-btn primary" style="flex:1">👨‍💼 协助申请</div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== ARTICLE: 提取款项 ==================== -->
+    <div class="page-overlay" id="page-article-withdraw">
+      <div class="article-detail-header" style="margin-top:54px">
+        <div class="article-detail-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="article-detail-meta">服务指南 · 4分钟阅读</div>
+        <div class="article-detail-title">如何申请提取款项</div>
+        <div class="article-detail-subtitle">储蓄险部分提取操作详解</div>
+      </div>
+
+      <div class="article-content">
+        <p>储蓄型保险（如充裕未来、隽富等）在积累一定账户价值后，可以申请部分提取使用。</p>
+
+        <div class="highlight-box">
+          <div class="highlight-title">⚠️ 重要提示</div>
+          <div class="highlight-text">提取后会相应减少保单的账户价值和身故赔偿额。</div>
+        </div>
+
+        <h3>提取条件</h3>
+        <p>• 保单已过冷河期（21天）<br>
+        • 保单已生效一定年限（通常 2-3 年后）<br>
+        • 账户中有足够的现金价值</p>
+
+        <h3>提取流程</h3>
+        <div class="step-list">
+          <div class="step-item"><span class="step-num">1</span><span class="step-text">登录保险公司 App</span></div>
+          <div class="step-item"><span class="step-num">2</span><span class="step-text">进入「保单服务」→「提取款项」</span></div>
+          <div class="step-item"><span class="step-num">3</span><span class="step-text">输入提取金额</span></div>
+          <div class="step-item"><span class="step-num">4</span><span class="step-text">确认收款银行账户</span></div>
+          <div class="step-item"><span class="step-num">5</span><span class="step-text">等待 5-7 个工作日到账</span></div>
+        </div>
+
+        <div class="tip-box">
+          提取方式建议选择 FPS 到账，速度更快。
+        </div>
+      </div>
+
+      <div class="contact-bar" style="padding:0 16px 16px">
+        <div class="contact-btn primary" style="flex:1">👨‍💼 咨询顾问</div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：保障缺口分析 ==================== -->
+    <div class="page-overlay" id="page-gap-analysis">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('discover')">‹ 返回</div>
+        <div class="detail-company">保障缺口分析</div>
+        <div class="detail-name">陈先生家庭保障全景</div>
+      </div>
+
+      <div class="detail-section" style="background:var(--primary-light);border-radius:12px;margin:0 16px 12px;padding:16px">
+        <div style="font-size:14px;font-weight:600;color:var(--primary-dark);margin-bottom:8px">📊 家庭综合评分</div>
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:80px;height:80px;border-radius:50%;border:6px solid var(--primary);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--primary)">62<span style="font-size:14px">分</span></div>
+          <div style="flex:1">
+            <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">
+              您的家庭保障覆盖了 <strong>2/4</strong> 个核心险种<br>
+              建议补充 <span style="color:var(--danger);font-weight:600">医疗险</span> 和 <span style="color:var(--danger);font-weight:600">人寿险</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-bar">
+        <div class="contact-btn primary" onclick="alert('预约顾问，定制家庭保障方案')">👨‍💼 预约顾问定制方案</div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：消息中心 ==================== -->
+    <div class="page-overlay" id="page-notifications">
+      <div class="overlay-nav" style="margin-top:54px;background:var(--white)">
+        <div class="overlay-back" onclick="showScreen('home')">‹</div>
+        <div class="overlay-title">消息中心</div>
+        <div style="margin-left:auto;font-size:13px;color:var(--primary);cursor:pointer" onclick="markAllRead()">全部已读</div>
+      </div>
+      <!-- 分类标签 -->
+      <div style="padding:12px 16px;background:var(--white);border-bottom:1px solid var(--border)">
+        <div style="display:flex;gap:6px;overflow-x:auto">
+          <div class="cat-pill active" onclick="filterMessages('all',this)">全部</div>
+          <div class="cat-pill" onclick="filterMessages('payment',this)">缴费提醒</div>
+          <div class="cat-pill" onclick="filterMessages('policy',this)">保单动态</div>
+          <div class="cat-pill" onclick="filterMessages('service',this)">服务进度</div>
+        </div>
+      </div>
+      <!-- 消息列表 -->
+      <div id="notification-list" style="padding:8px 16px">
+        <!-- 未读消息1 -->
+        <div class="notif-item unread" onclick="showScreen('notification-detail-1')">
+          <div class="notif-dot unread"></div>
+          <div class="notif-content">
+            <div class="notif-header">
+              <span class="notif-type payment">缴费提醒</span>
+              <span class="notif-time">今天 09:00</span>
+            </div>
+            <div class="notif-title">保诚 危疾加护保 III 保费即将到期</div>
+            <div class="notif-desc">年缴保费 HK$12,600 将于 2026-05-15 到期，还有 32 天。请及时缴费以保持保单有效。</div>
+          </div>
+          <div class="notif-arrow">›</div>
+        </div>
+        <!-- 未读消息2 -->
+        <div class="notif-item unread" onclick="showScreen('notification-detail-2')">
+          <div class="notif-dot unread"></div>
+          <div class="notif-content">
+            <div class="notif-header">
+              <span class="notif-type policy">保单动态</span>
+              <span class="notif-time">昨天 14:30</span>
+            </div>
+            <div class="notif-title">红利通知：友邦已发布周年红利</div>
+            <div class="notif-desc">AIA 充裕未来·传承 III 2025年度红利通知书已发布，点击查看详情。</div>
+          </div>
+          <div class="notif-arrow">›</div>
+        </div>
+        <!-- 已读消息3 -->
+        <div class="notif-item" onclick="showScreen('notification-detail-3')">
+          <div class="notif-dot"></div>
+          <div class="notif-content">
+            <div class="notif-header">
+              <span class="notif-type service">服务进度</span>
+              <span class="notif-time">昨天 10:15</span>
+            </div>
+            <div class="notif-title">自动转账授权申请已受理</div>
+            <div class="notif-desc">您的申请已提交给保诚，预计 3 个工作日完成审核。</div>
+          </div>
+          <div class="notif-arrow">›</div>
+        </div>
+        <!-- 已读消息4 -->
+        <div class="notif-item" onclick="showScreen('notification-detail-4')">
+          <div class="notif-dot"></div>
+          <div class="notif-content">
+            <div class="notif-header">
+              <span class="notif-type policy">保单动态</span>
+              <span class="notif-time">4月10日</span>
+            </div>
+            <div class="notif-title">宏利保单已过等待期</div>
+            <div class="notif-desc">活耀人生 危疾保的等待期已于 2026-05-01 届满，保障正式生效。</div>
+          </div>
+          <div class="notif-arrow">›</div>
+        </div>
+        <!-- 已读消息5 -->
+        <div class="notif-item" onclick="showScreen('notification-detail-5')">
+          <div class="notif-dot"></div>
+          <div class="notif-content">
+            <div class="notif-header">
+              <span class="notif-type payment">缴费提醒</span>
+              <span class="notif-time">4月5日</span>
+            </div>
+            <div class="notif-title">缴费成功通知</div>
+            <div class="notif-desc">AIA 充裕未来·传承 III 第3期保费 US$5,200 已缴费成功。</div>
+          </div>
+          <div class="notif-arrow">›</div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：消息详情 ==================== -->
+    <div class="page-overlay" id="page-notification-detail-1">
+      <div class="overlay-nav" style="margin-top:54px;background:var(--white)">
+        <div class="overlay-back" onclick="showScreen('notifications')">‹</div>
+        <div class="overlay-title">消息详情</div>
+      </div>
+      <div style="padding:16px">
+        <div style="background:var(--white);border-radius:14px;padding:16px;box-shadow:var(--card-shadow)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <span class="notif-type-tag payment">缴费提醒</span>
+            <span style="font-size:12px;color:var(--text-muted)">今天 09:00</span>
+          </div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:12px">保诚 危疾加护保 III 保费即将到期</div>
+          <div style="font-size:14px;color:var(--text-secondary);line-height:1.7">
+            <p>尊敬的用户，您的保单 <strong>危疾加护保 III</strong>（保单号：P987654321）即将到期续费。</p>
+            <div style="background:#FEF3C7;padding:12px;border-radius:10px;margin:12px 0">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span>年缴保费</span>
+                <strong>HK$ 12,600</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span>到期日期</span>
+                <strong>2026-05-15</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span>剩余天数</span>
+                <strong style="color:var(--warning)">32 天</strong>
+              </div>
+            </div>
+            <p>为确保保单持续有效，请在到期日前完成缴费。您可以通过以下方式缴纳：</p>
+            <p style="margin-top:8px">• FPS 转数快（推荐）<br>• 网上银行转账<br>• 信用卡支付</p>
+            <p style="margin-top:12px">如有疑问，请联系您的专属顾问张经理。</p>
+          </div>
+        </div>
+        <div class="contact-bar" style="margin-top:16px">
+          <div class="contact-btn outline" onclick="showScreen('service-renewal')">💳 立即缴费</div>
+          <div class="contact-btn primary" onclick="showScreen('profile')">👨‍💼 联系顾问</div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- 其他消息详情页（简化版） -->
+    <div class="page-overlay" id="page-notification-detail-2">
+      <div class="overlay-nav" style="margin-top:54px;background:var(--white)">
+        <div class="overlay-back" onclick="showScreen('notifications')">‹</div>
+        <div class="overlay-title">消息详情</div>
+      </div>
+      <div style="padding:16px">
+        <div style="background:var(--white);border-radius:14px;padding:16px;box-shadow:var(--card-shadow)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <span class="notif-type-tag policy">保单动态</span>
+            <span style="font-size:12px;color:var(--text-muted)">昨天 14:30</span>
+          </div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:12px">红利通知：友邦已发布周年红利</div>
+          <div style="font-size:14px;color:var(--text-secondary);line-height:1.7">
+            <p>尊敬的用户，AIA 充裕未来·传承 III（保单号：L123456789）2025年度周年红利通知书已发布。</p>
+            <div style="background:var(--primary-light);padding:12px;border-radius:10px;margin:12px 0">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span>周年红利</span>
+                <strong style="color:var(--primary)">US$ 1,200</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span>终期红利</span>
+                <strong style="color:var(--primary)">US$ 3,500</strong>
+              </div>
+            </div>
+            <p>请登录保联APP或联系顾问查看详细红利报告。</p>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <div class="page-overlay" id="page-notification-detail-3">
+      <div class="overlay-nav" style="margin-top:54px;background:var(--white)">
+        <div class="overlay-back" onclick="showScreen('notifications')">‹</div>
+        <div class="overlay-title">消息详情</div>
+      </div>
+      <div style="padding:16px">
+        <div style="background:var(--white);border-radius:14px;padding:16px;box-shadow:var(--card-shadow)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <span class="notif-type-tag service">服务进度</span>
+            <span style="font-size:12px;color:var(--text-muted)">昨天 10:15</span>
+          </div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:12px">自动转账授权申请已受理</div>
+          <div style="font-size:14px;color:var(--text-secondary);line-height:1.7">
+            <p>您的自动转账授权申请已成功提交给 PRUDENTIAL 保诚。</p>
+            <div style="background:#ECFDF5;padding:12px;border-radius:10px;margin:12px 0">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                <div style="width:24px;height:24px;border-radius:50%;background:var(--success);display:flex;align-items:center;justify-content:center;color:white;font-size:12px">✓</div>
+                <span style="font-weight:600">已提交</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;opacity:0.6">
+                <div style="width:24px;height:24px;border-radius:50%;background:#D1D5DB;display:flex;align-items:center;justify-content:center;color:white;font-size:12px">2</div>
+                <span>审核中</span>
+                <span style="margin-left:auto">预计 3 个工作日</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;opacity:0.6">
+                <div style="width:24px;height:24px;border-radius:50%;background:#D1D5DB;display:flex;align-items:center;justify-content:center;color:white;font-size:12px">3</div>
+                <span>完成生效</span>
+              </div>
+            </div>
+            <p>审核完成后将自动从您的香港银行账户扣款缴纳保费。</p>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <div class="page-overlay" id="page-notification-detail-4">
+      <div class="overlay-nav" style="margin-top:54px;background:var(--white)">
+        <div class="overlay-back" onclick="showScreen('notifications')">‹</div>
+        <div class="overlay-title">消息详情</div>
+      </div>
+      <div style="padding:16px">
+        <div style="background:var(--white);border-radius:14px;padding:16px;box-shadow:var(--card-shadow)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <span class="notif-type-tag policy">保单动态</span>
+            <span style="font-size:12px;color:var(--text-muted)">4月10日</span>
+          </div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:12px">宏利保单已过等待期</div>
+          <div style="font-size:14px;color:var(--text-secondary);line-height:1.7">
+            <p>恭喜！您为陈小明投保的 <strong>活耀人生 危疾保</strong>（保单号：M567891234）等待期已于 <strong>2026-05-01</strong> 届满。</p>
+            <div style="background:#D1FAE5;padding:12px;border-radius:10px;margin:12px 0">
+              <div style="display:flex;align-items:center;gap:8px">
+                <div style="font-size:20px">✅</div>
+                <div>
+                  <div style="font-weight:600;color:#065F46">保障已正式生效</div>
+                  <div style="font-size:12px;color:#047857">保额 HK$ 1,000,000</div>
+                </div>
+              </div>
+            </div>
+            <p>如有需要理赔，可直接联系顾问或通过保联APP提交申请。</p>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <div class="page-overlay" id="page-notification-detail-5">
+      <div class="overlay-nav" style="margin-top:54px;background:var(--white)">
+        <div class="overlay-back" onclick="showScreen('notifications')">‹</div>
+        <div class="overlay-title">消息详情</div>
+      </div>
+      <div style="padding:16px">
+        <div style="background:var(--white);border-radius:14px;padding:16px;box-shadow:var(--card-shadow)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+            <span class="notif-type-tag payment">缴费提醒</span>
+            <span style="font-size:12px;color:var(--text-muted)">4月5日</span>
+          </div>
+          <div style="font-size:17px;font-weight:700;margin-bottom:12px">缴费成功通知</div>
+          <div style="font-size:14px;color:var(--text-secondary);line-height:1.7">
+            <p>您为 <strong>AIA 充裕未来·传承 III</strong>（保单号：L123456789）缴纳的保费已到账确认。</p>
+            <div style="background:#ECFDF5;padding:12px;border-radius:10px;margin:12px 0">
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span>缴费金额</span>
+                <strong style="color:var(--success)">US$ 5,200</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+                <span>缴费期数</span>
+                <strong>第 3 期 / 共 20 期</strong>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span>到账时间</span>
+                <strong>2026-04-05</strong>
+              </div>
+            </div>
+            <p>保单状态正常，下次缴费日期为 <strong>2026-06-15</strong>。</p>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：汇率详情 ==================== -->
+    <div class="page-overlay" id="page-exchange">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('home')">‹ 返回</div>
+        <div class="detail-company">汇率查询</div>
+        <div class="detail-name">港币 / 人民币</div>
+      </div>
+
+      <div style="padding:0 16px">
+        <div style="background:var(--white);border-radius:16px;padding:20px;margin-bottom:12px;text-align:center;box-shadow:var(--card-shadow)">
+          <div style="font-size:40px;font-weight:700;color:var(--primary)">0.9100</div>
+          <div style="font-size:14px;color:var(--success);margin-top:4px">↑ 0.0011 (+0.12%)</div>
+        </div>
+
+        <div style="background:var(--white);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:var(--card-shadow)">
+          <div style="font-size:14px;font-weight:600;margin-bottom:10px">🏦 换汇渠道对比</div>
+          <div style="font-size:12px;line-height:2;color:var(--text-secondary)">
+            <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>FPS 转数快</span><span style="color:var(--primary)">0.9100</span><span style="color:var(--primary)">免费 ⭐</span></div>
+            <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border)"><span>手机银行</span><span>0.9080</span><span>免手续费</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：文章详情 ==================== -->
+    <div class="page-overlay" id="page-article-detail">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="goBackFromArticle()">‹ 返回</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-top:4px">理赔指南 · 2.3k 阅读 · 3分钟</div>
+      </div>
+      <div style="padding:0 20px">
+        <div style="font-size:20px;font-weight:700;line-height:1.4;margin-bottom:16px">在大陆看病，香港保单能赔吗？</div>
+        <div style="font-size:14px;line-height:2;color:var(--text-secondary)">
+          <p>大部分情况下<strong>可以赔</strong>，但需要满足特定条件。</p>
+          <div style="background:var(--primary-light);border-radius:10px;padding:14px;margin:16px 0">
+            <div style="font-weight:600;color:var(--primary-dark)">💡 核心结论</div>
+            <div style="font-size:13px;color:var(--primary-dark);margin-top:4px">关键在于：就诊医院是否在保单认可范围内。</div>
+          </div>
+        </div>
+        <div class="contact-bar" style="position:relative;padding:0 0 16px">
+          <div class="contact-btn outline" style="flex:1;text-align:center" onclick="alert('已收藏')">☆ 收藏</div>
+          <div class="contact-btn primary" style="flex:2;text-align:center">分享给朋友</div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：FAQ详情 ==================== -->
+    <div class="page-overlay" id="page-faq-detail">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('discover')">‹ 返回</div>
+        <div class="detail-company">热门问答</div>
+      </div>
+      <div style="padding:0 20px">
+        <div style="font-size:18px;font-weight:700;margin-bottom:16px">在大陆看病，香港保单能赔吗？</div>
+        <div style="background:var(--primary-light);border-radius:10px;padding:14px;margin-bottom:16px">
+          <div style="font-size:13px;color:var(--primary-dark);font-weight:600">简短回答</div>
+          <div style="font-size:13px;color:var(--primary-dark);margin-top:4px">大部分情况可以赔。在内地<strong>三甲医院</strong>就诊，准备齐全资料即可申请理赔。</div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== 二级页面：汇率查询工具 ==================== -->
+    <div class="page-overlay" id="page-tool-exchange">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('discover')">‹ 返回</div>
+        <div class="detail-company">汇率查询</div>
+      </div>
+      <div style="padding:0 16px">
+        <div style="background:var(--white);border-radius:16px;padding:20px;margin-bottom:12px;text-align:center;box-shadow:var(--card-shadow)">
+          <div style="font-size:40px;font-weight:700;color:var(--primary)">0.9100</div>
+          <div style="font-size:14px;color:var(--success);margin-top:4px">↑ 0.0011 (+0.12%)</div>
+        </div>
+      </div>
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== LOGIN ==================== -->
+    <div class="page-overlay login-page" id="page-login">
+      <div class="login-top" style="margin-top:54px">
+        <div class="login-logo">🛡️</div>
+        <div class="login-brand">保联</div>
+        <div class="login-slogan">连接你与每一张保单</div>
+      </div>
+      <div class="login-form">
+        <div class="login-form-title">登录 / 注册</div>
+        <div class="form-group">
+          <div class="form-label">手机号码</div>
+          <div class="phone-input">
+            <div class="phone-prefix">🇨🇳 +86 <span class="arrow">▾</span></div>
+            <input type="tel" placeholder="请输入手机号" value="138****1234">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="form-label">验证码</div>
+          <div class="otp-row">
+            <input class="otp-input" type="tel" maxlength="6" placeholder="——">
+            <button class="otp-btn">获取验证码</button>
+          </div>
+        </div>
+        <button class="login-btn" onclick="toggleLoginState(); showScreen('home')">登录 / 注册</button>
+        <div class="login-terms">
+          登录即表示同意 <a href="#">《用户协议》</a>和<a href="#">《隐私政策》</a>
+        </div>
+        <div class="skip-login" onclick="showScreen('home')">先逛逛，暂不登录 →</div>
+      </div>
+    </div>
+
+    <!-- ==================== VERIFY ==================== -->
+    <div class="page-overlay" id="page-verify">
+      <div class="overlay-nav" style="margin-top:54px">
+        <div class="overlay-back" onclick="showScreen('profile')">‹</div>
+        <div class="overlay-title">实名认证</div>
+      </div>
+      <div class="verify-form">
+        <div class="verify-title">验证您的身份</div>
+        <div class="verify-desc">完成实名认证后，系统将自动匹配您名下的香港保单。</div>
+
+        <div class="form-label">真实姓名</div>
+        <input class="verify-input" type="text" placeholder="请输入与保单一致的中文姓名">
+
+        <div class="form-label">证件类型</div>
+        <select class="id-type-select">
+          <option>中国大陆身份证</option>
+          <option>港澳通行证</option>
+          <option>护照</option>
+          <option>香港身份证 (HKID)</option>
+        </select>
+
+        <div class="form-label">证件号码</div>
+        <input class="verify-input" type="text" placeholder="请输入证件号码">
+
+        <div class="verify-note">
+          <span class="note-icon">🔒</span> 您的身份信息仅用于匹配保单，我们严格加密保存。
+        </div>
+
+        <button class="login-btn" onclick="showScreen('profile')">提交认证</button>
+      </div>
+    </div>
+
+
+    <!-- Tab Bar -->
+    <div class="tab-bar" id="main-tab-bar">
+      <div class="tab-item active" onclick="showScreen('home')" data-tab="home">
+        <div class="tab-icon-wrapper">
+          <div class="tab-icon">🏠</div>
+        </div>
+        <div class="tab-label">首页</div>
+      </div>
+      <div class="tab-item" onclick="showScreen('policy')" data-tab="policy">
+        <div class="tab-icon-wrapper">
+          <div class="tab-icon">📋</div>
+        </div>
+        <div class="tab-label">保单</div>
+      </div>
+      <div class="tab-item" onclick="showScreen('discover')" data-tab="discover">
+        <div class="tab-icon-wrapper">
+          <div class="tab-icon">🔍</div>
+        </div>
+        <div class="tab-label">发现</div>
+      </div>
+      <div class="tab-item" onclick="showScreen('profile')" data-tab="profile">
+        <div class="tab-icon-wrapper">
+          <div class="tab-icon">👤</div>
+        </div>
+        <div class="tab-label">我的</div>
+      </div>
+      <!-- Home Indicator -->
+      <div class="home-indicator"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var articleFrom = 'home';
+var productFrom = 'home';
+var isLoggedIn = true; // 默认登录状态
+var isVerified = true; // 默认已实名认证
+
+function goBackFromArticle() { showScreen(articleFrom); }
+function goBackFromProduct() { showScreen(productFrom); }
+
+// 退出登录（直接切换到未登录状态）
+function doLogout() {
+  isLoggedIn = false;
+  updateLoginState();
+  showScreen('home');
+}
+
+// 切换登录状态（演示用）
+function toggleLoginState() {
+  isLoggedIn = !isLoggedIn;
+  updateLoginState();
+}
+
+// 切换实名认证状态（演示用）
+function toggleVerifiedState() {
+  isVerified = !isVerified;
+  updateLoginState();
+}
+
+function updateLoginState() {
+  var loginCard = document.getElementById('home-login-card');
+  var unifiedAccount = document.getElementById('home-unified-account');
+  var bindPrompt = document.getElementById('home-bind-prompt');
+  var greeting = document.getElementById('home-greeting');
+  var greetingSub = document.getElementById('home-greeting-sub');
+  var profileMenuLoginOther = document.getElementById('profile-menu-login-other');
+  var profileMenuLogout = document.getElementById('profile-menu-logout');
+  
+  // 个人中心相关元素
+  var profileHeaderLoggedin = document.getElementById('profile-header-loggedin');
+  var profileHeaderLoggedout = document.getElementById('profile-header-loggedout');
+  var profileAdvisor = document.getElementById('profile-advisor');
+  
+  // 实名认证相关
+  var profileVerifiedLoggedin = document.getElementById('profile-verified-loggedin');
+  var profileUnverifiedLoggedin = document.getElementById('profile-unverified-loggedin');
+  var profileVerifyItemVerified = document.getElementById('profile-verify-item-verified');
+  var profileVerifyItemUnverified = document.getElementById('profile-verify-item-unverified');
+  var profileVerifyItemLoggedout = document.getElementById('profile-verify-item-loggedout');
+  
+  // 首页待办提醒
+  var todoSection = document.getElementById('home-todo-section');
+  
+  if (isLoggedIn) {
+    // 已登录状态
+    loginCard.style.display = 'none';
+    
+    // 根据实名状态显示不同内容
+    if (isVerified) {
+      // 已实名 - 显示统一账户卡片
+      unifiedAccount.style.display = 'block';
+      bindPrompt.style.display = 'none';
+      greeting.textContent = '早上好，陈先生 👋';
+      greetingSub.textContent = '您的保单一切正常';
+      // 显示待办提醒
+      if(todoSection) todoSection.style.display = 'block';
+    } else {
+      // 未实名 - 显示引导关联保单
+      unifiedAccount.style.display = 'none';
+      bindPrompt.style.display = 'block';
+      greeting.textContent = '早上好，陈先生 👋';
+      greetingSub.textContent = '完成实名认证，关联您的保单';
+      // 隐藏待办提醒
+      if(todoSection) todoSection.style.display = 'none';
+    }
+    
+    // 个人中心
+    if(profileHeaderLoggedin) profileHeaderLoggedin.style.display = 'flex';
+    if(profileHeaderLoggedout) profileHeaderLoggedout.style.display = 'none';
+    // 顾问仅在已实名时显示
+    if(profileAdvisor) profileAdvisor.style.display = isVerified ? 'block' : 'none';
+    // 显示账号操作菜单
+    if(profileMenuLoginOther) profileMenuLoginOther.style.display = 'flex';
+    if(profileMenuLogout) profileMenuLogout.style.display = 'flex';
+    
+    // 实名认证状态
+    if(profileVerifiedLoggedin) profileVerifiedLoggedin.style.display = isVerified ? 'block' : 'none';
+    if(profileUnverifiedLoggedin) profileUnverifiedLoggedin.style.display = isVerified ? 'none' : 'block';
+    if(profileVerifyItemVerified) profileVerifyItemVerified.style.display = isVerified ? 'flex' : 'none';
+    if(profileVerifyItemUnverified) profileVerifyItemUnverified.style.display = isVerified ? 'none' : 'flex';
+    if(profileVerifyItemLoggedout) profileVerifyItemLoggedout.style.display = 'none';
+    
+  } else {
+    // 未登录状态
+    loginCard.style.display = 'block';
+    unifiedAccount.style.display = 'none';
+    bindPrompt.style.display = 'none';
+    greeting.textContent = '欢迎来到保联 👋';
+    greetingSub.textContent = '登录后查看您的保单';
+    // 隐藏待办提醒
+    if(todoSection) todoSection.style.display = 'none';
+    
+    // 个人中心
+    if(profileHeaderLoggedin) profileHeaderLoggedin.style.display = 'none';
+    if(profileHeaderLoggedout) profileHeaderLoggedout.style.display = 'flex';
+    if(profileAdvisor) profileAdvisor.style.display = 'none';
+    // 隐藏账号操作菜单
+    if(profileMenuLoginOther) profileMenuLoginOther.style.display = 'none';
+    if(profileMenuLogout) profileMenuLogout.style.display = 'none';
+    
+    // 未登录 - 不显示认证状态
+    if(profileVerifiedLoggedin) profileVerifiedLoggedin.style.display = 'none';
+    if(profileUnverifiedLoggedin) profileUnverifiedLoggedin.style.display = 'none';
+    if(profileVerifyItemVerified) profileVerifyItemVerified.style.display = 'none';
+    if(profileVerifyItemUnverified) profileVerifyItemUnverified.style.display = 'none';
+    if(profileVerifyItemLoggedout) profileVerifyItemLoggedout.style.display = 'flex';
+  }
+}
+
+// 标记全部已读
+function markAllRead() {
+  var items = document.querySelectorAll('.notif-item.unread');
+  items.forEach(function(item) {
+    item.classList.remove('unread');
+    var dot = item.querySelector('.notif-dot');
+    if (dot) dot.classList.remove('unread');
+  });
+}
+
+// 筛选消息
+function filterMessages(type, el) {
+  // 更新标签选中状态
+  var pills = el.parentElement.querySelectorAll('.cat-pill');
+  pills.forEach(function(p) { p.classList.remove('active'); });
+  el.classList.add('active');
+  
+  // 筛选逻辑（简化版，实际项目中根据type过滤显示）
+  var items = document.querySelectorAll('.notif-item');
+  items.forEach(function(item) {
+    if (type === 'all') {
+      item.style.display = 'flex';
+    } else {
+      // 根据实际type匹配
+      var itemType = item.querySelector('.notif-type');
+      if (itemType && itemType.classList.contains(type)) {
+        item.style.display = 'flex';
+      } else {
+        item.style.display = 'none';
+      }
+    }
+  });
+}
+
+function showScreen(name) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page-overlay').forEach(p => p.classList.remove('active'));
+
+  // Show target
+  const target = document.getElementById('page-' + name);
+  if (target) target.classList.add('active');
+
+  // Overlay pages that hide tab bar
+  const overlayPages = ['login','verify','detail-saving','detail-protection','detail-protection-child',
+    'gap-analysis','notifications','exchange','article-detail','faq-detail','tool-exchange',
+    'service-renewal','service-autopay','service-withdraw','service-beneficiary',
+    'service-insured','service-owner','service-surrender',
+    'article-renewal','article-autopay','article-withdraw',
+    'notification-detail-1','notification-detail-2','notification-detail-3',
+    'notification-detail-4','notification-detail-5'];
+  const tabBar = document.getElementById('main-tab-bar');
+
+  if (overlayPages.includes(name)) {
+    tabBar.style.display = 'none';
+  } else {
+    tabBar.style.display = 'flex';
+  }
+
+  // Update tab bar active state
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+  const activeTab = document.querySelector(`.tab-item[data-tab="${name}"]`);
+  if (activeTab) activeTab.classList.add('active');
+
+  // Update proto nav
+  document.querySelectorAll('.proto-btn').forEach(b => b.classList.remove('active'));
+  const protoBtn = document.querySelector(`.proto-btn[onclick="showScreen('${name}')"]`);
+  if (protoBtn) protoBtn.classList.add('active');
+}
+
+// 初始化
+updateLoginState();
+</script>
+
+</body>
+</html>
