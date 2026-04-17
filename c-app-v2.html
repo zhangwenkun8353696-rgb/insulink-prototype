@@ -491,6 +491,77 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
   border-radius: 12px; font-size: 11px; font-weight: 600;
 }
 
+/* Hot Products Banner */
+.hot-products { padding: 0 16px; margin-bottom: 4px; }
+.hot-products .hp-scroll {
+  display: flex; gap: 12px; overflow-x: auto; padding-bottom: 4px;
+  scroll-snap-type: x mandatory;
+}
+.hot-products .hp-scroll::-webkit-scrollbar { display: none; }
+.hp-banner {
+  flex: 0 0 280px; height: 170px;
+  border-radius: 16px; padding: 0;
+  color: white; position: relative; overflow: hidden;
+  cursor: pointer; scroll-snap-align: start;
+  transition: transform 0.2s;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+}
+.hp-banner:active { transform: scale(0.97); }
+.hp-banner .hp-bg {
+  position: absolute; inset: 0;
+  background: inherit; z-index: 0;
+}
+.hp-banner .hp-deco {
+  position: absolute; z-index: 1; opacity: 0.08;
+  font-size: 100px; right: -10px; bottom: -15px;
+  font-weight: 900; line-height: 1;
+}
+.hp-banner .hp-deco2 {
+  position: absolute; z-index: 1; opacity: 0.06;
+  font-size: 60px; left: -5px; top: -10px;
+}
+.hp-banner .hp-inner {
+  position: relative; z-index: 2;
+  padding: 16px 18px 14px; height: 100%;
+  display: flex; flex-direction: column; justify-content: space-between;
+}
+.hp-banner .hp-top {
+  display: flex; justify-content: space-between; align-items: flex-start;
+}
+.hp-banner .hp-tag {
+  display: inline-block; background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  padding: 3px 10px; border-radius: 10px;
+  font-size: 11px; font-weight: 600;
+}
+.hp-banner .hp-insurer {
+  font-size: 12px; font-weight: 600; opacity: 0.9;
+  background: rgba(255,255,255,0.15); border-radius: 8px;
+  padding: 2px 8px;
+}
+.hp-banner .hp-mid {}
+.hp-banner .hp-name { font-size: 18px; font-weight: 800; line-height: 1.3; margin-bottom: 4px; text-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+.hp-banner .hp-type { font-size: 12px; opacity: 0.8; }
+.hp-banner .hp-bottom {
+  display: flex; align-items: flex-end; justify-content: space-between;
+}
+.hp-banner .hp-returns {
+  display: flex; flex-direction: column; gap: 2px;
+}
+.hp-banner .hp-return-row {
+  display: flex; align-items: baseline; gap: 6px; font-size: 11px; opacity: 0.9;
+}
+.hp-banner .hp-return-label { opacity: 0.7; font-size: 10px; }
+.hp-banner .hp-return-value { font-size: 16px; font-weight: 800; }
+.hp-banner .hp-return-unit { font-size: 10px; opacity: 0.8; }
+.hp-banner .hp-cta {
+  font-size: 11px; font-weight: 600;
+  background: rgba(255,255,255,0.2);
+  padding: 5px 12px; border-radius: 10px;
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+  white-space: nowrap;
+}
+
 /* Category Nav */
 .category-nav {
   display: flex; gap: 6px; padding: 0 16px 14px;
@@ -537,6 +608,24 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
 .profile-header {
   background: var(--white); padding: 20px;
   display: flex; align-items: center; gap: 16px;
+  position: relative;
+}
+.profile-header .inbox-btn {
+  position: absolute; right: 20px; top: 20px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--bg); display: flex;
+  align-items: center; justify-content: center;
+  font-size: 18px; cursor: pointer;
+  transition: background 0.2s;
+}
+.profile-header .inbox-btn:active { background: var(--primary-light); }
+.profile-header .inbox-btn .inbox-badge {
+  position: absolute; top: -2px; right: -2px;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  background: var(--danger); border-radius: 8px;
+  color: white; font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  border: 2px solid var(--white);
 }
 .profile-avatar {
   width: 56px; height: 56px; border-radius: 50%;
@@ -552,26 +641,30 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
 /* Advisor Card */
 .advisor-card {
   margin: 12px 16px; padding: 16px;
-  background: var(--white); border-radius: 14px;
+  background: linear-gradient(135deg, #F0FDF9 0%, #ECFDF5 50%, var(--white) 100%);
+  border-radius: 14px;
   box-shadow: var(--card-shadow);
+  border: 1px solid rgba(26, 107, 92, 0.08);
 }
-.advisor-card .ac-label { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+.advisor-label { font-size: 13px; color: var(--primary); font-weight: 600; margin-bottom: 12px; }
 .advisor-info { display: flex; align-items: center; gap: 12px; }
 .advisor-avatar {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: linear-gradient(135deg, #DBEAFE, #BFDBFE);
+  width: 48px; height: 48px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
+  font-size: 18px; font-weight: 700; color: white;
+  box-shadow: 0 2px 8px rgba(26, 107, 92, 0.3);
+  flex-shrink: 0;
 }
-.advisor-name { font-size: 15px; font-weight: 600; }
-.advisor-id { font-size: 12px; color: var(--text-secondary); }
-.advisor-actions { display: flex; gap: 8px; margin-top: 12px; }
+.advisor-name { font-size: 16px; font-weight: 700; color: var(--text); }
+.advisor-id { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 .advisor-btn {
-  flex: 1; padding: 10px; border-radius: 10px;
+  padding: 8px 16px; border-radius: 8px;
   text-align: center; font-size: 13px; font-weight: 600; cursor: pointer;
+  transition: opacity 0.2s; flex-shrink: 0;
 }
+.advisor-btn:active { opacity: 0.8; }
 .advisor-btn.call { background: var(--primary); color: white; }
-.advisor-btn.chat { background: var(--primary-light); color: var(--primary); }
 
 /* Menu List */
 .menu-section { margin: 12px 16px; background: var(--white); border-radius: 14px; box-shadow: var(--card-shadow); overflow: hidden; }
@@ -795,6 +888,242 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
 }
 .verify-note .note-icon { margin-right: 4px; }
 
+/* Verified Info Card */
+.verify-info-card {
+  background: var(--white); border-radius: 14px; padding: 20px;
+  box-shadow: var(--card-shadow); margin-bottom: 16px;
+}
+.verify-info-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0; border-bottom: 1px solid #F3F4F6;
+}
+.verify-info-row:last-child { border-bottom: none; }
+.verify-info-label { font-size: 13px; color: var(--text-secondary); }
+.verify-info-value { font-size: 14px; font-weight: 600; color: var(--text); }
+.verify-status-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  background: #ECFDF5; color: var(--success);
+}
+.verify-action-group {
+  display: flex; gap: 10px; margin-top: 20px;
+}
+.verify-action-btn {
+  flex: 1; padding: 14px; border-radius: 12px;
+  text-align: center; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.2s; border: none;
+}
+.verify-action-btn:active { opacity: 0.8; }
+.verify-action-btn.primary {
+  background: var(--primary); color: white;
+}
+.verify-action-btn.outline {
+  background: white; color: var(--text);
+  border: 1.5px solid var(--border);
+}
+.verify-action-btn.danger {
+  background: white; color: var(--danger);
+  border: 1.5px solid #FCA5A5;
+}
+.verify-action-btn.danger:active { background: #FEF2F2; }
+
+/* Identity Card (dual identity) */
+.verify-id-card {
+  background: white; border-radius: 14px; padding: 16px;
+  margin-bottom: 10px; box-shadow: var(--card-shadow);
+  border: 1.5px solid var(--border); transition: border-color 0.2s;
+}
+.verify-id-card.primary-id { border-color: var(--primary); }
+.verify-id-card-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.verify-id-card-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 600; padding: 3px 10px;
+  border-radius: 20px;
+}
+.verify-id-card-tag.main { background: var(--primary-light); color: var(--primary); }
+.verify-id-card-tag.sub { background: #FEF3C7; color: #92400E; }
+.verify-id-card-type {
+  font-size: 13px; color: var(--text-secondary); font-weight: 500;
+}
+.verify-id-card-body .verify-info-row { padding: 6px 0; }
+.verify-id-card-actions {
+  display: flex; gap: 8px; margin-top: 12px;
+  padding-top: 12px; border-top: 1px solid var(--border);
+}
+.verify-id-card-actions .verify-action-btn { flex: 1; padding: 8px 0; font-size: 13px; }
+
+/* Identity card eye toggle */
+.verify-id-eye {
+  font-size: 18px; cursor: pointer;
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; transition: background 0.2s;
+}
+.verify-id-eye:active { background: var(--primary-light); }
+
+/* Add identity card */
+.verify-add-card {
+  background: white; border-radius: 14px; padding: 20px;
+  text-align: center; cursor: pointer; border: 2px dashed var(--border);
+  transition: all 0.2s;
+}
+.verify-add-card:active { border-color: var(--primary); background: var(--primary-light); }
+.verify-add-icon { font-size: 32px; color: var(--primary); margin-bottom: 8px; }
+.verify-add-text { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.verify-add-desc { font-size: 12px; color: var(--text-muted); }
+
+/* Upload area */
+.upload-area {
+  width: 100%; height: 100px; border: 2px dashed var(--border);
+  border-radius: 12px; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 6px;
+  cursor: pointer; transition: border-color 0.2s; background: #FAFAFA;
+  margin-bottom: 14px; position: relative;
+}
+.upload-area:active { border-color: var(--primary); background: var(--primary-light); }
+.upload-area .upload-icon { font-size: 28px; }
+.upload-area .upload-text { font-size: 13px; color: var(--text-secondary); }
+.upload-area .upload-hint { font-size: 11px; color: var(--text-muted); }
+.upload-area.uploaded {
+  border-style: solid; border-color: var(--success); background: #F0FDF4;
+}
+.upload-area.uploaded .upload-icon { font-size: 20px; }
+.upload-row {
+  display: flex; gap: 10px;
+}
+.upload-row .upload-area { flex: 1; }
+
+/* Confirm Modal */
+.confirm-modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px; animation: fadeIn 0.2s ease;
+}
+.confirm-modal-box {
+  background: white; border-radius: 16px; width: 100%; max-width: 320px;
+  overflow: hidden; animation: slideUp 0.25s ease;
+}
+.confirm-modal-header {
+  text-align: center; padding: 28px 20px 16px;
+}
+.confirm-modal-icon { font-size: 44px; margin-bottom: 12px; }
+.confirm-modal-title { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.confirm-modal-body {
+  padding: 0 20px 20px; text-align: left;
+}
+.confirm-modal-warning {
+  background: #FEF2F2; border-radius: 10px; padding: 14px 16px;
+  border-left: 3px solid var(--danger);
+}
+.confirm-modal-warning p {
+  font-size: 13px; color: #991B1B; line-height: 1.7; margin: 0;
+}
+.confirm-modal-warning p + p { margin-top: 8px; }
+.confirm-modal-actions {
+  display: flex; border-top: 1px solid var(--border);
+}
+.confirm-modal-actions button {
+  flex: 1; padding: 14px; font-size: 15px; font-weight: 600;
+  border: none; cursor: pointer; background: white; transition: background 0.15s;
+}
+.confirm-modal-actions button:active { background: #F3F4F6; }
+.confirm-modal-actions .modal-cancel { color: var(--text-secondary); }
+.confirm-modal-actions .modal-confirm { color: var(--danger); }
+.confirm-modal-actions .modal-confirm:active { background: #FEF2F2; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+/* My Profile Page */
+.myprofile-avatar-section {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 32px 20px 20px;
+}
+.myprofile-avatar-wrap {
+  position: relative; cursor: pointer;
+}
+.myprofile-avatar {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 32px; font-weight: 700;
+  box-shadow: 0 4px 12px rgba(26,107,92,0.3);
+}
+.myprofile-avatar.has-photo {
+  background-size: cover; background-position: center;
+  font-size: 0;
+}
+.myprofile-avatar-edit-badge {
+  position: absolute; bottom: 0; right: 0;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: white; border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+}
+.myprofile-avatar-hint {
+  margin-top: 8px; font-size: 12px; color: var(--success); font-weight: 500;
+}
+.myprofile-avatar-small {
+  width: 36px; height: 36px; border-radius: 50%;
+  background-size: cover; background-position: center;
+  border: 1.5px solid var(--border);
+}
+.myprofile-info-card {
+  background: white; margin: 0 16px; border-radius: 14px;
+  box-shadow: var(--card-shadow); overflow: hidden;
+}
+.myprofile-info-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 16px; border-bottom: 1px solid var(--border);
+}
+.myprofile-label {
+  font-size: 15px; color: var(--text); font-weight: 500; flex-shrink: 0;
+}
+.myprofile-value-row {
+  display: flex; align-items: center; gap: 8px;
+}
+.myprofile-value {
+  font-size: 15px; color: var(--text-secondary);
+}
+.myprofile-edit-icon {
+  font-size: 16px; cursor: pointer; opacity: 0.6;
+  transition: opacity 0.2s;
+}
+.myprofile-edit-icon:active { opacity: 1; }
+.myprofile-arrow {
+  font-size: 18px; color: var(--text-muted); cursor: pointer;
+}
+.myprofile-edit-row {
+  display: flex; gap: 8px; padding: 8px 16px 14px; align-items: center;
+}
+.myprofile-edit-input {
+  flex: 1; height: 36px; border: 1.5px solid var(--border);
+  border-radius: 8px; padding: 0 12px; font-size: 14px;
+  outline: none; transition: border-color 0.2s;
+}
+.myprofile-edit-input:focus { border-color: var(--primary); }
+.myprofile-edit-save {
+  padding: 8px 16px; border-radius: 8px; border: none;
+  background: var(--primary); color: white; font-size: 13px;
+  font-weight: 600; cursor: pointer; transition: background 0.2s;
+}
+.myprofile-edit-save:active { background: var(--primary-dark); }
+.myprofile-edit-cancel {
+  padding: 8px 16px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: white;
+  color: var(--text-secondary); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: background 0.2s;
+}
+.myprofile-edit-cancel:active { background: #F3F4F6; }
+.myprofile-note {
+  margin: 20px 16px; padding: 14px 16px;
+  background: var(--primary-light); border-radius: 10px;
+  font-size: 12px; color: var(--primary-dark); line-height: 1.6;
+}
+
 /* Page Navigation Overlay */
 .page-overlay {
   display: none; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -815,6 +1144,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
 
 /* Bottom padding */
 .bottom-spacer { height: 24px; }
+.home-disclaimer { text-align: center; font-size: 11px; color: var(--text-muted); padding: 16px 16px 8px; }
 
 /* Page indicator */
 .page-indicator {
@@ -946,6 +1276,20 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
   padding: 6px 12px; border-radius: 14px;
   font-size: 11px; z-index: 200; cursor: pointer;
 }
+
+/* 待办数量切换按钮 */
+.todo-toggle {
+  position: absolute; top: 115px; right: 16px;
+  background: rgba(0,0,0,0.6); color: white;
+  padding: 6px 12px; border-radius: 14px;
+  font-size: 11px; z-index: 200; cursor: pointer;
+}
+
+/* 待办数量为0时的空状态 */
+.todo-empty {
+  text-align: center; padding: 24px 16px; color: var(--text-muted); font-size: 13px;
+}
+.todo-empty-icon { font-size: 36px; margin-bottom: 8px; opacity: 0.4; }
 </style>
 </head>
 <body>
@@ -954,11 +1298,12 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
 <div class="proto-nav">
   <button class="proto-btn active" onclick="showScreen('home')">首页</button>
   <button class="proto-btn" onclick="showScreen('policy')">保单</button>
-  <button class="proto-btn" onclick="showScreen('discover')">发现</button>
+  <button class="proto-btn" onclick="showScreen('discover')" style="display:none">发现</button>
   <button class="proto-btn" onclick="showScreen('profile')">我的</button>
 </div>
 <div class="state-toggle" onclick="toggleLoginState()">🔄 切换登录</div>
 <div class="verified-toggle" onclick="toggleVerifiedState()">📋 切换实名</div>
+<div class="todo-toggle" onclick="toggleTodoCount()">📝 切换待办</div>
 
 <div class="phone-frame">
   <div class="phone-notch"></div>
@@ -973,9 +1318,8 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
     <!-- ==================== HOME V2 ==================== -->
     <div class="page active" id="page-home">
       <div class="home-header">
-        <div class="home-greeting" id="home-greeting">早上好，陈先生 👋</div>
+        <div class="home-greeting" id="home-greeting">你好，陈先生 👋</div>
         <div class="home-greeting-sub" id="home-greeting-sub">您的保单一切正常</div>
-        <div class="notification-btn" onclick="showScreen('notifications')">🔔<div class="notification-dot"></div></div>
       </div>
 
       <!-- 登录卡片（未登录状态） -->
@@ -1007,9 +1351,9 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
       <!-- 未实名引导卡片（已登录+未实名状态） -->
       <div class="bind-prompt-card" id="home-bind-prompt" style="display:none">
         <div class="bind-prompt-icon">🔗</div>
-        <div class="bind-prompt-title">关联您的香港保单</div>
-        <div class="bind-prompt-desc">完成实名认证后，我们将自动帮您匹配名下所有香港保单</div>
-        <div class="bind-prompt-btn" onclick="showScreen('verify')">立即关联保单</div>
+        <div class="bind-prompt-title">绑定您的保单账户</div>
+        <div class="bind-prompt-desc">绑定投保时使用的证件后，我们将自动帮您匹配名下所有香港保单</div>
+        <div class="bind-prompt-btn" onclick="showScreen('verify')">立即绑定</div>
       </div>
 
       <!-- 隐藏旧的账户模块 -->
@@ -1034,8 +1378,8 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         </div>
       </div>
 
-      <!-- 今日汇率（一行滚动） -->
-      <div class="exchange-container" onclick="showScreen('exchange')" style="cursor:pointer">
+      <!-- 今日汇率（一行滚动）- MVP阶段隐藏 -->
+      <div class="exchange-container" onclick="showScreen('exchange')" style="display:none">
         <div class="exchange-label">📊 今日汇率</div>
         <div class="exchange-scroll-wrapper">
           <div class="exchange-scroll">
@@ -1065,42 +1409,11 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
           <span>⏰ 待办提醒</span>
           <span class="more" onclick="showScreen('notifications')">查看全部 ›</span>
         </div>
-        <div class="todo-list">
-          <div class="todo-card" onclick="showScreen('detail-protection')">
-            <div class="todo-dot" style="background:var(--warning)"></div>
-            <div class="todo-content">
-              <div class="todo-title">重疾险年缴保费即将到期</div>
-              <div class="todo-sub">保诚 危疾加护保 III · 还有 32 天</div>
-            </div>
-            <span class="todo-tag warning">缴费提醒</span>
-            <div class="todo-arrow">›</div>
-          </div>
-          <div class="todo-card" onclick="showScreen('detail-saving')">
-            <div class="todo-dot" style="background:var(--primary)"></div>
-            <div class="todo-content">
-              <div class="todo-title">储蓄险周年红利简报已发布</div>
-              <div class="todo-sub">AIA 充裕未来·传承 III · 点击查看</div>
-            </div>
-            <span class="todo-tag primary">收益简报</span>
-            <div class="todo-arrow">›</div>
-          </div>
-          <div class="todo-card" onclick="showScreen('service-autopay')">
-            <div class="todo-dot" style="background:var(--success)"></div>
-            <div class="todo-content">
-              <div class="todo-title">自动转账授权申请已受理</div>
-              <div class="todo-sub">预计 3 个工作日完成 · 服务进度更新</div>
-            </div>
-            <span class="todo-tag success">服务进度</span>
-            <div class="todo-arrow">›</div>
-          </div>
-          <div class="todo-card" onclick="showScreen('detail-protection')">
-            <div class="todo-dot" style="background:var(--warning)"></div>
-            <div class="todo-content">
-              <div class="todo-title">宏利保单已过等待期</div>
-              <div class="todo-sub">活耀人生 危疾保 · 等待期已于 2026-05-01 届满</div>
-            </div>
-            <span class="todo-tag info">保单状态</span>
-            <div class="todo-arrow">›</div>
+        <div id="todo-list-container">
+          <div class="todo-list" id="todo-list"></div>
+          <div class="todo-empty" id="todo-empty" style="display:none">
+            <div class="todo-empty-icon">✅</div>
+            <div>暂无待办事项，一切安好</div>
           </div>
         </div>
       </div>
@@ -1158,12 +1471,79 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
           <div class="service-icon">📋</div>
           <div class="service-label">变更持有人</div>
         </div>
-        <div class="service-item" onclick="showScreen('service-surrender')">
-          <div class="service-icon">❌</div>
-          <div class="service-label">退保</div>
+      </div>
+
+      <!-- 热门产品 - MVP阶段隐藏 -->
+      <div class="hot-products" style="margin-top:16px;display:none">
+        <div class="section-title">🔥 热门产品</div>
+        <div class="hp-scroll">
+          <div class="hp-banner" onclick="productFrom='home';showScreen('product-detail')" style="background:linear-gradient(135deg,#0E4A3E,#1A6B5C,#2D8B78)">
+            <div class="hp-deco">💎</div>
+            <div class="hp-deco2">✦</div>
+            <div class="hp-inner">
+              <div class="hp-top">
+                <div class="hp-tag">🏆 销量TOP</div>
+                <div class="hp-insurer">AIA 友邦</div>
+              </div>
+              <div class="hp-mid">
+                <div class="hp-name">盈御多元货币3</div>
+                <div class="hp-type">储蓄分红险 · 多币种切换</div>
+              </div>
+              <div class="hp-bottom">
+                <div class="hp-returns">
+                  <div class="hp-return-row"><span class="hp-return-label">预期IRR</span><span class="hp-return-value">7.12</span><span class="hp-return-unit">%</span></div>
+                  <div class="hp-return-row"><span class="hp-return-label">保证回报</span><span class="hp-return-value">1.05</span><span class="hp-return-unit">%</span></div>
+                </div>
+                <div class="hp-cta">了解详情 ›</div>
+              </div>
+            </div>
+          </div>
+          <div class="hp-banner" onclick="productFrom='home';showScreen('product-detail')" style="background:linear-gradient(135deg,#1E3A8A,#2563EB,#60A5FA)">
+            <div class="hp-deco">🛡️</div>
+            <div class="hp-deco2">✦</div>
+            <div class="hp-inner">
+              <div class="hp-top">
+                <div class="hp-tag">⭐ 人气之选</div>
+                <div class="hp-insurer">Manulife 宏利</div>
+              </div>
+              <div class="hp-mid">
+                <div class="hp-name">隽富多元货币</div>
+                <div class="hp-type">储蓄分红险 · 长期稳健回报</div>
+              </div>
+              <div class="hp-bottom">
+                <div class="hp-returns">
+                  <div class="hp-return-row"><span class="hp-return-label">预期IRR</span><span class="hp-return-value">7.08</span><span class="hp-return-unit">%</span></div>
+                  <div class="hp-return-row"><span class="hp-return-label">保证回报</span><span class="hp-return-value">1.02</span><span class="hp-return-unit">%</span></div>
+                </div>
+                <div class="hp-cta">了解详情 ›</div>
+              </div>
+            </div>
+          </div>
+          <div class="hp-banner" onclick="productFrom='home';showScreen('product-detail')" style="background:linear-gradient(135deg,#78350F,#B45309,#F59E0B)">
+            <div class="hp-deco">👑</div>
+            <div class="hp-deco2">✦</div>
+            <div class="hp-inner">
+              <div class="hp-top">
+                <div class="hp-tag">🆕 新品推荐</div>
+                <div class="hp-insurer">Chubb 安达</div>
+              </div>
+              <div class="hp-mid">
+                <div class="hp-name">安达尊耀传承</div>
+                <div class="hp-type">万用寿险 · 高杠杆传承</div>
+              </div>
+              <div class="hp-bottom">
+                <div class="hp-returns">
+                  <div class="hp-return-row"><span class="hp-return-label">预期IRR</span><span class="hp-return-value">6.52</span><span class="hp-return-unit">%</span></div>
+                  <div class="hp-return-row"><span class="hp-return-label">身故杠杆</span><span class="hp-return-value">8.5</span><span class="hp-return-unit">倍</span></div>
+                </div>
+                <div class="hp-cta">了解详情 ›</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
+      <div class="home-disclaimer">本服务由水滴金融服務（香港）有限公司提供</div>
       <div class="bottom-spacer"></div>
     </div>
 
@@ -1308,13 +1688,9 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         <div class="detail-row"><div class="detail-label">下次缴费</div><div class="detail-value" style="color:var(--warning)">2026-06-15（还有32天）</div></div>
       </div>
 
-      <div class="reminder-btn">📅 设置缴费提醒</div>
-
-      <!-- 移除通俗解读卡片 -->
 
       <div class="contact-bar">
-        <div class="contact-btn outline">📄 提取款项</div>
-        <div class="contact-btn primary">👨‍💼 联系顾问</div>
+        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85230001234'">👨‍💼 联系顾问</div>
       </div>
 
       <div class="bottom-spacer"></div>
@@ -1351,13 +1727,9 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         <div class="detail-row"><div class="detail-label">下次缴费</div><div class="detail-value" style="color:var(--warning)">2026-05-15（即将到期）</div></div>
       </div>
 
-      <div class="reminder-btn">📅 设置缴费提醒</div>
-
-      <!-- 移除通俗解读卡片 -->
 
       <div class="contact-bar">
-        <div class="contact-btn outline">📄 理赔指引</div>
-        <div class="contact-btn primary">👨‍💼 联系顾问</div>
+        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85230001234'">👨‍💼 联系顾问</div>
       </div>
 
       <div class="bottom-spacer"></div>
@@ -1400,18 +1772,16 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         </div>
       </div>
 
-      <!-- 移除通俗解读卡片 - 保留重要提示 -->
 
       <div class="contact-bar">
-        <div class="contact-btn outline">📄 理赔指引</div>
-        <div class="contact-btn primary">👨‍💼 联系顾问</div>
+        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85230001234'">👨‍💼 联系顾问</div>
       </div>
 
       <div class="bottom-spacer"></div>
     </div>
 
     <!-- ==================== DISCOVER ==================== -->
-    <div class="page" id="page-discover">
+    <div class="page" id="page-discover" style="display:none">
       <div class="discover-search">🔍 搜索文章、产品、问题...</div>
 
       <div class="discover-banner" onclick="articleFrom='discover';showScreen('article-detail')" style="cursor:pointer">
@@ -1476,70 +1846,67 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
     <div class="page" id="page-profile">
       <!-- 已登录状态头部 -->
       <div class="profile-header" id="profile-header-loggedin">
-        <div class="profile-avatar">陈</div>
-        <div>
+        <div class="profile-avatar" style="cursor:pointer" onclick="showScreen('my-profile')">陈</div>
+        <div style="cursor:pointer" onclick="showScreen('my-profile')">
           <div class="profile-name">陈先生</div>
-          <div class="profile-phone">+86 138****1234</div>
-          <div class="profile-verified" id="profile-verified-loggedin">✅ 已实名认证</div>
-          <div class="profile-unverified" id="profile-unverified-loggedin" style="display:none">⚠️ 未实名认证</div>
+          <div class="profile-phone">+86 138****5678</div>
         </div>
+        <div class="inbox-btn" onclick="showScreen('notifications')">📫<div class="inbox-badge">3</div></div>
       </div>
 
       <!-- 未登录状态头部 -->
       <div class="profile-header" id="profile-header-loggedout" style="display:none">
-        <div class="profile-avatar" style="background:linear-gradient(135deg,#9CA3AF,#6B7280)">👤</div>
-        <div>
-          <div class="profile-name">未登录</div>
+        <div class="profile-avatar" style="background:linear-gradient(135deg,#9CA3AF,#6B7280);cursor:pointer" onclick="showScreen('login')">👤</div>
+        <div style="cursor:pointer" onclick="showScreen('login')">
+          <div class="profile-name">点击登录</div>
           <div class="profile-phone">登录后查看更多信息</div>
         </div>
+        <div class="inbox-btn" onclick="showScreen('login')">📫</div>
       </div>
 
       <!-- 专属顾问（已登录才显示） -->
       <div class="advisor-card" id="profile-advisor">
-        <div class="ac-label">🏅 我的专属顾问</div>
+        <div class="advisor-label">🏅 我的专属顾问</div>
         <div class="advisor-info">
-          <div class="advisor-avatar">👨‍💼</div>
-          <div>
+          <div class="advisor-avatar">张</div>
+          <div style="flex:1">
             <div class="advisor-name">张经理</div>
             <div class="advisor-id">持牌编号 LB-67890</div>
           </div>
-        </div>
-        <div class="advisor-actions">
-          <div class="advisor-btn call">📞 一键拨打</div>
-          <div class="advisor-btn chat">💬 在线沟通</div>
+          <div class="advisor-btn call">📞 拨打</div>
         </div>
       </div>
 
-      <!-- 我的资料 -->
-      <div class="section-title">📝 我的资料</div>
+      <!-- 个人信息 -->
+      <div class="section-title">📝 个人信息</div>
       <div class="menu-section">
         <!-- 已实名状态 -->
         <div class="menu-item" id="profile-verify-item-verified" onclick="showScreen('verify')">
           <div class="menu-icon">🪪</div>
-          <div class="menu-label">实名认证</div>
-          <span style="font-size:12px;color:var(--success);margin-right:4px">已认证 ✓</span>
+          <div class="menu-label">保单账户</div>
+          <span id="profile-verify-count" style="font-size:12px;color:var(--success);margin-right:4px">已绑定 1 个账户</span>
           <div class="menu-arrow">›</div>
         </div>
-        <!-- 未实名状态 -->
+        <!-- 未绑定状态 -->
         <div class="menu-item" id="profile-verify-item-unverified" onclick="showScreen('verify')" style="display:none">
           <div class="menu-icon">🪪</div>
-          <div class="menu-label">实名认证</div>
-          <span style="font-size:12px;color:var(--warning);margin-right:4px">去认证</span>
+          <div class="menu-label">保单账户</div>
+          <span style="font-size:12px;color:var(--warning);margin-right:4px">去绑定</span>
           <div class="menu-arrow">›</div>
         </div>
-        <!-- 未登录状态（无认证标记） -->
+        <!-- 未登录状态 -->
         <div class="menu-item" id="profile-verify-item-loggedout" onclick="showScreen('login')" style="display:none">
           <div class="menu-icon">🪪</div>
-          <div class="menu-label">实名认证</div>
+          <div class="menu-label">保单账户</div>
           <div class="menu-arrow">›</div>
         </div>
-        <div class="menu-item"><div class="menu-icon">📱</div><div class="menu-label">修改账户手机号</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item" onclick="showScreen('change-phone')"><div class="menu-icon">📱</div><div class="menu-label">修改手机号</div><div class="menu-arrow">›</div></div>
       </div>
 
       <!-- 协议 -->
       <div class="section-title">📄 协议与政策</div>
       <div class="menu-section">
-        <div class="menu-item"><div class="menu-icon">📜</div><div class="menu-label">服务协议</div><div class="menu-arrow">›</div></div>
+        <div class="menu-item"><div class="menu-icon">📜</div><div class="menu-label">用户协议</div><div class="menu-arrow">›</div></div>
         <div class="menu-item"><div class="menu-icon">🔒</div><div class="menu-label">隐私协议</div><div class="menu-arrow">›</div></div>
       </div>
 
@@ -1563,6 +1930,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         <div class="menu-item" id="profile-menu-login-other"><div class="menu-icon">🔄</div><div class="menu-label">登录其他账号</div><div class="menu-arrow">›</div></div>
         <div class="menu-item" id="profile-menu-logout" onclick="doLogout()"><div class="menu-icon" style="color:var(--danger)">🚪</div><div class="menu-label" style="color:var(--danger)">退出登录</div><div class="menu-arrow">›</div></div>
       </div>
+
 
       <div class="bottom-spacer"></div>
     </div>
@@ -2507,18 +2875,21 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         <div class="form-group">
           <div class="form-label">手机号码</div>
           <div class="phone-input">
-            <div class="phone-prefix">🇨🇳 +86 <span class="arrow">▾</span></div>
-            <input type="tel" placeholder="请输入手机号" value="138****1234">
+            <select class="phone-prefix" id="phone-region">
+              <option value="+86">🇨🇳 +86</option>
+              <option value="+852">🇭🇰 +852</option>
+            </select>
+            <input type="tel" id="phone-number" placeholder="请输入手机号" value="">
           </div>
         </div>
         <div class="form-group">
           <div class="form-label">验证码</div>
           <div class="otp-row">
-            <input class="otp-input" type="tel" maxlength="6" placeholder="——">
-            <button class="otp-btn">获取验证码</button>
+            <input class="otp-input" type="tel" maxlength="6" placeholder="请输入验证码">
+            <button class="otp-btn" id="login-otp-btn" onclick="sendLoginOtp()">获取验证码</button>
           </div>
         </div>
-        <button class="login-btn" onclick="toggleLoginState(); showScreen('home')">登录 / 注册</button>
+        <button class="login-btn" onclick="doLogin()">登录 / 注册</button>
         <div class="login-terms">
           登录即表示同意 <a href="#">《用户协议》</a>和<a href="#">《隐私政策》</a>
         </div>
@@ -2526,38 +2897,259 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
       </div>
     </div>
 
-    <!-- ==================== VERIFY ==================== -->
+    <!-- ==================== VERIFY (保单账户绑定) ==================== -->
     <div class="page-overlay" id="page-verify">
       <div class="overlay-nav" style="margin-top:54px">
-        <div class="overlay-back" onclick="showScreen('profile')">‹</div>
-        <div class="overlay-title">实名认证</div>
+        <div class="overlay-back" onclick="goBackFromVerify()">‹</div>
+        <div class="overlay-title">保单账户</div>
       </div>
-      <div class="verify-form">
-        <div class="verify-title">验证您的身份</div>
-        <div class="verify-desc">完成实名认证后，系统将自动匹配您名下的香港保单。</div>
+      <div class="verify-form" id="verify-container">
 
-        <div class="form-label">真实姓名</div>
-        <input class="verify-input" type="text" placeholder="请输入与保单一致的中文姓名">
+        <!-- ========== Step 1: 填写证件信息 ========== -->
+        <div id="verify-step-form">
+          <div class="verify-title">绑定保单账户</div>
+          <div class="verify-desc">请填写投保时使用的证件信息，我们将验证并匹配您名下的保单。</div>
 
-        <div class="form-label">证件类型</div>
-        <select class="id-type-select">
-          <option>中国大陆身份证</option>
-          <option>港澳通行证</option>
-          <option>护照</option>
-          <option>香港身份证 (HKID)</option>
-        </select>
+          <div class="form-label">证件类型</div>
+          <select class="id-type-select" id="bind-id-type">
+            <option value="">请选择证件类型</option>
+            <option>中国大陆身份证</option>
+            <option>港澳通行证</option>
+            <option>护照</option>
+            <option>香港身份证 (HKID)</option>
+          </select>
 
-        <div class="form-label">证件号码</div>
-        <input class="verify-input" type="text" placeholder="请输入证件号码">
+          <div class="form-label">真实姓名</div>
+          <input class="verify-input" type="text" id="bind-name" placeholder="请输入与保单一致的姓名">
 
-        <div class="verify-note">
-          <span class="note-icon">🔒</span> 您的身份信息仅用于匹配保单，我们严格加密保存。
+          <div class="form-label">证件号码</div>
+          <input class="verify-input" type="text" id="bind-id-number" placeholder="请输入证件号码">
+
+          <div class="verify-note">
+            <span class="note-icon">🔒</span> 您的信息仅用于匹配保单，我们严格加密保存。
+          </div>
+
+          <button class="login-btn" onclick="doSendVerifyCode()">下一步：验证手机号</button>
         </div>
 
-        <button class="login-btn" onclick="showScreen('profile')">提交认证</button>
+        <!-- ========== Step 2: 手机验证码验证 ========== -->
+        <div id="verify-step-otp" style="display:none">
+          <div class="verify-title">验证手机号</div>
+          <div class="verify-desc">我们将向保单投保人预留的手机号 <span id="otp-phone" style="font-weight:600;color:var(--primary)">138****5678</span> 发送验证码。</div>
+
+          <div class="form-label">验证码</div>
+          <div class="otp-row">
+            <input class="otp-input" type="tel" maxlength="6" id="bind-otp-code" placeholder="请输入6位验证码">
+            <button class="otp-btn" id="bind-otp-btn" onclick="doResendOtp()">获取验证码</button>
+          </div>
+
+          <div class="verify-note">
+            <span class="note-icon">💡</span> 验证码将发送至投保时预留的手机号，如手机号已变更请联系您的顾问。
+          </div>
+
+          <button class="login-btn" onclick="doSubmitBind()">提交绑定</button>
+        </div>
+
+        <!-- ========== Step 3: 绑定成功 ========== -->
+        <div id="verify-step-success" style="display:none;text-align:center;padding-top:40px">
+          <div style="font-size:64px;margin-bottom:16px">🎉</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px">绑定成功</div>
+          <div style="font-size:14px;color:var(--text-secondary);margin-bottom:24px">已成功匹配到您名下的保单</div>
+          <div style="background:var(--white);border-radius:12px;padding:16px;text-align:left;margin-bottom:24px;box-shadow:var(--card-shadow)">
+            <div style="font-size:14px;color:var(--text-secondary);margin-bottom:12px">账户信息</div>
+            <div id="success-account-info" style="font-size:14px;line-height:2"></div>
+          </div>
+          <button class="login-btn" onclick="showScreen('home')" style="width:100%">查看我的保单</button>
+        </div>
+
+        <!-- ========== Step 3b: 未找到保单 ========== -->
+        <div id="verify-step-notfound" style="display:none;text-align:center;padding-top:60px">
+          <div style="font-size:64px;margin-bottom:16px">😔</div>
+          <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px">找不到结果</div>
+          <div style="font-size:14px;color:var(--text-secondary);margin-bottom:8px;line-height:1.6">未在系统中找到与您证件信息匹配的保单。</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-bottom:32px;line-height:1.6">请检查您填写的证件信息是否正确，<br>或确认该证件是否为保单投保人证件。</div>
+          <button class="login-btn" onclick="goBackFromVerify()" style="width:100%">返回重新填写</button>
+        </div>
+
+        <!-- ========== 已绑定账户列表 ========== -->
+        <div id="verify-view-list" style="display:none">
+          <div class="verify-note" style="margin-bottom:16px">
+            <span class="note-icon">💡</span> 已绑定的保单账户。当证件信息与保单持有人一致时，系统将自动匹配并展示您名下的保单。
+          </div>
+
+          <!-- 账户卡片列表 -->
+          <div id="verify-identity-list"></div>
+
+          <!-- 添加新账户的按钮 -->
+          <div id="verify-add-second" style="display:none;margin-top:12px">
+            <div class="verify-add-card" onclick="startBindNewAccount()">
+              <div class="verify-add-icon">＋</div>
+              <div class="verify-add-text">添加新账户</div>
+              <div class="verify-add-desc">如果您用其他身份购买了保单，可以再绑定一个</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
 
+
+
+
+    <!-- ==================== MY PROFILE (个人信息详情) ==================== -->
+    <div class="page-overlay" id="page-my-profile">
+      <div class="overlay-nav" style="margin-top:54px">
+        <div class="overlay-back" onclick="showScreen('profile')">‹</div>
+        <div class="overlay-title">个人信息</div>
+      </div>
+
+      <!-- 头像区域 -->
+      <div class="myprofile-avatar-section">
+        <div class="myprofile-avatar-wrap" onclick="triggerAvatarEdit()">
+          <div class="myprofile-avatar" id="myprofile-avatar-display">陈</div>
+          <div class="myprofile-avatar-edit-badge">📷</div>
+        </div>
+        <div class="myprofile-avatar-hint" id="myprofile-avatar-hint" style="display:none">✅ 头像已更新</div>
+        <input type="file" id="myprofile-avatar-input" accept="image/*" style="display:none" onchange="handleAvatarChange(event)">
+      </div>
+
+      <!-- 信息卡片 -->
+      <div class="myprofile-info-card">
+        <!-- 头像预览（用于已上传图片时显示） -->
+        <div id="myprofile-avatar-preview-row" style="display:none">
+          <div class="myprofile-info-row">
+            <span class="myprofile-label">头像</span>
+            <div class="myprofile-avatar-small" id="myprofile-avatar-small"></div>
+          </div>
+        </div>
+
+        <div class="myprofile-info-row">
+          <span class="myprofile-label">昵称</span>
+          <div class="myprofile-value-row">
+            <span class="myprofile-value" id="myprofile-nickname-display">陈先生</span>
+            <span class="myprofile-edit-icon" onclick="startEditNickname()">✏️</span>
+          </div>
+        </div>
+        <!-- 昵称编辑态 -->
+        <div id="myprofile-nickname-edit" style="display:none">
+          <div class="myprofile-edit-row">
+            <input class="myprofile-edit-input" id="myprofile-nickname-input" type="text" placeholder="请输入昵称" maxlength="20">
+            <button class="myprofile-edit-save" onclick="saveNickname()">保存</button>
+            <button class="myprofile-edit-cancel" onclick="cancelEditNickname()">取消</button>
+          </div>
+        </div>
+
+        <div class="myprofile-info-row">
+          <span class="myprofile-label">账号ID</span>
+          <div class="myprofile-value-row">
+            <span class="myprofile-value" id="myprofile-uid-display" style="font-family:monospace;font-size:13px;letter-spacing:0.5px">ID 20260417001</span>
+          </div>
+        </div>
+        <!-- 生日 - 已填写 -->
+        <div class="myprofile-info-row" id="myprofile-birthday-display-row">
+          <span class="myprofile-label">生日</span>
+          <div class="myprofile-value-row">
+            <span class="myprofile-value" id="myprofile-birthday-display">1990年06月15日</span>
+            <span class="myprofile-edit-icon" onclick="startEditBirthday()">✏️</span>
+          </div>
+        </div>
+        <!-- 生日 - 未填写 -->
+        <div class="myprofile-info-row" id="myprofile-birthday-empty-row" style="display:none">
+          <span class="myprofile-label">生日</span>
+          <div class="myprofile-value-row">
+            <span class="myprofile-value" style="color:var(--text-muted)">未设置</span>
+            <span class="myprofile-edit-icon" onclick="startEditBirthday()">✏️</span>
+          </div>
+        </div>
+        <!-- 生日 - 编辑态 -->
+        <div id="myprofile-birthday-edit" style="display:none">
+          <div class="myprofile-edit-row">
+            <input class="myprofile-edit-input" id="myprofile-birthday-input" type="date" value="1990-06-15">
+            <button class="myprofile-edit-save" onclick="saveBirthday()">保存</button>
+            <button class="myprofile-edit-cancel" onclick="cancelEditBirthday()">取消</button>
+          </div>
+        </div>
+
+        <div style="height:1px;background:var(--border);margin:4px 0"></div>
+
+        <!-- 手机号 - 已绑定（点击跳转独立修改页面） -->
+        <div class="myprofile-info-row" id="myprofile-phone-display-row" onclick="showScreen('change-phone')" style="cursor:pointer">
+          <span class="myprofile-label">手机号</span>
+          <div class="myprofile-value-row">
+            <span class="myprofile-value" id="myprofile-phone-display">+86 138****5678</span>
+            <span class="myprofile-edit-icon">›</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="myprofile-note">
+        <span class="note-icon">🔒</span> 您的个人信息仅用于账户管理和服务展示，我们严格加密保存。
+      </div>
+    </div>
+
+    <!-- ==================== CHANGE PHONE (修改手机号) ==================== -->
+    <div class="page-overlay" id="page-change-phone">
+      <div class="overlay-nav" style="margin-top:54px">
+        <div class="overlay-back" id="changephone-back-btn" onclick="showScreen('profile')">‹</div>
+        <div class="overlay-title">修改手机号</div>
+      </div>
+
+      <div style="padding:24px">
+        <!-- 输入新手机号 -->
+        <div id="changephone-step1">
+          <div class="verify-note" style="margin-bottom:20px">
+            <span class="note-icon">⚠️</span> 一个手机号只能绑定一个账号，更换后使用新手机号登录此账号。对于已绑定其他账号的手机号，本次操作后将与原账号解绑。
+          </div>
+
+          <div style="background:var(--white);border-radius:14px;padding:20px;box-shadow:var(--card-shadow);margin-bottom:20px">
+            <!-- 当前绑定手机号 -->
+            <div style="display:flex;align-items:center;gap:10px;padding-bottom:14px;border-bottom:1px solid var(--border);margin-bottom:16px">
+              <div style="width:36px;height:36px;border-radius:8px;background:var(--bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px">📱</div>
+              <div style="flex:1">
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">当前绑定手机号</div>
+                <div style="font-size:15px;font-weight:600;color:var(--text)" id="changephone-current-phone">+86 138****5678</div>
+              </div>
+              <div style="font-size:11px;color:var(--success);font-weight:500;background:#F0FFF4;padding:2px 8px;border-radius:4px">✓ 已绑定</div>
+            </div>
+
+            <!-- 新手机号 -->
+            <div class="form-group" style="margin-bottom:14px">
+              <div class="form-label">新手机号</div>
+              <div class="phone-input">
+                <div class="phone-prefix">+86 <span class="arrow">▾</span></div>
+                <input type="tel" id="changephone-new-number" placeholder="请输入新手机号" maxlength="11">
+              </div>
+            </div>
+
+            <!-- 验证码 -->
+            <div class="form-group" style="margin-bottom:0">
+              <div class="form-label">验证码</div>
+              <div class="otp-row">
+                <input class="otp-input" id="changephone-new-otp" type="text" placeholder="请输入验证码" maxlength="6">
+                <button class="otp-btn" id="changephone-send-new-btn" onclick="sendChangePhoneOtp('new')">获取验证码</button>
+              </div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:6px">验证码将发送至新手机号</div>
+            </div>
+          </div>
+
+          <button class="login-btn" onclick="submitNewPhone()">确认修改</button>
+        </div>
+
+        <!-- 修改成功 -->
+        <div id="changephone-step2" style="display:none">
+          <div style="text-align:center;padding:60px 0 30px">
+            <div style="font-size:64px;margin-bottom:16px">🎉</div>
+            <div style="font-size:20px;font-weight:700;color:var(--text);margin-bottom:8px">修改成功</div>
+            <div style="font-size:14px;color:var(--text-secondary);line-height:1.6">您的手机号已成功更新</div>
+          </div>
+          <div style="background:var(--white);border-radius:14px;padding:20px;margin-bottom:30px;box-shadow:var(--card-shadow)">
+            <div style="font-size:13px;color:var(--text-secondary);margin-bottom:8px">新手机号</div>
+            <div style="font-size:18px;font-weight:700;color:var(--text)" id="changephone-new-phone-display">+86 138****5678</div>
+          </div>
+          <button class="login-btn" onclick="finishChangePhone()" style="width:100%">返回</button>
+        </div>
+      </div>
+    </div>
 
     <!-- Tab Bar -->
     <div class="tab-bar" id="main-tab-bar">
@@ -2567,13 +3159,13 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         </div>
         <div class="tab-label">首页</div>
       </div>
-      <div class="tab-item" onclick="showScreen('policy')" data-tab="policy">
+      <div class="tab-item" onclick="showScreen('policy')" data-tab="policy" style="display:none">
         <div class="tab-icon-wrapper">
           <div class="tab-icon">📋</div>
         </div>
         <div class="tab-label">保单</div>
       </div>
-      <div class="tab-item" onclick="showScreen('discover')" data-tab="discover">
+      <div class="tab-item" onclick="showScreen('discover')" data-tab="discover" style="display:none">
         <div class="tab-icon-wrapper">
           <div class="tab-icon">🔍</div>
         </div>
@@ -2615,8 +3207,286 @@ function toggleLoginState() {
 
 // 切换实名认证状态（演示用）
 function toggleVerifiedState() {
+  if(isVerified) {
+    // 注销所有身份
+    identities = [];
+  } else {
+    // 恢复默认演示身份
+    identities = [
+      { id: 'mainland', type: '中国大陆身份证', name: '陈**', number: '4401****1234', expiry: '2030-06-30', isPrimary: true }
+    ];
+  }
   isVerified = !isVerified;
   updateLoginState();
+}
+
+// ============ 待办提醒 - 数据驱动渲染 ============
+var todoData = [
+  { dot: 'var(--warning)', title: '重疾险年缴保费即将到期', sub: '保诚 危疾加护保 III · 还有 32 天', tag: '缴费提醒', tagClass: 'warning', screen: 'detail-protection' },
+  { dot: 'var(--primary)', title: '储蓄险周年红利简报已发布', sub: 'AIA 充裕未来·传承 III · 点击查看', tag: '收益简报', tagClass: 'primary', screen: 'detail-saving' },
+  { dot: 'var(--success)', title: '自动转账授权申请已受理', sub: '预计 3 个工作日完成 · 服务进度更新', tag: '服务进度', tagClass: 'success', screen: 'service-autopay' },
+  { dot: 'var(--warning)', title: '宏利保单已过等待期', sub: '活耀人生 危疾保 · 等待期已于 2026-05-01 届满', tag: '保单状态', tagClass: 'info', screen: 'detail-protection' }
+];
+var todoCountMode = 0; // 0=全部(4条), 1=仅缴费(1条), 2=空(0条)
+
+function renderTodoList() {
+  var listEl = document.getElementById('todo-list');
+  var emptyEl = document.getElementById('todo-empty');
+  var sectionEl = document.getElementById('home-todo-section');
+  if(!listEl) return;
+
+  var items = todoData;
+  if(todoCountMode === 1) items = [todoData[0]]; // 只保留缴费提醒
+  if(todoCountMode === 2) items = []; // 空
+
+  if(items.length === 0) {
+    listEl.style.display = 'none';
+    emptyEl.style.display = 'block';
+    // 空状态时隐藏整个section标题
+    sectionEl.style.display = 'none';
+    return;
+  }
+
+  emptyEl.style.display = 'none';
+  listEl.style.display = 'block';
+  sectionEl.style.display = 'block';
+
+  var html = '';
+  items.forEach(function(item) {
+    html += '<div class="todo-card" onclick="showScreen(\'' + item.screen + '\')">' +
+      '<div class="todo-dot" style="background:' + item.dot + '"></div>' +
+      '<div class="todo-content">' +
+        '<div class="todo-title">' + item.title + '</div>' +
+        '<div class="todo-sub">' + item.sub + '</div>' +
+      '</div>' +
+      '<span class="todo-tag ' + item.tagClass + '">' + item.tag + '</span>' +
+      '<div class="todo-arrow">›</div>' +
+    '</div>';
+  });
+  listEl.innerHTML = html;
+}
+
+function toggleTodoCount() {
+  todoCountMode = (todoCountMode + 1) % 3;
+  var labels = ['待办(4条)', '待办(1条)', '待办(0条)'];
+  var btn = document.querySelector('.todo-toggle');
+  if(btn) btn.textContent = '📝 ' + labels[todoCountMode];
+  renderTodoList();
+}
+// 数据模型：identities 数组，每个元素代表一个已绑定的保单账户
+var identities = [
+  {
+    id: 'mainland',
+    type: '中国大陆身份证',
+    name: '陈**',
+    number: '4401****1234',
+    isPrimary: true
+  }
+];
+
+// 绑定流程临时数据
+var bindFormData = { type: '', name: '', number: '' };
+var otpTimer = null;
+
+// 明文显示状态（每个卡片独立控制）
+var identityVisibleState = {};
+
+function toggleIdentityVisibility(id) {
+  identityVisibleState[id] = !identityVisibleState[id];
+  renderIdentityList();
+}
+
+function renderIdentityList() {
+  var container = document.getElementById('verify-identity-list');
+  if(!container) return;
+
+  var html = '';
+  identities.forEach(function(ident) {
+    var isVisible = identityVisibleState[ident.id];
+    var displayName = ident.name;
+    var displayNumber = ident.number;
+    if(!isVisible && ident.name.indexOf('**') >= 0) {
+      // 已脱敏，保持脱敏
+    } else if(!isVisible) {
+      displayName = ident.name.charAt(0) + '**';
+    }
+    // 证件号码脱敏/明文
+    if(!isVisible) {
+      displayNumber = ident.number.length > 4
+        ? ident.number.substring(0, 4) + '****' + ident.number.substring(ident.number.length - 4)
+        : '****';
+    }
+
+    html += '<div class="verify-id-card">';
+    html += '  <div class="verify-id-card-header">';
+    html += '    <span class="verify-id-card-tag main">保单账户</span>';
+    html += '    <span class="verify-id-eye" onclick="toggleIdentityVisibility(\'' + ident.id + '\')" title="' + (isVisible ? '隐藏信息' : '显示信息') + '">' + (isVisible ? '🙈' : '👁️') + '</span>';
+    html += '  </div>';
+    html += '  <div class="verify-id-card-body">';
+    html += '    <div class="verify-info-card">';
+    html += '      <div class="verify-info-row"><span class="verify-info-label">姓名</span><span class="verify-info-value">' + displayName + '</span></div>';
+    html += '      <div class="verify-info-row"><span class="verify-info-label">证件类型</span><span class="verify-info-value">' + ident.type + '</span></div>';
+    html += '      <div class="verify-info-row"><span class="verify-info-label">证件号码</span><span class="verify-info-value">' + displayNumber + '</span></div>';
+    html += '    </div>';
+    html += '  </div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+
+  // 控制"添加新账户"按钮
+  var addBtn = document.getElementById('verify-add-second');
+  if(addBtn) {
+    addBtn.style.display = identities.length < 2 ? 'block' : 'none';
+  }
+}
+
+function hideAllVerifySteps() {
+  var steps = ['verify-step-form','verify-step-otp','verify-step-success','verify-step-notfound','verify-view-list'];
+  steps.forEach(function(id) {
+    var el = document.getElementById(id);
+    if(el) el.style.display = 'none';
+  });
+}
+
+function startBindNewAccount() {
+  hideAllVerifySteps();
+  document.getElementById('verify-step-form').style.display = 'block';
+  // 清空表单
+  document.getElementById('bind-id-type').selectedIndex = 0;
+  document.getElementById('bind-name').value = '';
+  document.getElementById('bind-id-number').value = '';
+}
+
+// Step 1 → Step 2: 发送验证码
+function doSendVerifyCode() {
+  var typeEl = document.getElementById('bind-id-type');
+  var nameEl = document.getElementById('bind-name');
+  var numberEl = document.getElementById('bind-id-number');
+
+  var typeVal = typeEl.value;
+  var nameVal = nameEl.value.trim();
+  var numberVal = numberEl.value.trim();
+
+  if(!typeVal) { alert('请选择证件类型'); return; }
+  if(!nameVal) { alert('请输入真实姓名'); return; }
+  if(!numberVal) { alert('请输入证件号码'); return; }
+
+  // 保存表单数据
+  bindFormData = { type: typeVal, name: nameVal, number: numberVal };
+
+  // 模拟发送验证码到投保人预留手机号
+  hideAllVerifySteps();
+  document.getElementById('verify-step-otp').style.display = 'block';
+  document.getElementById('otp-phone').textContent = '138****5678';
+  document.getElementById('bind-otp-code').value = '';
+  startOtpCountdown();
+}
+
+// 验证码倒计时
+function startOtpCountdown() {
+  var btn = document.getElementById('bind-otp-btn');
+  var seconds = 60;
+  btn.disabled = true;
+  btn.textContent = seconds + 's 后重发';
+  btn.style.opacity = '0.6';
+  if(otpTimer) clearInterval(otpTimer);
+  otpTimer = setInterval(function() {
+    seconds--;
+    if(seconds <= 0) {
+      clearInterval(otpTimer);
+      otpTimer = null;
+      btn.disabled = false;
+      btn.textContent = '重新获取';
+      btn.style.opacity = '1';
+    } else {
+      btn.textContent = seconds + 's 后重发';
+    }
+  }, 1000);
+}
+
+function doResendOtp() {
+  alert('验证码已重新发送至 138****5678');
+  startOtpCountdown();
+}
+
+// Step 2 → Step 3: 提交绑定
+function doSubmitBind() {
+  var code = document.getElementById('bind-otp-code').value.trim();
+  if(!code || code.length < 4) { alert('请输入正确的验证码'); return; }
+
+  // 模拟验证结果：演示模式下模拟绑定成功
+  // 如需模拟"找不到"，可临时改为 false
+  var bindSuccess = true;
+
+  hideAllVerifySteps();
+  if(bindSuccess) {
+    document.getElementById('verify-step-success').style.display = 'block';
+    // 显示账户信息
+    var maskedNumber = bindFormData.number.length > 4
+      ? bindFormData.number.substring(0, 4) + '****' + bindFormData.number.substring(bindFormData.number.length - 4)
+      : '****';
+    document.getElementById('success-account-info').innerHTML =
+      '<div class="verify-info-row"><span class="verify-info-label">证件类型</span><span class="verify-info-value">' + bindFormData.type + '</span></div>' +
+      '<div class="verify-info-row"><span class="verify-info-label">姓名</span><span class="verify-info-value">' + bindFormData.name + '</span></div>' +
+      '<div class="verify-info-row"><span class="verify-info-label">证件号码</span><span class="verify-info-value">' + maskedNumber + '</span></div>';
+
+    // 添加到 identities 数据
+    var newId = bindFormData.type.indexOf('香港') >= 0 ? 'hk' : 'other';
+    identities.push({
+      id: newId,
+      type: bindFormData.type,
+      name: bindFormData.name.charAt(0) + '**',
+      number: maskedNumber,
+      isPrimary: identities.length === 0
+    });
+    isVerified = true;
+    updateLoginState();
+    // 绑定成功页只需显示成功信息，隐藏已绑定列表和添加入口
+    document.getElementById('verify-view-list').style.display = 'none';
+  } else {
+    document.getElementById('verify-step-notfound').style.display = 'block';
+  }
+}
+
+function goBackFromVerify() {
+  var formView = document.getElementById('verify-step-form');
+  var otpView = document.getElementById('verify-step-otp');
+  var notfoundView = document.getElementById('verify-step-notfound');
+
+  if(otpView && otpView.style.display !== 'none') {
+    // 从验证码页面返回到表单
+    hideAllVerifySteps();
+    formView.style.display = 'block';
+    return;
+  }
+  if(notfoundView && notfoundView.style.display !== 'none') {
+    // 从"找不到"返回到表单
+    hideAllVerifySteps();
+    formView.style.display = 'block';
+    return;
+  }
+  if(formView && formView.style.display !== 'none') {
+    // 从表单返回上一级
+    if(isVerified) {
+      hideAllVerifySteps();
+      document.getElementById('verify-view-list').style.display = 'block';
+      renderIdentityList();
+    } else {
+      showScreen('profile');
+    }
+    return;
+  }
+  // 默认返回我的
+  showScreen('profile');
+}
+
+function getGreetingText() {
+  var hour = new Date().getHours();
+  if(hour >= 5 && hour < 12) return '早上好';
+  if(hour >= 12 && hour < 14) return '中午好';
+  if(hour >= 14 && hour < 18) return '下午好';
+  if(hour >= 18 && hour < 22) return '晚上好';
+  return '夜深了';
 }
 
 function updateLoginState() {
@@ -2634,8 +3504,6 @@ function updateLoginState() {
   var profileAdvisor = document.getElementById('profile-advisor');
   
   // 实名认证相关
-  var profileVerifiedLoggedin = document.getElementById('profile-verified-loggedin');
-  var profileUnverifiedLoggedin = document.getElementById('profile-unverified-loggedin');
   var profileVerifyItemVerified = document.getElementById('profile-verify-item-verified');
   var profileVerifyItemUnverified = document.getElementById('profile-verify-item-unverified');
   var profileVerifyItemLoggedout = document.getElementById('profile-verify-item-loggedout');
@@ -2647,23 +3515,23 @@ function updateLoginState() {
     // 已登录状态
     loginCard.style.display = 'none';
     
-    // 根据实名状态显示不同内容
+    // 根据绑定状态显示不同内容
     if (isVerified) {
-      // 已实名 - 显示统一账户卡片
+      // 已绑定 - 显示统一账户卡片
       unifiedAccount.style.display = 'block';
       bindPrompt.style.display = 'none';
-      greeting.textContent = '早上好，陈先生 👋';
+      greeting.textContent = getGreetingText() + '，陈先生 👋';
       greetingSub.textContent = '您的保单一切正常';
       // 显示待办提醒
-      if(todoSection) todoSection.style.display = 'block';
+      if(todoSection) { todoSection.style.display = 'block'; renderTodoList(); }
     } else {
-      // 未实名 - 显示引导关联保单
+      // 未绑定 - 显示引导关联保单
       unifiedAccount.style.display = 'none';
       bindPrompt.style.display = 'block';
-      greeting.textContent = '早上好，陈先生 👋';
-      greetingSub.textContent = '完成实名认证，关联您的保单';
+      greeting.textContent = getGreetingText() + '，陈先生 👋';
+      greetingSub.textContent = '绑定保单账户后，即可查看您的保单信息';
       // 隐藏待办提醒
-      if(todoSection) todoSection.style.display = 'none';
+      if(todoSection) { todoSection.style.display = 'none'; }
     }
     
     // 个人中心
@@ -2675,12 +3543,20 @@ function updateLoginState() {
     if(profileMenuLoginOther) profileMenuLoginOther.style.display = 'flex';
     if(profileMenuLogout) profileMenuLogout.style.display = 'flex';
     
-    // 实名认证状态
-    if(profileVerifiedLoggedin) profileVerifiedLoggedin.style.display = isVerified ? 'block' : 'none';
-    if(profileUnverifiedLoggedin) profileUnverifiedLoggedin.style.display = isVerified ? 'none' : 'block';
+    // 保单账户状态
     if(profileVerifyItemVerified) profileVerifyItemVerified.style.display = isVerified ? 'flex' : 'none';
     if(profileVerifyItemUnverified) profileVerifyItemUnverified.style.display = isVerified ? 'none' : 'flex';
     if(profileVerifyItemLoggedout) profileVerifyItemLoggedout.style.display = 'none';
+    // 更新"我的"页保单账户数量标签
+    var verifyCountLabel = document.getElementById('profile-verify-count');
+    if(verifyCountLabel && isVerified) verifyCountLabel.textContent = '已绑定 ' + identities.length + ' 个账户';
+    
+    // 保单账户页面视图同步
+    var verifyViewList = document.getElementById('verify-view-list');
+    var verifyStepForm = document.getElementById('verify-step-form');
+    if(verifyViewList) verifyViewList.style.display = isVerified ? 'block' : 'none';
+    if(verifyStepForm) verifyStepForm.style.display = isVerified ? 'none' : 'block';
+    if(isVerified) renderIdentityList();
     
   } else {
     // 未登录状态
@@ -2700,12 +3576,16 @@ function updateLoginState() {
     if(profileMenuLoginOther) profileMenuLoginOther.style.display = 'none';
     if(profileMenuLogout) profileMenuLogout.style.display = 'none';
     
-    // 未登录 - 不显示认证状态
-    if(profileVerifiedLoggedin) profileVerifiedLoggedin.style.display = 'none';
-    if(profileUnverifiedLoggedin) profileUnverifiedLoggedin.style.display = 'none';
+    // 未登录 - 不显示保单账户入口
     if(profileVerifyItemVerified) profileVerifyItemVerified.style.display = 'none';
     if(profileVerifyItemUnverified) profileVerifyItemUnverified.style.display = 'none';
     if(profileVerifyItemLoggedout) profileVerifyItemLoggedout.style.display = 'flex';
+    
+    // 未登录不显示保单账户视图
+    var verifyViewList2 = document.getElementById('verify-view-list');
+    var verifyStepForm2 = document.getElementById('verify-step-form');
+    if(verifyViewList2) verifyViewList2.style.display = 'none';
+    if(verifyStepForm2) verifyStepForm2.style.display = 'none';
   }
 }
 
@@ -2753,7 +3633,7 @@ function showScreen(name) {
   if (target) target.classList.add('active');
 
   // Overlay pages that hide tab bar
-  const overlayPages = ['login','verify','detail-saving','detail-protection','detail-protection-child',
+  const overlayPages = ['login','verify','my-profile','change-phone','detail-saving','detail-protection','detail-protection-child',
     'gap-analysis','notifications','exchange','article-detail','faq-detail','tool-exchange',
     'service-renewal','service-autopay','service-withdraw','service-beneficiary',
     'service-insured','service-owner','service-surrender',
@@ -2777,6 +3657,273 @@ function showScreen(name) {
   document.querySelectorAll('.proto-btn').forEach(b => b.classList.remove('active'));
   const protoBtn = document.querySelector(`.proto-btn[onclick="showScreen('${name}')"]`);
   if (protoBtn) protoBtn.classList.add('active');
+
+  // 进入保单账户页面时，根据状态显示对应视图
+  if(name === 'verify') {
+    hideAllVerifySteps();
+    if(isVerified) {
+      document.getElementById('verify-view-list').style.display = 'block';
+      renderIdentityList();
+    } else {
+      document.getElementById('verify-step-form').style.display = 'block';
+    }
+  }
+  // 进入修改手机号页面时初始化
+  if(name === 'change-phone') {
+    initChangePhonePage();
+  }
+}
+
+
+// ============ 个人信息详情页逻辑 ============
+var userNickname = '陈先生';
+var userAvatarInitial = '陈';
+
+function triggerAvatarEdit() {
+  document.getElementById('myprofile-avatar-input').click();
+}
+
+function handleAvatarChange(event) {
+  var file = event.target.files[0];
+  if(!file) return;
+  // 模拟上传成功
+  var avatarDisplay = document.getElementById('myprofile-avatar-display');
+  avatarDisplay.classList.add('has-photo');
+  avatarDisplay.style.backgroundImage = "url(" + URL.createObjectURL(file) + ")";
+  avatarDisplay.textContent = '';
+  // 显示提示
+  var hint = document.getElementById('myprofile-avatar-hint');
+  hint.style.display = 'block';
+  setTimeout(function() { hint.style.display = 'none'; }, 2000);
+  // 更新"我的"页头像
+  var profileAvatars = document.querySelectorAll('.profile-header .profile-avatar');
+  profileAvatars.forEach(function(el) {
+    if(!el.style.background || el.style.background.indexOf('9CA3AF') < 0) {
+      el.classList.add('has-photo');
+      el.style.backgroundImage = avatarDisplay.style.backgroundImage;
+      el.textContent = '';
+    }
+  });
+}
+
+function startEditNickname() {
+  document.getElementById('myprofile-nickname-display').parentElement.parentElement.style.display = 'none';
+  document.getElementById('myprofile-nickname-edit').style.display = 'block';
+  var input = document.getElementById('myprofile-nickname-input');
+  input.value = userNickname;
+  input.focus();
+}
+
+function saveNickname() {
+  var input = document.getElementById('myprofile-nickname-input');
+  var newNickname = input.value.trim();
+  if(!newNickname) {
+    input.style.borderColor = 'var(--danger)';
+    setTimeout(function() { input.style.borderColor = ''; }, 1000);
+    return;
+  }
+  userNickname = newNickname;
+  userAvatarInitial = newNickname.charAt(0);
+  // 更新显示
+  document.getElementById('myprofile-nickname-display').textContent = newNickname;
+  // 更新头像首字
+  var avatarDisplay = document.getElementById('myprofile-avatar-display');
+  if(!avatarDisplay.classList.contains('has-photo')) {
+    avatarDisplay.textContent = newNickname.charAt(0);
+  }
+  // 更新"我的"页
+  var profileName = document.querySelector('#profile-header-loggedin .profile-name');
+  if(profileName) profileName.textContent = newNickname;
+  var profileAvatars = document.querySelectorAll('.profile-header .profile-avatar');
+  profileAvatars.forEach(function(el) {
+    if(!el.classList.contains('has-photo') && (!el.style.background || el.style.background.indexOf('9CA3AF') < 0)) {
+      el.textContent = newNickname.charAt(0);
+    }
+  });
+  cancelEditNickname();
+}
+
+function cancelEditNickname() {
+  document.getElementById('myprofile-nickname-display').parentElement.parentElement.style.display = 'flex';
+  document.getElementById('myprofile-nickname-edit').style.display = 'none';
+}
+
+// ============ 生日编辑逻辑 ============
+var userBirthday = '1990-06-15'; // 格式 YYYY-MM-DD，空字符串表示未设置
+
+function startEditBirthday() {
+  var displayRow = document.getElementById('myprofile-birthday-display-row');
+  var emptyRow = document.getElementById('myprofile-birthday-empty-row');
+  var editDiv = document.getElementById('myprofile-birthday-edit');
+  var input = document.getElementById('myprofile-birthday-input');
+
+  if(displayRow) displayRow.style.display = 'none';
+  if(emptyRow) emptyRow.style.display = 'none';
+  editDiv.style.display = 'block';
+  input.value = userBirthday || '';
+  input.focus();
+}
+
+function saveBirthday() {
+  var input = document.getElementById('myprofile-birthday-input');
+  var val = input.value.trim();
+  userBirthday = val;
+
+  var displayRow = document.getElementById('myprofile-birthday-display-row');
+  var emptyRow = document.getElementById('myprofile-birthday-empty-row');
+  var editDiv = document.getElementById('myprofile-birthday-edit');
+
+  editDiv.style.display = 'none';
+
+  if(val) {
+    var parts = val.split('-');
+    var formatted = parts[0] + '年' + parseInt(parts[1]) + '月' + parseInt(parts[2]) + '日';
+    document.getElementById('myprofile-birthday-display').textContent = formatted;
+    displayRow.style.display = 'flex';
+    emptyRow.style.display = 'none';
+  } else {
+    displayRow.style.display = 'none';
+    emptyRow.style.display = 'flex';
+  }
+}
+
+function cancelEditBirthday() {
+  var displayRow = document.getElementById('myprofile-birthday-display-row');
+  var emptyRow = document.getElementById('myprofile-birthday-empty-row');
+  var editDiv = document.getElementById('myprofile-birthday-edit');
+
+  editDiv.style.display = 'none';
+  if(userBirthday) {
+    displayRow.style.display = 'flex';
+    emptyRow.style.display = 'none';
+  } else {
+    displayRow.style.display = 'none';
+    emptyRow.style.display = 'flex';
+  }
+}
+
+// ============ 修改手机号（独立页面） ============
+var changePhoneOtpTimer = null;
+
+function initChangePhonePage() {
+  // 每次进入页面重置到Step1
+  document.getElementById('changephone-step1').style.display = 'block';
+  document.getElementById('changephone-step2').style.display = 'none';
+  document.getElementById('changephone-back-btn').style.visibility = 'visible';
+  document.getElementById('changephone-new-number').value = '';
+  document.getElementById('changephone-new-otp').value = '';
+  // 重置按钮状态
+  resetOtpBtn('changephone-send-new-btn');
+  if(changePhoneOtpTimer) { clearInterval(changePhoneOtpTimer); changePhoneOtpTimer = null; }
+}
+
+function resetOtpBtn(btnId) {
+  var btn = document.getElementById(btnId);
+  if(btn) { btn.disabled = false; btn.textContent = '获取验证码'; btn.style.opacity = '1'; }
+}
+
+function sendChangePhoneOtp(type) {
+  var btnId = 'changephone-send-new-btn';
+  var btn = document.getElementById(btnId);
+  if(!btn || btn.disabled) return;
+
+  var newNumber = document.getElementById('changephone-new-number').value.trim();
+  if(!newNumber || newNumber.length < 11) { alert('请先输入新手机号'); return; }
+
+  // 模拟发送验证码
+  btn.disabled = true;
+  var countdown = 60;
+  btn.style.opacity = '0.6';
+  btn.textContent = countdown + 's';
+
+  if(changePhoneOtpTimer) clearInterval(changePhoneOtpTimer);
+  changePhoneOtpTimer = setInterval(function() {
+    countdown--;
+    if(countdown <= 0) {
+      clearInterval(changePhoneOtpTimer);
+      changePhoneOtpTimer = null;
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.textContent = '获取验证码';
+    } else {
+      btn.textContent = countdown + 's';
+    }
+  }, 1000);
+}
+
+function submitNewPhone() {
+  var newNumber = document.getElementById('changephone-new-number').value.trim();
+  var code = document.getElementById('changephone-new-otp').value.trim();
+
+  // 原型演示模式：不校验，直接走成功流程
+  var displayNumber = newNumber.length >= 11 ? newNumber : '13900139888';
+  var masked = displayNumber.substring(0, 3) + '****' + displayNumber.substring(7);
+  userPhone = masked;
+  var newDisplay = userPhonePrefix + ' ' + userPhone;
+
+  // 更新成功页显示
+  document.getElementById('changephone-new-phone-display').textContent = newDisplay;
+
+  // 切到成功步骤，隐藏返回按钮防止误操作
+  document.getElementById('changephone-step1').style.display = 'none';
+  document.getElementById('changephone-step2').style.display = 'block';
+  document.getElementById('changephone-back-btn').style.visibility = 'hidden';
+
+  if(changePhoneOtpTimer) { clearInterval(changePhoneOtpTimer); changePhoneOtpTimer = null; }
+}
+
+function finishChangePhone() {
+  // 同步更新个人信息页的手机号显示
+  document.getElementById('myprofile-phone-display').textContent = userPhonePrefix + ' ' + userPhone;
+  // 同步"我的"TAB头像区域手机号
+  var profilePhoneEl = document.querySelector('#profile-header-loggedin .profile-phone');
+  if(profilePhoneEl) profilePhoneEl.textContent = userPhonePrefix + ' ' + userPhone;
+  // 返回个人中心
+  showScreen('profile');
+}
+
+// startEditPhone 保留为兼容（个人信息页不再直接调用，但以防万一）
+function startEditPhone() { showScreen('change-phone'); }
+
+// ============ 登录页逻辑 ============
+var loginOtpTimer = null;
+
+function sendLoginOtp() {
+  var btn = document.getElementById('login-otp-btn');
+  var phoneInput = document.getElementById('phone-number');
+  var phone = phoneInput ? phoneInput.value.trim() : '';
+  if(!phone || phone.length < 8) { alert('请先输入手机号'); return; }
+  if(btn && btn.disabled) return;
+
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+  var seconds = 60;
+  btn.textContent = seconds + 's 后重发';
+  if(loginOtpTimer) clearInterval(loginOtpTimer);
+  loginOtpTimer = setInterval(function() {
+    seconds--;
+    if(seconds <= 0) {
+      clearInterval(loginOtpTimer);
+      loginOtpTimer = null;
+      btn.disabled = false;
+      btn.style.opacity = '1';
+      btn.textContent = '重新获取';
+    } else {
+      btn.textContent = seconds + 's 后重发';
+    }
+  }, 1000);
+}
+
+function doLogin() {
+  var phoneInput = document.getElementById('phone-number');
+  var otpInput = document.querySelector('#page-login .otp-input');
+  var phone = phoneInput ? phoneInput.value.trim() : '';
+  var otp = otpInput ? otpInput.value.trim() : '';
+  if(!phone || phone.length < 8) { alert('请输入手机号'); return; }
+  if(!otp || otp.length < 4) { alert('请输入验证码'); return; }
+  isLoggedIn = true;
+  updateLoginState();
+  showScreen('home');
 }
 
 // 初始化
