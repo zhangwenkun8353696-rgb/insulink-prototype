@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>保联 InsuLink — C端原型 V2</title>
+<title>陆港财富通 — C端原型 V2</title>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 :root {
@@ -289,7 +289,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
   transition: all 0.2s;
 }
 .todo-card:active { transform: scale(0.98); }
-.todo-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.todo-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 .todo-content { flex: 1; }
 .todo-title { font-size: 14px; font-weight: 500; }
 .todo-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
@@ -367,13 +367,13 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
 .policy-item .status-stripe.active { background: var(--success); }
 .policy-item .status-stripe.warning { background: var(--warning); }
 .pi-header { display: flex; justify-content: space-between; align-items: flex-start; padding-left: 10px; }
-.pi-company { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
+.pi-company { font-size: 11px; color: var(--text-muted); font-weight: 400; letter-spacing: 0.5px; }
 .pi-status { font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
 .pi-status.active { background: #D1FAE5; color: #065F46; }
 .pi-status.warning { background: #FEF3C7; color: #92400E; }
 .pi-name { font-size: 16px; font-weight: 700; margin-top: 4px; padding-left: 10px; }
-.pi-type { font-size: 12px; color: var(--primary); margin-top: 2px; padding-left: 10px; }
-.pi-type.protection { color: #2563EB; }
+.pi-type { font-size: 11px; color: var(--text-muted); margin-top: 2px; padding-left: 10px; }
+.pi-type.protection { color: var(--text-muted); }
 .pi-details { display: flex; gap: 16px; margin-top: 12px; padding-left: 10px; }
 .pi-detail-item { }
 .pi-detail-label { font-size: 11px; color: var(--text-muted); }
@@ -398,7 +398,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
 }
 .detail-back { font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px; opacity: 0.9; }
 .detail-company { font-size: 12px; opacity: 0.8; margin-top: 16px; letter-spacing: 0.5px; }
-.detail-name { font-size: 22px; font-weight: 700; margin-top: 4px; }
+.detail-name { font-size: 20px; font-weight: 700; margin-top: 4px; }
 .detail-status-badge {
   display: inline-block; margin-top: 8px;
   padding: 4px 12px; border-radius: 20px;
@@ -1209,7 +1209,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
 
 /* ========== UNIFIED ACCOUNT CARD ========== */
 .unified-account-card {
-  margin: -12px 16px 12px; padding: 22px 20px;
+  margin: -12px 16px 12px; padding: 24px 20px;
   background: linear-gradient(135deg, var(--primary) 0%, #2D8B78 100%);
   border-radius: 16px; box-shadow: var(--card-shadow-hover);
   cursor: pointer; position: relative; overflow: hidden;
@@ -1221,35 +1221,127 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
   top: -20px; right: -20px;
   width: 100px; height: 100px;
   background: rgba(255,255,255,0.1); border-radius: 50%;
+  pointer-events: none;
 }
+.unified-account-card::after {
+  content: ''; position: absolute;
+  bottom: -30px; left: 20px;
+  width: 60px; height: 60px;
+  background: rgba(255,255,255,0.06); border-radius: 50%;
+  pointer-events: none;
+}
+/* === 卡片顶部标题栏 === */
 .unified-account-card .card-header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+  display: flex; align-items: center;
+  margin-bottom: 14px;
 }
-.unified-account-card .card-icon { font-size: 22px; }
-.unified-account-card .card-title { font-size: 14px; color: rgba(255,255,255,0.9); font-weight: 500; }
-.unified-account-card .card-body {
-  display: flex; gap: 20px;
+.unified-account-card .card-header-left {
+  display: flex; align-items: center; gap: 8px; flex: 1;
 }
-.unified-account-card .account-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
+.unified-account-card .card-header-title {
+  font-size: 15px; font-weight: 700; color: white; letter-spacing: 0.5px;
 }
-.unified-account-card .account-label {
-  font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom: 6px;
+.unified-account-card .card-header-eye {
+  font-size: 16px; cursor: pointer; opacity: 0.65;
+  transition: opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  padding: 2px;
 }
-.unified-account-card .account-value {
-  font-size: 22px; font-weight: 800; color: white; line-height: 1.3; margin-bottom: 4px;
+.unified-account-card .card-header-eye:hover { opacity: 1; }
+.unified-account-card .card-header-arrow {
+  font-size: 22px; color: rgba(255,255,255,0.45);
+  font-weight: 300; line-height: 1;
+  cursor: pointer;
+  padding: 4px 8px;
+  -webkit-tap-highlight-color: transparent;
 }
-.unified-account-card .account-unit {
-  font-size: 12px; color: rgba(255,255,255,0.8);
+/* === 标题栏与数据区分隔线 === */
+.unified-account-card .card-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.12);
+  margin-bottom: 16px;
 }
-.unified-account-card .account-divider {
-  width: 1px; background: rgba(255,255,255,0.2);
+.unified-account-card .card-body { cursor: pointer; }
+.unified-account-card .amount-hidden {
+  letter-spacing: 2px;
 }
-.unified-account-card .card-arrow {
-  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
-  font-size: 20px; color: rgba(255,255,255,0.5);
+
+/* === 样式1：左右结构 === */
+.unified-account-card .layout-hz {
+  display: flex; align-items: center; gap: 0;
+}
+.unified-account-card .hz-left {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 4px 0;
+}
+.unified-account-card .hz-left-title {
+  font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 600; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.unified-account-card .hz-left-title .title-icon { font-size: 15px; }
+.unified-account-card .hz-right-title {
+  font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 600; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 5px;
+}
+.unified-account-card .hz-right-title .title-icon { font-size: 15px; }
+.unified-account-card .hz-left-value {
+  font-size: 26px; font-weight: 800; color: white; line-height: 1.15;
+  letter-spacing: -0.5px;
+}
+.unified-account-card .hz-left-currency {
+  font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6);
+  margin-right: 2px;
+}
+.unified-account-card .hz-left-sub {
+  font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px;
+}
+.unified-account-card .hz-divider {
+  width: 1px; align-self: stretch; background: rgba(255,255,255,0.12);
+  flex-shrink: 0; margin: 0 16px;
+}
+.unified-account-card .hz-right {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 4px 0;
+}
+.unified-account-card .hz-right-num {
+  font-size: 26px; font-weight: 800; color: white; line-height: 1.15;
+}
+.unified-account-card .hz-right-sub {
+  font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 4px;
+}
+/* === 样式2：左右结构（储蓄 | 保障） === */
+.unified-account-card .layout-vt {
+  display: flex; align-items: stretch; gap: 0;
+}
+.unified-account-card .vt-left {
+  flex: 1; padding-right: 20px;
+}
+.unified-account-card .vt-right {
+  flex: 1; padding-left: 20px;
+  border-left: 1px solid rgba(255,255,255,0.15);
+}
+.unified-account-card .vt-header {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 10px;
+}
+.unified-account-card .vt-header-icon { font-size: 13px; }
+.unified-account-card .vt-header-title {
+  font-size: 13px; color: rgba(255,255,255,0.85); font-weight: 600;
+}
+.unified-account-card .vt-row {
+  display: flex; align-items: baseline; gap: 8px;
+  padding: 4px 0;
+}
+.unified-account-card .vt-row:first-of-type { padding-top: 0; }
+.unified-account-card .vt-row-label {
+  font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.55);
+  letter-spacing: 0.5px;
+}
+.unified-account-card .vt-row-value {
+  font-size: 20px; font-weight: 800; color: white; line-height: 1.3;
+  letter-spacing: -0.5px;
+}
+.unified-account-card .vt-row-sub {
+  font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px;
 }
 
 /* 未实名状态引导 */
@@ -1285,11 +1377,83 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
   font-size: 11px; z-index: 200; cursor: pointer;
 }
 
+/* 顾问数量切换按钮 */
+.advisor-toggle {
+  position: absolute; top: 142px; right: 16px;
+  background: rgba(0,0,0,0.6); color: white;
+  padding: 6px 12px; border-radius: 14px;
+  font-size: 11px; z-index: 200; cursor: pointer;
+}
+.card-toggle {
+  position: absolute; top: 169px; right: 16px;
+  background: rgba(0,0,0,0.6); color: white;
+  padding: 6px 12px; border-radius: 14px;
+  font-size: 11px; z-index: 200; cursor: pointer;
+}
+
 /* 待办数量为0时的空状态 */
 .todo-empty {
   text-align: center; padding: 24px 16px; color: var(--text-muted); font-size: 13px;
 }
 .todo-empty-icon { font-size: 36px; margin-bottom: 8px; opacity: 0.4; }
+
+/* Advisor Card on Home */
+.advisor-home-card {
+  margin: 0 16px 12px;
+  padding: 16px;
+  background: var(--white);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.advisor-home-card:active { transform: scale(0.98); }
+.advisor-home-avatar {
+  width: 44px; height: 44px;
+  background: var(--primary-light);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.advisor-home-info { flex: 1; }
+.advisor-home-name { font-size: 15px; font-weight: 600; color: var(--text); }
+.advisor-home-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.advisor-home-action { flex-shrink: 0; }
+.advisor-call-btn {
+  padding: 8px 16px;
+  background: var(--primary);
+  color: white;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.advisor-call-btn:active { transform: scale(0.95); background: var(--primary-dark); }
+
+/* Multi-advisor cards on home */
+.advisor-home-item {
+  margin: 0 16px 8px;
+  padding: 14px 16px;
+  background: var(--white);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.advisor-home-item:active { transform: scale(0.98); }
+.advisor-home-item:last-child { margin-bottom: 12px; }
+.advisor-policy-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
 </style>
 </head>
 <body>
@@ -1303,7 +1467,9 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
 </div>
 <div class="state-toggle" onclick="toggleLoginState()">🔄 切换登录</div>
 <div class="verified-toggle" onclick="toggleVerifiedState()">📋 切换实名</div>
-<div class="todo-toggle" onclick="toggleTodoCount()">📝 切换待办</div>
+<div class="todo-toggle" onclick="toggleTodoCount()">🔔 切换提醒</div>
+<div class="advisor-toggle" onclick="toggleAdvisorCount()">👤 1位顾问</div>
+<div class="card-toggle" onclick="toggleAccountCard()">💳 样式1</div>
 
 <div class="phone-frame">
   <div class="phone-notch"></div>
@@ -1331,21 +1497,8 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
       </div>
 
       <!-- 统一账户卡片（已登录+已实名状态） -->
-      <div class="unified-account-card" id="home-unified-account" onclick="showScreen('policy')">
-        <div class="card-body">
-          <div class="account-section">
-            <div class="account-label">💰 账户</div>
-            <div class="account-value">$15,600</div>
-            <div class="account-unit">已缴保费</div>
-          </div>
-          <div class="account-divider"></div>
-          <div class="account-section">
-            <div class="account-label">🛡️ 保障</div>
-            <div class="account-value">2</div>
-            <div class="account-unit">保单</div>
-          </div>
-        </div>
-        <div class="card-arrow">›</div>
+      <div class="unified-account-card" id="home-unified-account">
+        <!-- 由 renderAccountCard() 动态渲染 -->
       </div>
 
       <!-- 未实名引导卡片（已登录+未实名状态） -->
@@ -1363,7 +1516,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
           <div class="module-icon saving">💰</div>
           <div class="module-info">
             <div class="module-label">储蓄账户</div>
-            <div class="module-value">US$ 15,600<span>已缴纳保费</span></div>
+            <div class="module-value">USD 15,600<span>已缴纳保费</span></div>
           </div>
           <div class="module-arrow">›</div>
         </div>
@@ -1403,23 +1556,22 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         </div>
       </div>
 
-      <!-- 待办提醒 -->
+      <!-- 保单动态区（基于保单数据实时计算，常态有内容） -->
       <div id="home-todo-section">
         <div class="section-title">
-          <span>⏰ 待办提醒</span>
-          <span class="more" onclick="showScreen('notifications')">查看全部 ›</span>
+          <span>🔔 保单动态</span>
         </div>
         <div id="todo-list-container">
           <div class="todo-list" id="todo-list"></div>
           <div class="todo-empty" id="todo-empty" style="display:none">
             <div class="todo-empty-icon">✅</div>
-            <div>暂无待办事项，一切安好</div>
+            <div>暂无保单提醒，一切安好</div>
           </div>
         </div>
       </div>
 
       <!-- 精选攻略 - 恢复老样式横向滚动 -->
-      <div class="section-title">📚 精选攻略 <span class="more">更多 ›</span></div>
+      <div class="section-title">📚 精选攻略 <span class="more" style="display:none">更多 ›</span></div>
       <div class="hscroll">
         <div class="article-card" onclick="showScreen('article-renewal')">
           <div class="article-img" style="background:linear-gradient(135deg,#DBEAFE,#BFDBFE)">💳</div>
@@ -1444,9 +1596,15 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         </div>
       </div>
 
-      <!-- 保单服务入口 - 每个服务直接跳转对应页面 -->
-      <div class="section-title">🔧 保单服务</div>
-      <div class="service-grid">
+      <!-- 专属顾问卡片（仅已登录+已绑定时可见） -->
+      <div id="home-advisor-card">
+        <div class="section-title">👨‍💼 您的顾问</div>
+        <div id="home-advisor-list"></div>
+      </div>
+
+      <!-- 保单服务入口 - MVP阶段暂隐藏，与精选攻略二选一 -->
+      <div class="section-title" style="display:none">🔧 保单服务</div>
+      <div class="service-grid" style="display:none">
         <div class="service-item" onclick="showScreen('service-renewal')">
           <div class="service-icon">💳</div>
           <div class="service-label">续期缴费</div>
@@ -1487,7 +1645,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
               </div>
               <div class="hp-mid">
                 <div class="hp-name">盈御多元货币3</div>
-                <div class="hp-type">储蓄分红险 · 多币种切换</div>
+                <div class="hp-type">长期分红储蓄险 · 多币种切换</div>
               </div>
               <div class="hp-bottom">
                 <div class="hp-returns">
@@ -1508,7 +1666,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
               </div>
               <div class="hp-mid">
                 <div class="hp-name">隽富多元货币</div>
-                <div class="hp-type">储蓄分红险 · 长期稳健回报</div>
+                <div class="hp-type">长期分红储蓄险 · 长期稳健回报</div>
               </div>
               <div class="hp-bottom">
                 <div class="hp-returns">
@@ -1543,7 +1701,27 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         </div>
       </div>
 
-      <div class="home-disclaimer">本服务由水滴金融服務（香港）有限公司提供</div>
+      <!-- 水滴金融品牌信息（所有状态可见） -->
+      <div id="home-brand-card">
+        <div style="background:var(--white);border-radius:16px;padding:20px;margin:0 16px 12px;box-shadow:var(--card-shadow)">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+            <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700">滴</div>
+            <div>
+              <div style="font-size:15px;font-weight:600;color:var(--text)">水滴金融</div>
+              <div style="font-size:12px;color:var(--text-secondary)">持牌保险经纪公司</div>
+            </div>
+          </div>
+          <div style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:10px">
+            水滴金融服务（香港）有限公司是香港持牌保险经纪公司，与 AIA、保诚、宏利、富卫、忠意等主流保司深度合作，合作超千款产品，为你提供专业的保险顾问服务。
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary)">
+            <span style="font-size:14px">📞</span>
+            <span>服务热线：</span>
+            <a href="tel:+85236140432" style="color:var(--primary);font-weight:500;text-decoration:none">+852 3614 0432</a>
+          </div>
+        </div>
+      </div>
+      <div class="home-disclaimer">本服务由水滴金融服务（香港）有限公司提供</div>
       <div class="bottom-spacer"></div>
     </div>
 
@@ -1551,14 +1729,11 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
     <div class="page" id="page-policy">
       <div class="policy-page-header">
         <div class="policy-page-title">我的保单</div>
-        <!-- 移除筛选组件 -->
       </div>
-
-      <!-- 去掉缺口分析，直接显示保单 -->
 
       <div class="family-group">
         <div class="family-label"><span class="emoji">👤</span> 陈先生（本人）</div>
-        <!-- 储蓄类保单 -->
+        <!-- 账户类-长期分红储蓄险-生效中 -->
         <div class="policy-item" onclick="showScreen('detail-saving')">
           <div class="status-stripe active"></div>
           <div class="pi-header">
@@ -1566,21 +1741,19 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
             <div class="pi-status active">🟢 生效中</div>
           </div>
           <div class="pi-name">充裕未来·传承 III</div>
-          <div class="pi-type">储蓄分红险</div>
+          <div class="pi-type">长期分红储蓄险</div>
           <div class="pi-details">
             <div class="pi-detail-item">
               <div class="pi-detail-label">已缴保费</div>
-              <div class="pi-detail-value">US$ 15,600</div>
-              <div class="pi-detail-sub">≈ ¥ 113,568</div>
+              <div class="pi-detail-value">USD 15,600</div>
             </div>
             <div class="pi-detail-item">
-              <div class="pi-detail-label">年缴保费</div>
-              <div class="pi-detail-value">US$ 5,200</div>
-              <div class="pi-detail-sub">≈ ¥ 37,856</div>
+              <div class="pi-detail-label">每期保费</div>
+              <div class="pi-detail-value">USD 5,200</div>
             </div>
             <div class="pi-detail-item">
               <div class="pi-detail-label">缴费进度</div>
-              <div class="pi-detail-value">3/20年</div>
+              <div class="pi-detail-value">3/20期</div>
             </div>
           </div>
           <div class="pi-footer">
@@ -1589,29 +1762,27 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
           </div>
         </div>
 
-        <!-- 保障类保单 -->
+        <!-- 保障类-终身危疾险-生效中（即将缴费动态） -->
         <div class="policy-item" onclick="showScreen('detail-protection')">
-          <div class="status-stripe warning"></div>
+          <div class="status-stripe active"></div>
           <div class="pi-header">
             <div class="pi-company">PRUDENTIAL 保诚</div>
-            <div class="pi-status warning">🟡 即将缴费</div>
+            <div class="pi-status active">🟢 生效中</div>
           </div>
           <div class="pi-name">危疾加护保 III</div>
-          <div class="pi-type protection">重疾险</div>
+          <div class="pi-type protection">终身危疾险</div>
           <div class="pi-details">
             <div class="pi-detail-item">
-              <div class="pi-detail-label">保额</div>
-              <div class="pi-detail-value">HK$ 800,000</div>
-              <div class="pi-detail-sub">≈ ¥ 728,000</div>
+              <div class="pi-detail-label">已缴保费</div>
+              <div class="pi-detail-value">HKD 11,550</div>
             </div>
             <div class="pi-detail-item">
-              <div class="pi-detail-label">年缴保费</div>
-              <div class="pi-detail-value">HK$ 12,600</div>
-              <div class="pi-detail-sub">≈ ¥ 11,466</div>
+              <div class="pi-detail-label">每期保费</div>
+              <div class="pi-detail-value">HKD 1,050</div>
             </div>
             <div class="pi-detail-item">
               <div class="pi-detail-label">缴费进度</div>
-              <div class="pi-detail-value">2/25年</div>
+              <div class="pi-detail-value">11/12期</div>
             </div>
           </div>
           <div class="pi-footer">
@@ -1619,162 +1790,510 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
             <div class="pi-arrow">›</div>
           </div>
         </div>
-      </div>
 
-      <div class="family-group">
-        <div class="family-label"><span class="emoji">👶</span> 陈小明（子女）</div>
-        <div class="policy-item" onclick="showScreen('detail-protection-child')">
+        <!-- 保障类-终身危疾险-生效中（缴费超时动态） -->
+        <div class="policy-item" onclick="showScreen('detail-overdue')">
           <div class="status-stripe active"></div>
           <div class="pi-header">
-            <div class="pi-company">MANULIFE 宏利</div>
+            <div class="pi-company">PRUDENTIAL 保诚</div>
             <div class="pi-status active">🟢 生效中</div>
           </div>
-          <div class="pi-name">活耀人生 危疾保</div>
-          <div class="pi-type protection">重疾险</div>
+          <div class="pi-name">危疾加护保 III</div>
+          <div class="pi-type protection">终身危疾险</div>
           <div class="pi-details">
             <div class="pi-detail-item">
-              <div class="pi-detail-label">保额</div>
-              <div class="pi-detail-value">HK$ 1,000,000</div>
-              <div class="pi-detail-sub">≈ ¥ 910,000</div>
+              <div class="pi-detail-label">已缴保费</div>
+              <div class="pi-detail-value">HKD 11,550</div>
             </div>
             <div class="pi-detail-item">
-              <div class="pi-detail-label">年缴保费</div>
-              <div class="pi-detail-value">HK$ 8,400</div>
-              <div class="pi-detail-sub">≈ ¥ 7,644</div>
+              <div class="pi-detail-label">每期保费</div>
+              <div class="pi-detail-value">HKD 1,050</div>
             </div>
             <div class="pi-detail-item">
               <div class="pi-detail-label">缴费进度</div>
-              <div class="pi-detail-value">1/25年</div>
+              <div class="pi-detail-value">11/12期</div>
+            </div>
+          </div>
+          <div class="pi-footer" style="background:#FEF2F2">
+            <div class="pi-next-pay" style="color:var(--danger)"><strong>第12期已超时15天，请尽快缴纳避免保单失效 ⚠️</strong></div>
+            <div class="pi-arrow">›</div>
+          </div>
+        </div>
+
+        <!-- 账户类-长期分红储蓄险-保单中止 -->
+        <div class="policy-item" onclick="showScreen('detail-lapsed')">
+          <div class="status-stripe" style="background:#9CA3AF"></div>
+          <div class="pi-header">
+            <div class="pi-company">富卫</div>
+            <div class="pi-status" style="color:#9CA3AF">⏸️ 已中止</div>
+          </div>
+          <div class="pi-name">盈聚未来</div>
+          <div class="pi-type">长期分红储蓄险</div>
+          <div class="pi-details">
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">已缴保费</div>
+              <div class="pi-detail-value">USD 9,000</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">每期保费</div>
+              <div class="pi-detail-value">USD 3,000</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">缴费进度</div>
+              <div class="pi-detail-value">3/10期</div>
+            </div>
+          </div>
+          <div class="pi-footer" style="background:#FEF2F2">
+            <div class="pi-next-pay" style="color:var(--danger)"><strong>保费未缴纳，保单已中止，可联系顾问复效</strong></div>
+            <div class="pi-arrow">›</div>
+          </div>
+        </div>
+
+        <!-- 保障类-终身危疾险-已中止（即将失效动态） -->
+        <div class="policy-item" onclick="showScreen('detail-expiring')">
+          <div class="status-stripe" style="background:#9CA3AF"></div>
+          <div class="pi-header">
+            <div class="pi-company">忠意</div>
+            <div class="pi-status" style="color:#9CA3AF">⏸️ 已中止</div>
+          </div>
+          <div class="pi-name">跨越无限保</div>
+          <div class="pi-type protection">终身危疾险</div>
+          <div class="pi-details">
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">已缴保费</div>
+              <div class="pi-detail-value">HKD 6,800</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">每期保费</div>
+              <div class="pi-detail-value">HKD 6,800</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">缴费方式</div>
+              <div class="pi-detail-value">年缴</div>
+            </div>
+          </div>
+          <div class="pi-footer" style="background:#FEF2F2">
+            <div class="pi-next-pay" style="color:var(--danger)"><strong>保单将在 28 天后失效，请及时续保 ⚠️</strong></div>
+            <div class="pi-arrow">›</div>
+          </div>
+        </div>
+
+        <!-- 账户类-长期分红储蓄险-一次性缴清 -->
+        <div class="policy-item" onclick="showScreen('detail-single')">
+          <div class="status-stripe active"></div>
+          <div class="pi-header">
+            <div class="pi-company">AIA 友邦</div>
+            <div class="pi-status active">🟢 生效中</div>
+          </div>
+          <div class="pi-name">简爱·延续5</div>
+          <div class="pi-type">长期分红储蓄险</div>
+          <div class="pi-details">
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">已缴保费</div>
+              <div class="pi-detail-value">HKD 250,000</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">缴费方式</div>
+              <div class="pi-detail-value">一次性缴清</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">受保人</div>
+              <div class="pi-detail-value">李XX（配偶）</div>
             </div>
           </div>
           <div class="pi-footer">
-            <div class="pi-next-pay">下次缴费：<strong>2026-11-01</strong>（200天后）</div>
+            <div class="pi-next-pay">已缴清，无需缴费</div>
             <div class="pi-arrow">›</div>
           </div>
         </div>
       </div>
+
+      <div class="family-group">
+        <div class="family-label"><span class="emoji">👶</span> 陈小明（子女）</div>
+        <!-- 保障类-终身危疾险-生效中 -->
+        <div class="policy-item" onclick="showScreen('detail-protection-child')">
+          <div class="status-stripe" style="background:var(--primary)"></div>
+          <div class="pi-header">
+            <div class="pi-company">MANULIFE 宏利</div>
+            <div class="pi-status" style="color:var(--primary)">✅ 生效中</div>
+          </div>
+          <div class="pi-name">活耀人生 危疾保</div>
+          <div class="pi-type protection">终身危疾险</div>
+          <div class="pi-details">
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">已缴保费</div>
+              <div class="pi-detail-value">HKD 700</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">每期保费</div>
+              <div class="pi-detail-value">HKD 700</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">缴费进度</div>
+              <div class="pi-detail-value">1/12期</div>
+            </div>
+          </div>
+          <div class="pi-footer">
+            <div class="pi-next-pay" style="color:var(--primary)">下次缴费日 2026-05-18</div>
+            <div class="pi-arrow">›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 已失效保单 -->
+      <div class="family-group" style="opacity:0.65">
+        <div class="family-label"><span class="emoji">📁</span> 已失效保单 <span style="font-size:12px;color:var(--text-muted);font-weight:400">1 张</span></div>
+        <div class="policy-item" onclick="showScreen('detail-expired')" style="opacity:0.7">
+          <div class="status-stripe" style="background:#6B7280"></div>
+          <div class="pi-header">
+            <div class="pi-company">AIA 友邦</div>
+            <div class="pi-status" style="color:#6B7280">⚫ 已失效</div>
+          </div>
+          <div class="pi-name">加裕智倍保2</div>
+          <div class="pi-type protection">终身危疾险</div>
+          <div class="pi-details">
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">已缴保费</div>
+              <div class="pi-detail-value">USD 18,900</div>
+            </div>
+            <div class="pi-detail-item">
+              <div class="pi-detail-label">失效日期</div>
+              <div class="pi-detail-value">2025-12-01</div>
+            </div>
+          </div>
+          <div class="pi-footer" style="background:#F3F4F6">
+            <div class="pi-next-pay" style="color:#6B7280">保单已失效，如需恢复请联系顾问</div>
+            <div class="pi-arrow">›</div>
+          </div>
+        </div>
+      </div>
+
       <div class="bottom-spacer"></div>
     </div>
 
-    <!-- ==================== POLICY DETAIL (储蓄类) ==================== -->
+    <!-- ==================== POLICY DETAIL (储蓄类-分期-生效中) ==================== -->
     <div class="page-overlay" id="page-detail-saving">
       <div class="detail-header" style="margin-top:54px">
         <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
-        <div class="detail-company">AIA 友邦</div>
         <div class="detail-name">充裕未来·传承 III</div>
-        <div class="detail-status-badge">🟢 生效中 · 保单号 L123456789</div>
-        <div class="detail-type-tag saving">💰 储蓄类</div>
+        <div class="detail-status-badge">🟢 生效中</div>
+        <div class="detail-type-tag saving">💰 长期分红储蓄险</div>
       </div>
 
-      <!-- 储蓄类详情 - 用已缴纳保费代替账户价值 -->
+      <!-- 保单信息 -->
       <div class="detail-section">
         <div class="detail-section-title">📋 保单信息</div>
-        <div class="detail-row"><div class="detail-label">产品名称</div><div class="detail-value">充裕未来·传承 III</div></div>
-        <div class="detail-row"><div class="detail-label">保单状态</div><div class="detail-value">生效中</div></div>
+        <div class="detail-row"><div class="detail-label">保险公司</div><div class="detail-value">AIA 友邦</div></div>
         <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">L123456789</div></div>
-        <div class="detail-row"><div class="detail-label">承保公司</div><div class="detail-value">AIA 友邦</div></div>
         <div class="detail-row"><div class="detail-label">保单持有人</div><div class="detail-value">陈XX</div></div>
+        <div class="detail-row"><div class="detail-label">第二持有人</div><div class="detail-value">李XX（配偶）</div></div>
         <div class="detail-row"><div class="detail-label">受保人</div><div class="detail-value">陈XX（本人）</div></div>
-        <div class="detail-row"><div class="detail-label">受益人</div><div class="detail-value">李XX（配偶）</div></div>
-        <div class="detail-row"><div class="detail-label">生效时间</div><div class="detail-value">2023-06-15</div></div>
+        <div class="detail-row"><div class="detail-label">第二受保人</div><div class="detail-value">陈小明（子女）</div></div>
+        <div class="detail-row"><div class="detail-label">受益人</div><div class="detail-value">李XX（配偶）50%</div></div>
+        <div class="detail-row"><div class="detail-label">第二受益人</div><div class="detail-value">陈小明（子女）50%</div></div>
+        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2023-06-15</div></div>
+        <div class="detail-row"><div class="detail-label">冷静期</div><div class="detail-value">至 2023-06-29</div></div>
       </div>
 
+      <!-- 缴费信息 -->
       <div class="detail-section">
-        <div class="detail-section-title">💰 缴费与领取</div>
-        <div class="detail-row"><div class="detail-label">投入方式</div><div class="detail-value">年缴 · US$ 5,200/年</div></div>
-        <div class="detail-row"><div class="detail-label">缴费期限</div><div class="detail-value">20年</div></div>
-        <div class="detail-row"><div class="detail-label">已缴年数</div><div class="detail-value">3年（15%）</div></div>
-        <div class="detail-row"><div class="detail-label">已缴纳保费</div><div class="detail-value" style="color:var(--primary-dark)">US$ 15,600</div></div>
-        <div class="detail-row"><div class="detail-label">下次缴费</div><div class="detail-value" style="color:var(--warning)">2026-06-15（还有32天）</div></div>
+        <div class="detail-section-title">💰 缴费信息</div>
+        <div class="detail-row"><div class="detail-label">缴费方式</div><div class="detail-value">年缴</div></div>
+        <div class="detail-row"><div class="detail-label">每期保费</div><div class="detail-value">USD 5,200</div></div>
+        <div class="detail-row"><div class="detail-label">缴费期数</div><div class="detail-value">20期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴期数</div><div class="detail-value">3期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴保费</div><div class="detail-value" style="color:var(--primary-dark)">USD 15,600</div></div>
+        <div class="detail-row"><div class="detail-label">下次缴费日</div><div class="detail-value" style="color:var(--warning)">2026-06-15（还有32天）</div></div>
+        <div class="detail-row"><div class="detail-label">付款方式</div><div class="detail-value">银行转账</div></div>
+        <div class="detail-row"><div class="detail-label">付清日期</div><div class="detail-value">2042-06-15</div></div>
       </div>
-
 
       <div class="contact-bar">
-        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85230001234'">👨‍💼 联系顾问</div>
+        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85291234567'">👨‍💼 联系顾问 · 张志明</div>
       </div>
 
       <div class="bottom-spacer"></div>
     </div>
 
-    <!-- ==================== POLICY DETAIL (保障类-本人) ==================== -->
+    <!-- ==================== POLICY DETAIL (保障类-分期-生效中-即将缴费动态) ==================== -->
     <div class="page-overlay" id="page-detail-protection">
       <div class="detail-header" style="margin-top:54px">
         <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
-        <div class="detail-company">PRUDENTIAL 保诚</div>
         <div class="detail-name">危疾加护保 III</div>
-        <div class="detail-status-badge">🟡 即将缴费 · 保单号 P987654321</div>
-        <div class="detail-type-tag protection">🛡️ 保障类</div>
+        <div class="detail-status-badge">🟢 生效中</div>
+        <div class="detail-type-tag protection">🛡️ 终身危疾险</div>
       </div>
 
-      <!-- 保障类详情 -->
+      <!-- 保单信息 -->
       <div class="detail-section">
         <div class="detail-section-title">📋 保单信息</div>
-        <div class="detail-row"><div class="detail-label">产品名称</div><div class="detail-value">危疾加护保 III</div></div>
-        <div class="detail-row"><div class="detail-label">保单状态</div><div class="detail-value">生效中</div></div>
+        <div class="detail-row"><div class="detail-label">保险公司</div><div class="detail-value">PRUDENTIAL 保诚</div></div>
         <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">P987654321</div></div>
-        <div class="detail-row"><div class="detail-label">承保公司</div><div class="detail-value">PRUDENTIAL 保诚</div></div>
-        <div class="detail-row"><div class="detail-label">被保人</div><div class="detail-value">陈XX（本人）</div></div>
-        <div class="detail-row"><div class="detail-label">保障期限</div><div class="detail-value">终身（至100岁）</div></div>
-        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2024-06-15</div></div>
+        <div class="detail-row"><div class="detail-label">保单持有人</div><div class="detail-value">陈XX</div></div>
+        <div class="detail-row"><div class="detail-label">受保人</div><div class="detail-value">陈XX（本人）</div></div>
+        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2025-06-15</div></div>
+        <div class="detail-row"><div class="detail-label">失效日期</div><div class="detail-value">2026-06-14</div></div>
+      </div>
+
+      <!-- 缴费信息 -->
+      <div class="detail-section">
+        <div class="detail-section-title">💰 缴费信息</div>
+        <div class="detail-row"><div class="detail-label">缴费方式</div><div class="detail-value">月缴</div></div>
+        <div class="detail-row"><div class="detail-label">每期保费</div><div class="detail-value">HKD 1,050</div></div>
+        <div class="detail-row"><div class="detail-label">缴费期数</div><div class="detail-value">12期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴期数</div><div class="detail-value">11期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴保费</div><div class="detail-value" style="color:var(--primary-dark)">HKD 11,550</div></div>
+        <div class="detail-row"><div class="detail-label">下次缴费日</div><div class="detail-value" style="color:var(--warning)">2026-05-15（即将到期）</div></div>
+        <div class="detail-row"><div class="detail-label">付款方式</div><div class="detail-value">自动转账（BOC）</div></div>
+
+        <div style="margin:12px -12px 0;padding:12px 14px;background:#FFFBEB;border-radius:10px;display:flex;align-items:flex-start;gap:8px">
+          <span style="font-size:16px;line-height:1.4">💡</span>
+          <div style="font-size:13px;color:#92400E;line-height:1.5">第12期保费将于 2026-05-15 到期，请确保账户余额充足或及时缴纳。</div>
+        </div>
+      </div>
+
+      <div class="contact-bar">
+        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85298765432'">👨‍💼 联系顾问 · 李美琪</div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== POLICY DETAIL (保障类-子女-生效中) ==================== -->
+    <div class="page-overlay" id="page-detail-protection-child">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
+        <div class="detail-name">活耀人生 危疾保</div>
+        <div class="detail-status-badge" style="background:#DCFCE7;color:#166534">✅ 生效中</div>
+        <div class="detail-type-tag protection">🛡️ 终身危疾险</div>
+      </div>
+
+      <!-- 保单信息 -->
+      <div class="detail-section">
+        <div class="detail-section-title">📋 保单信息</div>
+        <div class="detail-row"><div class="detail-label">保险公司</div><div class="detail-value">MANULIFE 宏利</div></div>
+        <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">M567891234</div></div>
+        <div class="detail-row"><div class="detail-label">保单持有人</div><div class="detail-value">陈XX</div></div>
+        <div class="detail-row"><div class="detail-label">受保人</div><div class="detail-value">陈小明（子女）</div></div>
+        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2026-04-18</div></div>
+      </div>
+
+      <!-- 缴费信息 -->
+      <div class="detail-section">
+        <div class="detail-section-title">💰 缴费信息</div>
+        <div class="detail-row"><div class="detail-label">缴费方式</div><div class="detail-value">月缴</div></div>
+        <div class="detail-row"><div class="detail-label">每期保费</div><div class="detail-value">HKD 700</div></div>
+        <div class="detail-row"><div class="detail-label">缴费期数</div><div class="detail-value">12期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴期数</div><div class="detail-value">1期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴保费</div><div class="detail-value" style="color:var(--primary-dark)">HKD 700</div></div>
+        <div class="detail-row"><div class="detail-label">下次缴费日</div><div class="detail-value">2026-05-18</div></div>
+        <div class="detail-row"><div class="detail-label">付款方式</div><div class="detail-value">银行转账</div></div>
+        <div class="detail-row"><div class="detail-label">付清日期</div><div class="detail-value">2027-04-18</div></div>
+      </div>
+
+      <div class="contact-bar">
+        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85298765432'">👨‍💼 联系顾问 · 李美琪</div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== POLICY DETAIL (保障类-月缴-生效中-缴费超时动态) ==================== -->
+    <div class="page-overlay" id="page-detail-overdue">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
+        <div class="detail-name">危疾加护保 III</div>
+        <div class="detail-status-badge">🟢 生效中</div>
+        <div class="detail-type-tag protection">🛡️ 终身危疾险</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">📋 保单信息</div>
+        <div class="detail-row"><div class="detail-label">保险公司</div><div class="detail-value">PRUDENTIAL 保诚</div></div>
+        <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">P987654321</div></div>
+        <div class="detail-row"><div class="detail-label">保单持有人</div><div class="detail-value">陈XX</div></div>
+        <div class="detail-row"><div class="detail-label">受保人</div><div class="detail-value">陈XX（本人）</div></div>
+        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2025-06-15</div></div>
+        <div class="detail-row"><div class="detail-label">失效日期</div><div class="detail-value">2026-06-14</div></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">💰 缴费信息</div>
+        <div class="detail-row"><div class="detail-label">缴费方式</div><div class="detail-value">月缴</div></div>
+        <div class="detail-row"><div class="detail-label">每期保费</div><div class="detail-value">HKD 1,050</div></div>
+        <div class="detail-row"><div class="detail-label">缴费期数</div><div class="detail-value">12期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴期数</div><div class="detail-value">11期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴保费</div><div class="detail-value" style="color:var(--primary-dark)">HKD 11,550</div></div>
+        <div class="detail-row"><div class="detail-label">下次缴费日</div><div class="detail-value" style="color:var(--danger)">2026-04-15（已超时15天）</div></div>
+        <div class="detail-row"><div class="detail-label">付款方式</div><div class="detail-value">自动转账（BOC）</div></div>
+        <div style="margin:12px -12px 0;padding:12px 14px;background:#FEF2F2;border-radius:10px;display:flex;align-items:flex-start;gap:8px">
+          <span style="font-size:16px;line-height:1.4">⚠️</span>
+          <div style="font-size:13px;color:#991B1B;line-height:1.5">缴费已超时 15 天，请尽快缴纳以免保单失效。如需帮助可联系顾问。</div>
+        </div>
+      </div>
+
+      <div class="contact-bar">
+        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85298765432'">👨‍💼 联系顾问 · 李美琪</div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== POLICY DETAIL (储蓄类-保单中止) ==================== -->
+    <div class="page-overlay" id="page-detail-lapsed">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
+        <div class="detail-name">盈聚未来</div>
+        <div class="detail-status-badge" style="background:#F3F4F6;color:#9CA3AF">⏸️ 已中止</div>
+        <div class="detail-type-tag saving">💰 长期分红储蓄险</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">📋 保单信息</div>
+        <div class="detail-row"><div class="detail-label">保险公司</div><div class="detail-value">富卫 FWD</div></div>
+        <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">FWD20240001</div></div>
+        <div class="detail-row"><div class="detail-label">保单持有人</div><div class="detail-value">陈XX</div></div>
+        <div class="detail-row"><div class="detail-label">受保人</div><div class="detail-value">陈XX（本人）</div></div>
+        <div class="detail-row"><div class="detail-label">受益人</div><div class="detail-value">李XX（配偶）100%</div></div>
+        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2022-03-10</div></div>
+        <div class="detail-row"><div class="detail-label">冷静期</div><div class="detail-value">至 2022-03-24</div></div>
       </div>
 
       <div class="detail-section">
         <div class="detail-section-title">💰 缴费信息</div>
         <div class="detail-row"><div class="detail-label">缴费方式</div><div class="detail-value">年缴</div></div>
-        <div class="detail-row"><div class="detail-label">年缴保费</div><div class="detail-value">HK$ 12,600</div></div>
-        <div class="detail-row"><div class="detail-label">缴费期限</div><div class="detail-value">25年</div></div>
-        <div class="detail-row"><div class="detail-label">已缴年数</div><div class="detail-value">2年（8%）</div></div>
-        <div class="detail-row"><div class="detail-label">下次缴费</div><div class="detail-value" style="color:var(--warning)">2026-05-15（即将到期）</div></div>
+        <div class="detail-row"><div class="detail-label">每期保费</div><div class="detail-value">USD 3,000</div></div>
+        <div class="detail-row"><div class="detail-label">缴费期数</div><div class="detail-value">10期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴期数</div><div class="detail-value">3期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴保费</div><div class="detail-value" style="color:var(--primary-dark)">USD 9,000</div></div>
+        <div class="detail-row"><div class="detail-label">下次缴费日</div><div class="detail-value" style="color:var(--danger)">2026-03-10（已超时39天）</div></div>
+        <div class="detail-row"><div class="detail-label">付款方式</div><div class="detail-value">银行转账</div></div>
+        <div class="detail-row"><div class="detail-label">付清日期</div><div class="detail-value">2031-03-10</div></div>
+        <div style="margin:12px -12px 0;padding:12px 14px;background:#FEF2F2;border-radius:10px;display:flex;align-items:flex-start;gap:8px">
+          <span style="font-size:16px;line-height:1.4">⏸️</span>
+          <div style="font-size:13px;color:#991B1B;line-height:1.5">保单已中止，保费未缴纳。可联系顾问申请复效恢复保障。</div>
+        </div>
       </div>
 
-
       <div class="contact-bar">
-        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85230001234'">👨‍💼 联系顾问</div>
+        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85291234567'">👨‍💼 联系顾问 · 张志明</div>
       </div>
 
       <div class="bottom-spacer"></div>
     </div>
 
-    <!-- ==================== POLICY DETAIL (保障类-子女) ==================== -->
-    <div class="page-overlay" id="page-detail-protection-child">
+    <!-- ==================== POLICY DETAIL (保障类-已失效) ==================== -->
+    <div class="page-overlay" id="page-detail-expired">
       <div class="detail-header" style="margin-top:54px">
         <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
-        <div class="detail-company">MANULIFE 宏利</div>
-        <div class="detail-name">活耀人生 危疾保</div>
-        <div class="detail-status-badge">🟢 生效中 · 保单号 M567891234</div>
-        <div class="detail-type-tag protection">🛡️ 保障类</div>
+        <div class="detail-name">加裕智倍保2</div>
+        <div class="detail-status-badge" style="background:#F3F4F6;color:#6B7280">⚫ 已失效</div>
+        <div class="detail-type-tag protection">🛡️ 终身危疾险</div>
       </div>
 
       <div class="detail-section">
         <div class="detail-section-title">📋 保单信息</div>
-        <div class="detail-row"><div class="detail-label">产品名称</div><div class="detail-value">活耀人生 危疾保</div></div>
-        <div class="detail-row"><div class="detail-label">保单状态</div><div class="detail-value">生效中</div></div>
-        <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">M567891234</div></div>
-        <div class="detail-row"><div class="detail-label">承保公司</div><div class="detail-value">MANULIFE 宏利</div></div>
-        <div class="detail-row"><div class="detail-label">持有人</div><div class="detail-value">陈XX</div></div>
-        <div class="detail-row"><div class="detail-label">被保人</div><div class="detail-value">陈小明（子女）</div></div>
-        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2026-02-01</div></div>
+        <div class="detail-row"><div class="detail-label">保险公司</div><div class="detail-value">AIA 友邦</div></div>
+        <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">AIA20210003</div></div>
+        <div class="detail-row"><div class="detail-label">保单持有人</div><div class="detail-value">陈XX</div></div>
+        <div class="detail-row"><div class="detail-label">受保人</div><div class="detail-value">陈XX（本人）</div></div>
+        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2020-06-01</div></div>
+        <div class="detail-row"><div class="detail-label">失效日期</div><div class="detail-value">2025-12-01</div></div>
       </div>
 
       <div class="detail-section">
         <div class="detail-section-title">💰 缴费信息</div>
-        <div class="detail-row"><div class="detail-label">年缴保费</div><div class="detail-value">HK$ 8,400</div></div>
-        <div class="detail-row"><div class="detail-label">缴费期限</div><div class="detail-value">25年</div></div>
-        <div class="detail-row"><div class="detail-label">已缴年数</div><div class="detail-value">1年（4%）</div></div>
-        <div class="detail-row"><div class="detail-label">下次缴费</div><div class="detail-value">2026-11-01（200天后）</div></div>
-      </div>
-
-      <div class="explainer-card">
-        <div class="explainer-title">⚠️ 重要提示</div>
-        <div class="explainer-text">
-          保单等候期至 <strong>2026-05-01</strong> 届满。
-          在等候期内确诊重疾不在赔付范围内，建议持续关注。
+        <div class="detail-row"><div class="detail-label">缴费方式</div><div class="detail-value">年缴</div></div>
+        <div class="detail-row"><div class="detail-label">每期保费</div><div class="detail-value">USD 18,900</div></div>
+        <div class="detail-row"><div class="detail-label">缴费期数</div><div class="detail-value">25期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴期数</div><div class="detail-value">5期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴保费</div><div class="detail-value" style="color:var(--primary-dark)">USD 94,500</div></div>
+        <div class="detail-row"><div class="detail-label">付款方式</div><div class="detail-value">银行转账</div></div>
+        <div style="margin:12px -12px 0;padding:12px 14px;background:#F3F4F6;border-radius:10px;display:flex;align-items:flex-start;gap:8px">
+          <span style="font-size:16px;line-height:1.4">⚫</span>
+          <div style="font-size:13px;color:#6B7280;line-height:1.5">保单已失效，无法恢复。如需重新投保，请联系顾问。</div>
         </div>
       </div>
 
+      <div class="contact-bar">
+        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85291234567'">👨‍💼 联系顾问 · 张志明</div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== POLICY DETAIL (保障类-年缴-已中止-即将失效动态) ==================== -->
+    <div class="page-overlay" id="page-detail-expiring">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
+        <div class="detail-name">跨越无限保</div>
+        <div class="detail-status-badge" style="background:#F3F4F6;color:#9CA3AF">⏸️ 已中止</div>
+        <div class="detail-type-tag protection">🛡️ 终身危疾险</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">📋 保单信息</div>
+        <div class="detail-row"><div class="detail-label">保险公司</div><div class="detail-value">忠意 Generali</div></div>
+        <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">GIA20230005</div></div>
+        <div class="detail-row"><div class="detail-label">保单持有人</div><div class="detail-value">陈XX</div></div>
+        <div class="detail-row"><div class="detail-label">受保人</div><div class="detail-value">陈XX（本人）</div></div>
+        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2025-05-17</div></div>
+        <div class="detail-row"><div class="detail-label">失效日期</div><div class="detail-value">2026-05-16</div></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">💰 缴费信息</div>
+        <div class="detail-row"><div class="detail-label">缴费方式</div><div class="detail-value">年缴</div></div>
+        <div class="detail-row"><div class="detail-label">每期保费</div><div class="detail-value">HKD 6,800</div></div>
+        <div class="detail-row"><div class="detail-label">缴费期数</div><div class="detail-value">1期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴期数</div><div class="detail-value">1期</div></div>
+        <div class="detail-row"><div class="detail-label">已缴保费</div><div class="detail-value" style="color:var(--primary-dark)">HKD 6,800</div></div>
+        <div class="detail-row"><div class="detail-label">付款方式</div><div class="detail-value">银行转账</div></div>
+        <div style="margin:12px -12px 0;padding:12px 14px;background:#FEF2F2;border-radius:10px;display:flex;align-items:flex-start;gap:8px">
+          <span style="font-size:16px;line-height:1.4">🔴</span>
+          <div style="font-size:13px;color:#991B1B;line-height:1.5">保单将在 28 天后失效，请及时续保以延续保障。</div>
+        </div>
+      </div>
 
       <div class="contact-bar">
-        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85230001234'">👨‍💼 联系顾问</div>
+        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85291234567'">👨‍💼 联系顾问 · 张志明</div>
+      </div>
+
+      <div class="bottom-spacer"></div>
+    </div>
+
+    <!-- ==================== POLICY DETAIL (一次性缴清) ==================== -->
+    <div class="page-overlay" id="page-detail-single">
+      <div class="detail-header" style="margin-top:54px">
+        <div class="detail-back" onclick="showScreen('policy')">‹ 返回</div>
+        <div class="detail-name">简爱·延续5</div>
+        <div class="detail-status-badge">🟢 生效中</div>
+        <div class="detail-type-tag saving">💰 长期分红储蓄险</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">📋 保单信息</div>
+        <div class="detail-row"><div class="detail-label">保险公司</div><div class="detail-value">AIA 友邦</div></div>
+        <div class="detail-row"><div class="detail-label">保单号</div><div class="detail-value">A789012345</div></div>
+        <div class="detail-row"><div class="detail-label">保单持有人</div><div class="detail-value">李XX</div></div>
+        <div class="detail-row"><div class="detail-label">第二持有人</div><div class="detail-value">陈XX</div></div>
+        <div class="detail-row"><div class="detail-label">受保人</div><div class="detail-value">李XX（配偶）</div></div>
+        <div class="detail-row"><div class="detail-label">第二受保人</div><div class="detail-value">陈小明（子女）</div></div>
+        <div class="detail-row"><div class="detail-label">受益人</div><div class="detail-value">陈XX 50%</div></div>
+        <div class="detail-row"><div class="detail-label">第二受益人</div><div class="detail-value">陈小明 50%</div></div>
+        <div class="detail-row"><div class="detail-label">生效日期</div><div class="detail-value">2025-01-01</div></div>
+        <div class="detail-row"><div class="detail-label">冷静期</div><div class="detail-value">至 2025-01-15</div></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">💰 缴费信息</div>
+        <div class="detail-row"><div class="detail-label">缴费方式</div><div class="detail-value">一次性缴清</div></div>
+        <div class="detail-row"><div class="detail-label">已缴保费</div><div class="detail-value" style="color:var(--primary-dark)">HKD 250,000</div></div>
+        <div class="detail-row"><div class="detail-label">付清日期</div><div class="detail-value">2025-01-01</div></div>
+      </div>
+
+      <div class="contact-bar">
+        <div class="contact-btn primary" style="flex:1" onclick="window.location.href='tel:+85291234567'">👨‍💼 联系顾问 · 张志明</div>
       </div>
 
       <div class="bottom-spacer"></div>
@@ -1864,8 +2383,8 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         <div class="inbox-btn" onclick="showScreen('login')">📫</div>
       </div>
 
-      <!-- 专属顾问（已登录才显示） -->
-      <div class="advisor-card" id="profile-advisor">
+      <!-- 专属顾问已移至首页，此处保留代码但不展示 -->
+      <div class="advisor-card" id="profile-advisor" style="display:none">
         <div class="advisor-label">🏅 我的专属顾问</div>
         <div class="advisor-info">
           <div class="advisor-avatar">张</div>
@@ -1924,9 +2443,9 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
         </div>
       </div>
 
-      <!-- 账号操作 -->
-      <div class="section-title">🔐 账号</div>
-      <div class="menu-section">
+      <!-- 账号操作（仅已登录显示） -->
+      <div class="section-title" id="profile-account-title">🔐 账号</div>
+      <div class="menu-section" id="profile-account-section">
         <div class="menu-item" id="profile-menu-login-other"><div class="menu-icon">🔄</div><div class="menu-label">登录其他账号</div><div class="menu-arrow">›</div></div>
         <div class="menu-item" id="profile-menu-logout" onclick="doLogout()"><div class="menu-icon" style="color:var(--danger)">🚪</div><div class="menu-label" style="color:var(--danger)">退出登录</div><div class="menu-arrow">›</div></div>
       </div>
@@ -2344,15 +2863,15 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
           <div style="font-size:13px;color:var(--text-secondary);line-height:1.8">
             <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
               <span>已缴保费合计</span>
-              <span style="font-weight:600">US$ 15,600</span>
+              <span style="font-weight:600">USD 15,600</span>
             </div>
             <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)">
               <span>当前退保价值</span>
-              <span style="font-weight:600;color:var(--warning)">约 US$ 12,000</span>
+              <span style="font-weight:600;color:var(--warning)">约 USD 12,000</span>
             </div>
             <div style="display:flex;justify-content:space-between;padding:8px 0;color:var(--danger)">
               <span>预计损失</span>
-              <span style="font-weight:600">约 US$ 3,600</span>
+              <span style="font-weight:600">约 USD 3,600</span>
             </div>
           </div>
         </div>
@@ -2549,7 +3068,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
               <span class="notif-time">今天 09:00</span>
             </div>
             <div class="notif-title">保诚 危疾加护保 III 保费即将到期</div>
-            <div class="notif-desc">年缴保费 HK$12,600 将于 2026-05-15 到期，还有 32 天。请及时缴费以保持保单有效。</div>
+            <div class="notif-desc">年缴保费 HKD 12,600 将于 2026-05-15 到期，还有 32 天。请及时缴费以保持保单有效。</div>
           </div>
           <div class="notif-arrow">›</div>
         </div>
@@ -2601,7 +3120,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
               <span class="notif-time">4月5日</span>
             </div>
             <div class="notif-title">缴费成功通知</div>
-            <div class="notif-desc">AIA 充裕未来·传承 III 第3期保费 US$5,200 已缴费成功。</div>
+            <div class="notif-desc">AIA 充裕未来·传承 III 第3期保费 USD 5,200 已缴费成功。</div>
           </div>
           <div class="notif-arrow">›</div>
         </div>
@@ -2627,7 +3146,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
             <div style="background:#FEF3C7;padding:12px;border-radius:10px;margin:12px 0">
               <div style="display:flex;justify-content:space-between;margin-bottom:6px">
                 <span>年缴保费</span>
-                <strong>HK$ 12,600</strong>
+                <strong>HKD 12,600</strong>
               </div>
               <div style="display:flex;justify-content:space-between;margin-bottom:6px">
                 <span>到期日期</span>
@@ -2669,14 +3188,14 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
             <div style="background:var(--primary-light);padding:12px;border-radius:10px;margin:12px 0">
               <div style="display:flex;justify-content:space-between;margin-bottom:6px">
                 <span>周年红利</span>
-                <strong style="color:var(--primary)">US$ 1,200</strong>
+                <strong style="color:var(--primary)">USD 1,200</strong>
               </div>
               <div style="display:flex;justify-content:space-between">
                 <span>终期红利</span>
-                <strong style="color:var(--primary)">US$ 3,500</strong>
+                <strong style="color:var(--primary)">USD 3,500</strong>
               </div>
             </div>
-            <p>请登录保联APP或联系顾问查看详细红利报告。</p>
+            <p>请登录陆港财富通或联系顾问查看详细红利报告。</p>
           </div>
         </div>
       </div>
@@ -2738,11 +3257,11 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
                 <div style="font-size:20px">✅</div>
                 <div>
                   <div style="font-weight:600;color:#065F46">保障已正式生效</div>
-                  <div style="font-size:12px;color:#047857">保额 HK$ 1,000,000</div>
+                  <div style="font-size:12px;color:#047857">保额 HKD 1,000,000</div>
                 </div>
               </div>
             </div>
-            <p>如有需要理赔，可直接联系顾问或通过保联APP提交申请。</p>
+            <p>如有需要理赔，可直接联系顾问或通过陆港财富通提交申请。</p>
           </div>
         </div>
       </div>
@@ -2766,7 +3285,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
             <div style="background:#ECFDF5;padding:12px;border-radius:10px;margin:12px 0">
               <div style="display:flex;justify-content:space-between;margin-bottom:6px">
                 <span>缴费金额</span>
-                <strong style="color:var(--success)">US$ 5,200</strong>
+                <strong style="color:var(--success)">USD 5,200</strong>
               </div>
               <div style="display:flex;justify-content:space-between;margin-bottom:6px">
                 <span>缴费期数</span>
@@ -2867,7 +3386,7 @@ body { font-family: -apple-system, 'PingFang SC', 'Helvetica Neue', Arial, sans-
     <div class="page-overlay login-page" id="page-login">
       <div class="login-top" style="margin-top:54px">
         <div class="login-logo">🛡️</div>
-        <div class="login-brand">保联</div>
+        <div class="login-brand">陆港财富通</div>
         <div class="login-slogan">连接你与每一张保单</div>
       </div>
       <div class="login-form">
@@ -3220,14 +3739,139 @@ function toggleVerifiedState() {
   updateLoginState();
 }
 
+// ============ 账户卡片 - 双样式渲染 ============
+var accountCardMode = 1; // 1=左右结构, 2=上下结构
+
+// 金额显隐状态
+var amountHidden = false;
+
+// 账户数据模型
+// 归类规则：长期分红储蓄险/短期储蓄保险/年金保险/投连险/终身寿险 → 账户
+//           医疗险/定期危疾险/终身危疾险/定期寿险/意外险 → 保障
+var accountData = {
+  premium: {
+    USD: { amount: 24600, count: 2 },  // 充裕未来15,600(长期分红储蓄险) + 盈聚未来9,000(长期分红储蓄险)
+    HKD: { amount: 250000, count: 1 }   // 简爱·延续5 250,000(长期分红储蓄险)
+  },
+  protection: { count: 4 }  // 保障类保单数（不含已失效）：危疾加护保III×2(终身危疾险) + 跨越无限保(终身危疾险) + 活耀人生(终身危疾险)
+};
+
+// 金额脱敏：隐藏时替换为 ****
+function maskAmount(str) {
+  return '****';
+}
+
+function renderAccountCard() {
+  var el = document.getElementById('home-unified-account');
+  if(!el) return;
+
+  // 计算显示金额（单币种直接显示，多币种折算USD）
+  var hasMultiCurrency = Object.keys(accountData.premium).length > 1;
+  var displayCurrency, displayAmount;
+  if(hasMultiCurrency) {
+    var usdTotal = accountData.premium.USD ? accountData.premium.USD.amount : 0;
+    var hkdInUsd = accountData.premium.HKD ? Math.round(accountData.premium.HKD.amount / 7.8) : 0;
+    displayCurrency = 'USD';
+    displayAmount = (usdTotal + hkdInUsd).toLocaleString();
+  } else {
+    var onlyKey = Object.keys(accountData.premium)[0];
+    displayCurrency = onlyKey;
+    displayAmount = accountData.premium[onlyKey].amount.toLocaleString();
+  }
+
+  // 根据显隐状态处理金额
+  var showCurrency = amountHidden ? '' : displayCurrency;
+  var showAmount = amountHidden ? maskAmount(displayAmount) : displayAmount;
+  var showProtectionCount = amountHidden ? maskAmount(String(accountData.protection.count)) : accountData.protection.count;
+
+  // 顶部标题栏：左侧"概览 + 眼睛"，右侧箭头
+  var headerHtml = '<div class="card-header">' +
+    '<div class="card-header-left">' +
+      '<div class="card-header-title">概览</div>' +
+      '<div class="card-header-eye" onclick="event.stopPropagation();toggleAmountVisibility()">' +
+        (amountHidden ? '👁️‍🗨️' : '👁️') +
+      '</div>' +
+    '</div>' +
+    '<div class="card-header-arrow" onclick="event.stopPropagation();showScreen(\'policy\')">›</div>' +
+  '</div>' +
+  '<div class="card-divider"></div>';
+
+  var showPremiumLabel = amountHidden ? '' : '已缴保费';
+  var showProtectionSub = amountHidden ? '' : '保单';
+
+  var html = headerHtml;
+  if(accountCardMode === 1) {
+    // === 样式1：左右结构 ===
+    html += '<div class="card-body" onclick="showScreen(\'policy\')">' +
+    '<div class="layout-hz">' +
+      '<div class="hz-left">' +
+        '<div class="hz-left-title"><span class="title-icon">💰</span>账户</div>' +
+        '<div class="hz-left-value"><span class="hz-left-currency">' + showCurrency + '</span> ' + showAmount + '</div>' +
+        '<div class="hz-left-sub">' + showPremiumLabel + '</div>' +
+      '</div>' +
+      '<div class="hz-divider"></div>' +
+      '<div class="hz-right">' +
+        '<div class="hz-right-title"><span class="title-icon">🛡️</span>保障</div>' +
+        '<div class="hz-right-num">' + showProtectionCount + '</div>' +
+        '<div class="hz-right-sub">' + showProtectionSub + '</div>' +
+      '</div>' +
+    '</div>' +
+    '</div>';
+
+  } else {
+    // === 样式2：左右结构（储蓄账户 | 保障账户） ===
+    var showProtectionLabel = amountHidden ? '' : '保单';
+    html += '<div class="card-body" onclick="showScreen(\'policy\')">' +
+    '<div class="layout-vt">' +
+      '<div class="vt-left">' +
+        '<div class="vt-header">' +
+          '<span class="vt-header-icon">💰</span>' +
+          '<span class="vt-header-title">储蓄账户</span>' +
+        '</div>' +
+        '<div class="vt-row">' +
+          '<span class="vt-row-label">' + showCurrency + '</span>' +
+          '<span class="vt-row-value">' + showAmount + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="vt-right">' +
+        '<div class="vt-header">' +
+          '<span class="vt-header-icon">🛡️</span>' +
+          '<span class="vt-header-title">保障账户</span>' +
+        '</div>' +
+        '<div class="vt-row">' +
+          '<span class="vt-row-label">' + showProtectionLabel + '</span>' +
+          '<span class="vt-row-value">' + showProtectionCount + '</span>' +
+        '</div>' +
+      '</div>' +
+    '</div>' +
+    '</div>';
+  }
+
+  el.innerHTML = html;
+}
+
+function toggleAmountVisibility() {
+  amountHidden = !amountHidden;
+  renderAccountCard();
+}
+
+function toggleAccountCard() {
+  accountCardMode = accountCardMode === 1 ? 2 : 1;
+  var labels = ['样式1', '样式2'];
+  var btn = document.querySelector('.card-toggle');
+  if(btn) btn.textContent = '💳 ' + labels[accountCardMode - 1];
+  renderAccountCard();
+}
+
 // ============ 待办提醒 - 数据驱动渲染 ============
 var todoData = [
-  { dot: 'var(--warning)', title: '重疾险年缴保费即将到期', sub: '保诚 危疾加护保 III · 还有 32 天', tag: '缴费提醒', tagClass: 'warning', screen: 'detail-protection' },
-  { dot: 'var(--primary)', title: '储蓄险周年红利简报已发布', sub: 'AIA 充裕未来·传承 III · 点击查看', tag: '收益简报', tagClass: 'primary', screen: 'detail-saving' },
-  { dot: 'var(--success)', title: '自动转账授权申请已受理', sub: '预计 3 个工作日完成 · 服务进度更新', tag: '服务进度', tagClass: 'success', screen: 'service-autopay' },
-  { dot: 'var(--warning)', title: '宏利保单已过等待期', sub: '活耀人生 危疾保 · 等待期已于 2026-05-01 届满', tag: '保单状态', tagClass: 'info', screen: 'detail-protection' }
+  { dot: 'var(--success)', title: '保单已生效', sub: '恭喜！充裕未来·传承 III 已生效，冷静期至 2026-05-01，如有疑问可联系顾问', screen: 'detail-saving' },
+  { dot: 'var(--warning)', title: '缴费日历', sub: 'AIA 充裕未来·传承 III · 第4期需在 2026-06-15 前缴纳 USD 5,200', screen: 'detail-saving' },
+  { dot: 'var(--danger)', title: '缴费超时', sub: '保诚 危疾加护保 III · 第3期费用还未缴纳，请尽快缴纳避免保单失效', screen: 'detail-protection' },
+  { dot: 'var(--danger)', title: '保单中止', sub: '富卫 盈聚未来 · 保费未缴纳保单已中止，可联系顾问进行复效', screen: 'detail-lapsed' },
+  { dot: 'var(--danger)', title: '保单即将失效', sub: '忠意 跨越无限保 · 保单将在 28 天后失效，请及时续保', screen: 'detail-expiring' }
 ];
-var todoCountMode = 0; // 0=全部(4条), 1=仅缴费(1条), 2=空(0条)
+var todoCountMode = 0; // 0=全部(5条), 1=仅缴费日历(1条), 2=空(0条)
 
 function renderTodoList() {
   var listEl = document.getElementById('todo-list');
@@ -3236,7 +3880,7 @@ function renderTodoList() {
   if(!listEl) return;
 
   var items = todoData;
-  if(todoCountMode === 1) items = [todoData[0]]; // 只保留缴费提醒
+  if(todoCountMode === 1) items = [todoData[1]]; // 仅缴费日历
   if(todoCountMode === 2) items = []; // 空
 
   if(items.length === 0) {
@@ -3253,13 +3897,13 @@ function renderTodoList() {
 
   var html = '';
   items.forEach(function(item) {
+    var dotHtml = '<div class="todo-dot" style="background:' + item.dot + '"></div>';
     html += '<div class="todo-card" onclick="showScreen(\'' + item.screen + '\')">' +
-      '<div class="todo-dot" style="background:' + item.dot + '"></div>' +
+      dotHtml +
       '<div class="todo-content">' +
         '<div class="todo-title">' + item.title + '</div>' +
         '<div class="todo-sub">' + item.sub + '</div>' +
       '</div>' +
-      '<span class="todo-tag ' + item.tagClass + '">' + item.tag + '</span>' +
       '<div class="todo-arrow">›</div>' +
     '</div>';
   });
@@ -3268,11 +3912,58 @@ function renderTodoList() {
 
 function toggleTodoCount() {
   todoCountMode = (todoCountMode + 1) % 3;
-  var labels = ['待办(4条)', '待办(1条)', '待办(0条)'];
+  var labels = ['全部动态(5条)', '缴费提醒(1条)', '无动态(0条)'];
   var btn = document.querySelector('.todo-toggle');
-  if(btn) btn.textContent = '📝 ' + labels[todoCountMode];
+  if(btn) btn.textContent = '🔔 ' + labels[todoCountMode];
   renderTodoList();
 }
+// 数据模型：顾问列表
+var advisorData = [
+  { name: '张志明', license: 'LB-67890', phone: '+85291234567', initial: '张', policyHint: '充裕未来·传承 III' },
+  { name: '李美琪', license: 'LB-11223', phone: '+85298765432', initial: '李', policyHint: '危疾加护保 III · 活耀人生危疾保' }
+];
+// 顾问显示模式：0=显示1位，1=显示全部
+var advisorCountMode = 0;
+function toggleAdvisorCount() {
+  advisorCountMode = (advisorCountMode + 1) % 2;
+  var labels = ['1位顾问', '全部顾问'];
+  var btn = document.querySelector('.advisor-toggle');
+  if(btn) btn.textContent = '👤 ' + labels[advisorCountMode];
+  renderHomeAdvisorList();
+}
+function renderHomeAdvisorList() {
+  var container = document.getElementById('home-advisor-list');
+  if(!container) return;
+  
+  var advisors = [];
+  if(isLoggedIn && isVerified) {
+    advisors = advisorData; // 已绑定：展示保单对应顾问
+  }
+  // 未登录/未绑定：不展示顾问卡片（由updateLoginState控制显隐）
+  
+  // 根据切换模式决定显示数量
+  var displayAdvisors = (advisorCountMode === 0) ? advisors.slice(0, 1) : advisors;
+  
+  var html = '';
+  displayAdvisors.forEach(function(adv) {
+    html += '<div class="advisor-home-item" onclick="window.location.href=\'tel:' + adv.phone + '\'">';
+    html += '  <div class="advisor-home-avatar">' + adv.initial + '</div>';
+    html += '  <div class="advisor-home-info">';
+    html += '    <div class="advisor-home-name">' + adv.name + ' <span style="font-size:12px;color:var(--text-secondary);font-weight:400">持牌 ' + adv.license + '</span></div>';
+    if(adv.policyHint) {
+      html += '    <div class="advisor-policy-hint">' + adv.policyHint + ' 可联系</div>';
+    } else {
+      html += '    <div class="advisor-policy-hint">有任何问题随时联系</div>';
+    }
+    html += '  </div>';
+    html += '  <div class="advisor-home-action">';
+    html += '    <div class="advisor-call-btn">📞 致电</div>';
+    html += '  </div>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
 // 数据模型：identities 数组，每个元素代表一个已绑定的保单账户
 var identities = [
   {
@@ -3497,6 +4188,8 @@ function updateLoginState() {
   var greetingSub = document.getElementById('home-greeting-sub');
   var profileMenuLoginOther = document.getElementById('profile-menu-login-other');
   var profileMenuLogout = document.getElementById('profile-menu-logout');
+  var profileAccountTitle = document.getElementById('profile-account-title');
+  var profileAccountSection = document.getElementById('profile-account-section');
   
   // 个人中心相关元素
   var profileHeaderLoggedin = document.getElementById('profile-header-loggedin');
@@ -3508,8 +4201,10 @@ function updateLoginState() {
   var profileVerifyItemUnverified = document.getElementById('profile-verify-item-unverified');
   var profileVerifyItemLoggedout = document.getElementById('profile-verify-item-loggedout');
   
-  // 首页待办提醒
+  // 首页保单状态区
   var todoSection = document.getElementById('home-todo-section');
+  // 首页顾问卡片
+  var advisorCard = document.getElementById('home-advisor-card');
   
   if (isLoggedIn) {
     // 已登录状态
@@ -3519,29 +4214,34 @@ function updateLoginState() {
     if (isVerified) {
       // 已绑定 - 显示统一账户卡片
       unifiedAccount.style.display = 'block';
+      renderAccountCard();
       bindPrompt.style.display = 'none';
       greeting.textContent = getGreetingText() + '，陈先生 👋';
       greetingSub.textContent = '您的保单一切正常';
-      // 显示待办提醒
+      // 显示保单动态区 + 顾问卡片
       if(todoSection) { todoSection.style.display = 'block'; renderTodoList(); }
+      if(advisorCard) { advisorCard.style.display = 'block'; renderHomeAdvisorList(); }
     } else {
       // 未绑定 - 显示引导关联保单
       unifiedAccount.style.display = 'none';
       bindPrompt.style.display = 'block';
       greeting.textContent = getGreetingText() + '，陈先生 👋';
       greetingSub.textContent = '绑定保单账户后，即可查看您的保单信息';
-      // 隐藏待办提醒
+      // 隐藏保单动态区和顾问卡片
       if(todoSection) { todoSection.style.display = 'none'; }
+      if(advisorCard) { advisorCard.style.display = 'none'; }
     }
     
     // 个人中心
     if(profileHeaderLoggedin) profileHeaderLoggedin.style.display = 'flex';
     if(profileHeaderLoggedout) profileHeaderLoggedout.style.display = 'none';
-    // 顾问仅在已实名时显示
-    if(profileAdvisor) profileAdvisor.style.display = isVerified ? 'block' : 'none';
-    // 显示账号操作菜单
+    // 顾问已移至首页，我的TAB不再展示
+    if(profileAdvisor) profileAdvisor.style.display = 'none';
+    // 显示账号操作区域
     if(profileMenuLoginOther) profileMenuLoginOther.style.display = 'flex';
     if(profileMenuLogout) profileMenuLogout.style.display = 'flex';
+    if(profileAccountTitle) profileAccountTitle.style.display = 'flex';
+    if(profileAccountSection) profileAccountSection.style.display = 'block';
     
     // 保单账户状态
     if(profileVerifyItemVerified) profileVerifyItemVerified.style.display = isVerified ? 'flex' : 'none';
@@ -3563,18 +4263,21 @@ function updateLoginState() {
     loginCard.style.display = 'block';
     unifiedAccount.style.display = 'none';
     bindPrompt.style.display = 'none';
-    greeting.textContent = '欢迎来到保联 👋';
+    greeting.textContent = '欢迎来到陆港财富通 👋';
     greetingSub.textContent = '登录后查看您的保单';
-    // 隐藏待办提醒
+    // 隐藏保单动态区和顾问卡片
     if(todoSection) todoSection.style.display = 'none';
+    if(advisorCard) { advisorCard.style.display = 'none'; }
     
     // 个人中心
     if(profileHeaderLoggedin) profileHeaderLoggedin.style.display = 'none';
     if(profileHeaderLoggedout) profileHeaderLoggedout.style.display = 'flex';
     if(profileAdvisor) profileAdvisor.style.display = 'none';
-    // 隐藏账号操作菜单
+    // 隐藏账号操作区域（标题+菜单）
     if(profileMenuLoginOther) profileMenuLoginOther.style.display = 'none';
     if(profileMenuLogout) profileMenuLogout.style.display = 'none';
+    if(profileAccountTitle) profileAccountTitle.style.display = 'none';
+    if(profileAccountSection) profileAccountSection.style.display = 'none';
     
     // 未登录 - 不显示保单账户入口
     if(profileVerifyItemVerified) profileVerifyItemVerified.style.display = 'none';
@@ -3634,12 +4337,13 @@ function showScreen(name) {
 
   // Overlay pages that hide tab bar
   const overlayPages = ['login','verify','my-profile','change-phone','detail-saving','detail-protection','detail-protection-child',
+    'detail-overdue','detail-lapsed','detail-expired','detail-expiring','detail-single',
     'gap-analysis','notifications','exchange','article-detail','faq-detail','tool-exchange',
     'service-renewal','service-autopay','service-withdraw','service-beneficiary',
     'service-insured','service-owner','service-surrender',
     'article-renewal','article-autopay','article-withdraw',
     'notification-detail-1','notification-detail-2','notification-detail-3',
-    'notification-detail-4','notification-detail-5'];
+    'notification-detail-4','notification-detail-5','policy-expired'];
   const tabBar = document.getElementById('main-tab-bar');
 
   if (overlayPages.includes(name)) {
